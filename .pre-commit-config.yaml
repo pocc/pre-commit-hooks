@@ -1,0 +1,13 @@
+---
+# This file configures https://pre-commit.com/
+# to use specific hooks and options.
+fail_fast: true
+
+repos:
+  - repo: local
+      - id: shellcheck
+        name: shellcheck (local)
+        language: script
+        entry: relay shellcheck
+        types: [shell]
+        args: [-e, SC1091]
