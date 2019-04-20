@@ -5,9 +5,21 @@ fail_fast: true
 
 repos:
   - repo: local
-      - id: shellcheck
-        name: shellcheck (local)
+      - id: clang-format
+        name: clang-format
+        entry: hooks/clang-format
+        description: Formats C/CPP code
+        files: '\.cp?p?$'
         language: script
-        entry: relay shellcheck
-        types: [shell]
-        args: [-e, SC1091]
+      - id: clang-tidy
+        name: clang-tidy
+        entry: hooks/clang-tidy
+        description: Find warnings/errors in C/CPP code
+        files: '\.cp?p?$'
+        language: script
+      - id: oclint
+        name: oclint
+        entry: hooks/oclint
+        description: Find warnings/errors in C/CPP code
+        files: '\.cp?p?$'
+        language: script

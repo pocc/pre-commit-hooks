@@ -3,12 +3,21 @@
 # which hooks are provided by this repo
 # for use by other git repos.
 
-- id: shellcheck
-  name: Test shell scripts with shellcheck
-  description: Shell scripts conform to shellcheck
-  entry: relay shellcheck
+- id: clang-format
+  name: clang-format
+  entry: hooks/clang-format
+  description: Formats C/CPP code
+  files: '\.cp?p?$'
   language: script
-  types: [shell]
-  args: [-e, SC1091]
-  additional_dependencies: [shellcheck]
-
+- id: clang-tidy
+  name: clang-tidy
+  entry: hooks/clang-tidy
+  description: Find warnings/errors in C/CPP code
+  files: '\.cp?p?$'
+  language: script
+- id: oclint
+  name: oclint
+  entry: hooks/oclint
+  description: Find warnings/errors in C/CPP code
+  files: '\.cp?p?$'
+  language: script

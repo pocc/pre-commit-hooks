@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+readonly DEBUG=${DEBUG:-unset}
+if [ "${DEBUG}" != unset ]; then
+  set -x
+fi
+
+# oclint can generate plist files that are unnecessary
+pwd_files="$(ls)"
+oclint "$@" -- -DCMAKE_EXPORT_COMPILE_COMMANDS
+tempfiles="$(comm -23 <( echo $pwd_files ) <( ls ) | grep .plist)"
+rm $tempfiles
+
