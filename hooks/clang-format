@@ -5,6 +5,6 @@ readonly DEBUG=${DEBUG:-unset}
 if [ "${DEBUG}" != unset ]; then
   set -x
 fi
-
+echo $@
 clang-format "$@"
 

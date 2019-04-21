@@ -9,17 +9,17 @@ repos:
         name: clang-format
         entry: hooks/clang-format
         description: Formats C/CPP code
-        files: '\.cp?p?$'
+        files: '.*\.cp?p?$'
         language: script
       - id: clang-tidy
         name: clang-tidy
         entry: hooks/clang-tidy
         description: Find warnings/errors in C/CPP code
-        files: '\.cp?p?$'
+        files: '.*\.cp?p?$'
         language: script
       - id: oclint
         name: oclint
         entry: hooks/oclint
         description: Find warnings/errors in C/CPP code
-        files: '\.cp?p?$'
+        files: '.*\.cp?p?$'
         language: script

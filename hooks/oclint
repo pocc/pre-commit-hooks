@@ -8,6 +8,6 @@ fi
 # oclint can generate plist files that are unnecessary
 pwd_files="$(ls)"
 oclint "$@" -- -DCMAKE_EXPORT_COMPILE_COMMANDS
-tempfiles="$(comm -23 <( echo $pwd_files ) <( ls ) | grep .plist)"
+tempfiles="(comm -3 <( echo $pwd_files | tr ' ' '\n' ) <( ls | tr ' ' '\n' ) | grep .plist)"
 rm $tempfiles
 
