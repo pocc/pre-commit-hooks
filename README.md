@@ -49,3 +49,8 @@ _Your package manager may already have them._
 | [oclint](http://oclint.org/)                                             | static code analysis tool for C, C++ and Objective-C code | N/A                |
 
 [1]: `-fix` will fail if there are compiler errors vs `-fix-errors` will continue (and can even fix some of them)
+
+## Testing
+
+To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are
+working as expected, use `pytest tests/test.py`.

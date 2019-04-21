@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Tests clang-format, clang-tidy, and oclint against .c and .cpp."""
+"""Tests clang-format, clang-tidy, and oclint against .c and .cpp
+With this snippet:
+
+    int main() {  int i;  return 10;}
+
+- Triggers clang-format because what should be on 4 lines is on 1
+- Triggers clang-tidy because "magical number" 10 is used
+- Triggers oclint because short variable name is used
+"""
 import os
 import re
 import subprocess as sp
@@ -84,5 +92,5 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
             -> See https://github.com/oclint/oclint/issues/537"""
         if os.path.exists("test.plist"):
             os.remove("test.plist")
-        for filename in cls.testfiles:
+        for filename in cls.filenames:
             os.remove(filename)
