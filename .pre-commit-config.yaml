@@ -4,14 +4,18 @@
 fail_fast: true
 
 repos:
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: master
+    hooks: 
+      - id: shellcheck
   - repo: local
       - id: clang-format
         name: clang-format
         entry: hooks/clang-format
         description: Formats C/CPP code
-        args: [-i, -style=Google]
         types: [c, c++]
         language: script
+        additional_dependencies: [clang-format]
       - id: clang-tidy
         name: clang-tidy
         entry: hooks/clang-tidy
@@ -19,6 +23,7 @@ repos:
         args: [-fix-errors, -quiet, -checks=*, -warnings-as-errors=*]
         types: [c, c++]
         language: script
+        additional_dependencies: [clang-tidy]
       - id: oclint
         name: oclint
         entry: hooks/oclint
@@ -26,3 +31,5 @@ repos:
         args: [-enable-global-analysis, -enable-clang-static-analyzer]
         types: [c, c++]
         language: script
+        additional_dependencies: [oclint]
+

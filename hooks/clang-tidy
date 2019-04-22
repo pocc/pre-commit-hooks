@@ -6,5 +6,8 @@ if [ "${DEBUG}" != unset ]; then
   set -x
 fi
 
-clang-tidy "$@" -- -DCMAKE_EXPORT_COMPILE_COMMANDS
+. hooks/utils
+
+# hook args exist that need to be acted upon
+clang-tidy $(clean_args "$@")
 

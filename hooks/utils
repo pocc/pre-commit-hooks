@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Utilities for other hooks
+
+# oclint looks for a compilation database. This flag tells it to skip it.
+function clean_args {
+	if [ $(echo "$@" | grep "-use-comp-db") ]; then
+		# -use-comp-db is a hook command, so do something and then remove it
+		args="$(echo $@ "-use-comp-db" | tr ' ' '\n' | sort | uniq -u)"
+	else
+		args="$@ -- -DCMAKE_EXPORT_COMPILE_COMMANDS"
+	fi
+
+	echo $args
+}

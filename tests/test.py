@@ -13,10 +13,6 @@ import re
 import subprocess as sp
 import unittest
 
-# oclint and clang-tidy look for a compilation database.
-# This flag tells them to skip it.
-SKIP_COMP_DB = ["--", "-DCMAKE_EXPORT_COMPILE_COMMANDS"]
-
 
 class TestCLinters(unittest.TestCase):
     @classmethod
@@ -32,7 +28,7 @@ class TestCLinters(unittest.TestCase):
         """Test clang format using google style, printing to stdout."""
         expected = 'int main() {\n  int i;\n  return 10;\n}'
         for filename in self.testfiles:
-            actual = sp.check_output(["clang-format", filename], text=True)
+            actual = sp.check_output(["hooks/clang-format", filename], text=True)
             assert actual == expected
 
     def test_clang_tidy(self):
@@ -43,7 +39,7 @@ class TestCLinters(unittest.TestCase):
 int main() {{ int i; return 10; }}
                            ^
 """
-        cmds = ["clang-tidy", "-quiet", "-checks=*", "-warnings-as-errors=*"]
+        cmds = ["./hooks/clang-tidy", "-quiet", "-checks=*", "-warnings-as-errors=*"]
         for filename in self.testfiles:
             expected = clang_tidy_expected.format(filename)
             actual = self.get_all_output(cmds, filename)
@@ -65,7 +61,7 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
 
 [OCLint (http://oclint.org) v0.13]
 """
-        cmds = ["oclint", "-enable-global-analysis",
+        cmds = ["./hooks/oclint", "-enable-global-analysis",
                 "-enable-clang-static-analyzer"]
         for filename in self.testfiles:
             expected = oclint_expected_template.format(filename)
@@ -82,7 +78,7 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
         Returns (str):
             Text output of function
         """
-        combined_cmds = cmds + [filename] + SKIP_COMP_DB
+        combined_cmds = cmds + [filename]
         _pipe = sp.Popen(combined_cmds, stderr=sp.STDOUT, stdout=sp.PIPE)
         return _pipe.communicate()[0].decode('utf-8')
 
@@ -92,5 +88,5 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
             -> See https://github.com/oclint/oclint/issues/537"""
         if os.path.exists("test.plist"):
             os.remove("test.plist")
-        for filename in cls.filenames:
+        for filename in cls.testfiles:
             os.remove(filename)
