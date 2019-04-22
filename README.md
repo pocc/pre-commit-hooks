@@ -1,6 +1,6 @@
 # pre-commit hooks
 
-Designed to be a part of https://pre-commit.com/hooks.html  
+Designed to be a part of https://pre-commit.com/hooks.html
 Inspired by shell scripts in https://github.com/jumanjihouse/pre-commit-hooks/
 
 ## Description
@@ -11,11 +11,11 @@ This manages 3 C/CPP Static Code Analyzers:
 - clang-tidy
 - oclint
 
-It is currently not possible to pass any arguments after `--` 
+It is currently not possible to pass any arguments after `--`
 due to pre-commit architecture.
 
-By default, `-- -DCMAKE_EXPORT_COMPILER_COMMANDS` is added to both 
-clang-tidy and oclint to avoid compilation database errors. If you 
+By default, `-- -DCMAKE_EXPORT_COMPILER_COMMANDS` is added to both
+clang-tidy and oclint to avoid compilation database errors. If you
 want to use a compilation database, reference the command in
 `- repo: local` in your config.
 
@@ -31,7 +31,7 @@ Add to `.pre-commit-config.yaml` in your git repo:
       - id: oclint
 ```
 
-Add arguments after the id for the utility. clang-format args 
+Add arguments after the id for the utility. clang-format args
 example syntax: `args: [-i, style=Google]`.
 
 ## Available Hooks

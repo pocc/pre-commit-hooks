@@ -22,7 +22,7 @@ class TestCLinters():
         for filename in testfiles:
             with open(filename, 'w') as f:
                 f.write(c_program)
-        cls.testfiles = [os.path.abspath(filename) for filename in testfiles] 
+        cls.testfiles = [os.path.abspath(filename) for filename in testfiles]
 
     def test_clang_format(self):
         """Test clang format using google style, printing to stdout."""
@@ -45,7 +45,7 @@ int main() {{ int i; return 10; }}
             actual = self.get_all_output(cmds, filename)
             # In case num warnings changes due to more checks
             actual = re.sub(r"^\d+", "2", actual)
-            assert actual == expected 
+            assert actual == expected
 
     @pytest.mark.slow
     def test_oclint(self):
@@ -55,7 +55,7 @@ int main() {{ int i; return 10; }}
 
 OCLint Report
 
-Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2 
+Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
 
 {0}:1:14: short variable name [naming|P3] Length of variable name `i` is 1, which is shorter than the threshold of 3
 {0}:1:14: unused local variable [unused|P3] The local variable 'i' is unused.
@@ -72,7 +72,7 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
     @staticmethod
     def get_all_output(cmds, filename):
         """Helper fn to get stderr and stdout from llvm command.
-        
+
         Args:
             cmds (list): List of commands to send to Popen
             filename (str): Name of file to run commands against

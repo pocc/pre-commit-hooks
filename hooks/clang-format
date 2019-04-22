@@ -5,4 +5,3 @@
 
 check_exists clang-format
 clang-format "$@"
-

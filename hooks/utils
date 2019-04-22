@@ -12,11 +12,11 @@ function check_exists {
 		proj_site="https://github.com/pocc/pre-commit-hooks#prerequisites"
 		echo -e "ERR: $1 not found."
 		echo -e "Make sure to install $1 and add it to your path."
-		echo -e "For more info: $proj_site" 
+		echo -e "For more info: $proj_site"
 	fi
 }
 
-# oclint/clang-tidy look for a compilation database. 
+# oclint/clang-tidy look for a compilation database.
 # This flag tells them to skip it.
 function clean_args {
 	if echo "$@" | grep -q "-use-comp-db"; then
@@ -26,4 +26,3 @@ function clean_args {
 		echo "${@}" "--" "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 	fi
 }
-

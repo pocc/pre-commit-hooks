@@ -7,4 +7,3 @@ check_exists clang-tidy
 # Split text into an array of args that can be passed into clang-tidy
 IFS=" " read -r -a args <<< "$(clean_args "$@")"
 clang-tidy "${args[@]}"
-
