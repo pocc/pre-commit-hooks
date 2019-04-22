@@ -1,14 +1,29 @@
 #!/usr/bin/env bash
 # Utilities for other hooks
+# Set up environment
+set -eu
+readonly DEBUG=${DEBUG:-unset}
+if [ "${DEBUG}" != unset ]; then
+  set -x
+fi
 
-# oclint looks for a compilation database. This flag tells it to skip it.
-function clean_args {
-	if [ $(echo "$@" | grep "-use-comp-db") ]; then
-		# -use-comp-db is a hook command, so do something and then remove it
-		args="$(echo $@ "-use-comp-db" | tr ' ' '\n' | sort | uniq -u)"
-	else
-		args="$@ -- -DCMAKE_EXPORT_COMPILE_COMMANDS"
+function check_exists {
+	if [ -z "$(command -v "$1")" ]; then
+		proj_site="https://github.com/pocc/pre-commit-hooks#prerequisites"
+		echo -e "ERR: $1 not found."
+		echo -e "Make sure to install $1 and add it to your path."
+		echo -e "For more info: $proj_site" 
 	fi
-
-	echo $args
 }
+
+# oclint/clang-tidy look for a compilation database. 
+# This flag tells them to skip it.
+function clean_args {
+	if echo "$@" | grep -q "-use-comp-db"; then
+		# -use-comp-db is a hook cmd, so remove it (and don't add below option)
+		echo "$@" "-use-comp-db" | tr ' ' '\n' | sort | uniq -u
+	else
+		echo "${@}" "--" "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+	fi
+}
+

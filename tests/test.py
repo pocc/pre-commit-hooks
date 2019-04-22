@@ -9,12 +9,12 @@ With this snippet:
 - Triggers oclint because short variable name is used
 """
 import os
+import pytest
 import re
 import subprocess as sp
-import unittest
 
 
-class TestCLinters(unittest.TestCase):
+class TestCLinters():
     @classmethod
     def setup_class(cls):
         testfiles = ["test.c", "test.cpp"]
@@ -46,7 +46,8 @@ int main() {{ int i; return 10; }}
             # In case num warnings changes due to more checks
             actual = re.sub(r"^\d+", "2", actual)
             assert actual == expected 
- 
+
+    @pytest.mark.slow
     def test_oclint(self):
         """Test oclint with major analyses turned on."""
         oclint_expected_template = """\

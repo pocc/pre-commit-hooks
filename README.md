@@ -36,21 +36,34 @@ example syntax: `args: [-i, style=Google]`.
 
 ## Available Hooks
 
+### Prerequisites
+
 _You will need to install these utilities to use them._
 _Your package manager may already have them._
 
 - `brew install llvm oclint`
 - `apt install clang-format clang-tidy oclint`
 
-|                                                                          | What it does                                              | Fix Inplace       |
-|--------------------------------------------------------------------------|-----------------------------------------------------------|--------------------|
-| [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | Formats C/C++ code according to a style                   | -i                 |
-| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | clang-based C/C++ linter                                  | -fix, --fix-errors [1] |
-| [oclint](http://oclint.org/)                                             | static code analysis tool for C, C++ and Objective-C code | N/A                |
+### Hook Info
 
-[1]: `-fix` will fail if there are compiler errors vs `-fix-errors` will continue (and can even fix some of them)
+|                                                                          | What it does                                              | Fix Inplace            |
+|--------------------------------------------------------------------------|-----------------------------------------------------------|------------------------|
+| [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | Formats C/C++ code according to a style                   | -i                     |
+| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | clang-based C/C++ linter                                  | -fix, --fix-errors [1] |
+| [oclint](http://oclint.org/)                                             | static code analysis tool for C, C++ and Objective-C code | N/A                    |
+
+[1]: `-fix` will fail if there are compiler errors. `-fix-errors` will
+`-fix` and fix compiler errors if it can, like missing semicolons.
+
+### Compilation Database
+
+`clang-tidy` and `oclint` both expect a [compilation
+database](https://clang.llvm.org/docs/JSONCompilationDatabase.html). Default
+behavior for these hooks is to have `-- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON`
+passed in.  To preempt this option (and have these tools searchg for a
+compilation database), pass in hook arg `-use-comp-db`.
 
 ## Testing
 
 To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are
-working as expected, use `pytest tests/test.py`.
+working as expected on your system, use `pytest tests/test.py`.

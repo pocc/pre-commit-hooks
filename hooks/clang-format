@@ -1,9 +1,8 @@
 #!/bin/sh
 # Wrapper script for clang-format
-set -eu
-readonly DEBUG=${DEBUG:-unset}
-if [ "${DEBUG}" != unset ]; then
-  set -x
-fi
+
+. hooks/utils
+
+check_exists clang-format
 clang-format "$@"
 
