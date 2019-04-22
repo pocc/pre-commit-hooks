@@ -18,7 +18,6 @@ repos:
       - id: check-yaml
       - id: debug-statements
       - id: name-tests-test
-      - id: double-quote-string-fixer
       - id: requirements-txt-fixer
   - repo: https://gitlab.com/pycqa/flake8
     rev: 98beabdcc50ee352a8a5eded1009b0914a3645b9
@@ -41,14 +40,11 @@ repos:
     rev: e19a16efb0f001f55fc96529199d498814016e30
     hooks:
       - id: pyupgrade
-  - repo: https://github.com/asottile/add-trailing-comma
-    rev: 98e865eb962c730c5014a8d6626fd511569db402
+  - repo: https://github.com/ambv/black
+    rev: cea13f498418784e22f8fbd78db3f9240a2bad11
     hooks:
-      - id: add-trailing-comma
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v2.3.1
-    hooks:
-      - id: pylint
+      - id: black
+        args: ["-l", "79"]
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 1.11.0
     hooks:
@@ -60,20 +56,20 @@ repos:
         name: clang-format
         entry: hooks/clang-format
         description: Formats C/CPP code
-        types: [c, c++]
+        files: \.cp?p?
         language: script
         additional_dependencies: [clang-format]
       - id: clang-tidy
         name: clang-tidy
         entry: hooks/clang-tidy
         description: Find warnings/errors in C/CPP code
-        types: [c, c++]
+        files: \.cp?p?
         language: script
         additional_dependencies: [clang-tidy]
       - id: oclint
         name: oclint
         entry: hooks/oclint
         description: Find warnings/errors in C/CPP code
-        types: [c, c++]
+        files: \.cp?p?
         language: script
         additional_dependencies: [oclint]
