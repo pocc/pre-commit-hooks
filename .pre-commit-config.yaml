@@ -49,7 +49,9 @@ repos:
     rev: 1.11.0
     hooks:
       - id: shellcheck
+        type: [shell]
         args: ["--color=always", "--shell=bash", "-x", "-a"]
+        additional_dependencies: [shellcheck]
   - repo: local
     hooks:
       - id: clang-format
