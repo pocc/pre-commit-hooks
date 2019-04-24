@@ -5,6 +5,12 @@
 
 check_exists clang-tidy
 # Split text into an array of args that can be passed into clang-tidy
-IFS=" " read -r -a args <<< "$(clean_args "$@")"
-clang-tidy "${args[@]}"
-return $?
+# tee because of weird stdout issues with clang-tidy
+output="$(clang-tidy "$@" 2>/dev/null | tee)"
+# If there is any stdout from clang-tidy, that means there are errors
+if [ -z "${output}" ]; then
+	exit 0
+else
+	echo -e "${output}"
+	exit 1
+fi

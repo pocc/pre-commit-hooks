@@ -20,27 +20,43 @@ class TestCLinters:
 
     @classmethod
     def setup_class(cls):
-        """Create test files that will be used by other tests."""
-        testfiles = ["test.c", "test.cpp"]
-        c_program = "int main() { int i; return 10; }"
-        for filename in testfiles:
-            with open(filename, "w") as filedesc:
-                filedesc.write(c_program)
-        cls.testfiles = [os.path.abspath(filename) for filename in testfiles]
+        """Create test files that will be used by other tests.
 
-    def test_clang_format(self):
-        """Use google style, printing a format diff to stdout."""
-        expected = r"""1c1,4
+        "err" files are expected to error for all linters
+        "ok" files are expected to pass for all listers
+        """
+        errfiles = ["tests/files/err.c", "tests/files/err.cpp"]
+        okfiles = ["tests/files/ok.c", "tests/files/ok.cpp"]
+        cls.errfiles = [os.path.abspath(filename) for filename in errfiles]
+        cls.okfiles = [os.path.abspath(filename) for filename in okfiles]
+
+    def test_clang_format_ok(self):
+        self.run_clang_format(
+            filelist=self.okfiles, expected_output="", expected_retcode=0
+        )
+
+    def test_clang_format_err(self):
+        clang_format_err = r"""1c1,4
 < int main() { int i; return 10; }
-\ No newline at end of file
 ---
 > int main() {
 >   int i;
 >   return 10;
 > }
-\ No newline at end of file
 """
-        for filename in self.testfiles:
+        self.run_clang_format(
+            filelist=self.errfiles,
+            expected_output=clang_format_err,
+            expected_retcode=1,
+        )
+
+    @staticmethod
+    def run_clang_format(filelist, expected_output, expected_retcode):
+        """Test that oclint returns correct retcode & output for files.
+
+        Use google style, printing a format diff to stdout."""
+        for filename in filelist:
+            print("Analyzing file", filename)
             _pipe = sp.Popen(
                 ["hooks/clang-format", filename],
                 text=True,
@@ -48,32 +64,54 @@ class TestCLinters:
                 stderr=sp.STDOUT,
             )
             actual = _pipe.communicate()[0]
-            assert actual == expected
+            # Expecting error text with a err return code
+            assert actual == expected_output
+            assert _pipe.returncode == expected_retcode
 
-    def test_clang_tidy(self):
-        """Test clang tidy using all checks."""
-        clang_tidy_expected = r"""2 warnings generated.
-{0}:1:28: error: 10 is a magic number; consider replacing it with a named constant [cppcoreguidelines-avoid-magic-numbers,-warnings-as-errors]
+    def test_clang_tidy_ok(self):
+        self.run_clang_tidy(
+            filelist=self.okfiles, expected_output="", expected_retcode=0
+        )
+
+    def test_clang_tidy_err(self):
+        clang_tidy_error = r"""{0}:1:28: error: 10 is a magic number; consider replacing it with a named constant [cppcoreguidelines-avoid-magic-numbers,-warnings-as-errors]
 int main() {{ int i; return 10; }}
                            ^
 """  # noqa: E501
+        self.run_clang_tidy(
+            filelist=self.errfiles,
+            expected_output=clang_tidy_error,
+            expected_retcode=1,
+        )
+
+    def run_clang_tidy(self, filelist, expected_output, expected_retcode):
+        """Test that clang tidy returns correct retcode & output for files."""
         cmds = [
             "./hooks/clang-tidy",
             "-quiet",
             "-checks=*",
             "-warnings-as-errors=*",
         ]
-        for filename in self.testfiles:
-            expected = clang_tidy_expected.format(filename)
-            actual = self.get_all_output(cmds, filename)
+        for filename in filelist:
+            print("Analyzing file", filename)
+            expected = expected_output.format(filename)
             # In case num warnings changes due to more checks
+            actual, retcode = self.get_all_output(cmds, filename)
+            print(actual, retcode)
             actual = re.sub(r"^\d+", "2", actual)
+            # Expecting error text with a err return code
             assert actual == expected
+            assert retcode == expected_retcode
 
     @pytest.mark.slow
-    def test_oclint(self):
-        """Test oclint with major analyses turned on."""
-        oclint_expected_template = r"""
+    def test_oclint_ok(self):
+        self.run_oclint(
+            filelist=self.okfiles, expected_output="", expected_retcode=0
+        )
+
+    @pytest.mark.slow
+    def test_oclint_err(self):
+        oclint_stdout_err = r"""
 
 OCLint Report
 
@@ -84,15 +122,26 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
 
 [OCLint (http://oclint.org) v0.13]
 """  # noqa: E501
+        self.run_oclint(
+            filelist=self.errfiles,
+            expected_output=oclint_stdout_err,
+            expected_retcode=1,
+        )
+
+    def run_oclint(self, filelist, expected_output, expected_retcode):
+        """Test that oclint returns correct retcode & output for files."""
         cmds = [
             "./hooks/oclint",
             "-enable-global-analysis",
             "-enable-clang-static-analyzer",
         ]
-        for filename in self.testfiles:
-            expected = oclint_expected_template.format(filename)
-            actual = self.get_all_output(cmds, filename)
+        for filename in filelist:
+            print("Analyzing file", filename)
+            expected = expected_output.format(filename)
+            actual, retcode = self.get_all_output(cmds, filename)
+            # Expecting error text with a err return code
             assert actual == expected
+            assert retcode == expected_retcode
 
     @staticmethod
     def get_all_output(cmds, filename):
@@ -101,14 +150,14 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
         Args:
             cmds (list): List of commands to send to Popen
             filename (str): Name of file to run commands against
-        Returns (str):
-            Text output of function
+        Returns (tuple):
+            Text output of function, return code
         """
         combined_cmds = cmds + [filename]
         _pipe = sp.Popen(
             combined_cmds, stderr=sp.STDOUT, stdout=sp.PIPE, text=True
         )
-        return _pipe.communicate()[0]
+        return _pipe.communicate()[0], _pipe.returncode
 
     @classmethod
     def teardown_class(cls):
@@ -116,7 +165,3 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
             -> See https://github.com/oclint/oclint/issues/537"""
         if os.path.exists("test.plist"):
             os.remove("test.plist")
-        for filename in cls.testfiles:
-            filename = os.path.abspath(filename)
-            if os.path.exists(filename):
-                os.remove(filename)

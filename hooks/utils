@@ -17,14 +17,3 @@ function check_exists {
 		exit 1
 	fi
 }
-
-# oclint/clang-tidy look for a compilation database.
-# This flag tells them to skip it.
-function clean_args {
-	if echo "$@" | grep -q "-use-comp-db"; then
-		# -use-comp-db is a hook cmd, so remove it (and don't add below option)
-		echo "$@" "-use-comp-db" | tr ' ' '\n' | sort | uniq -u
-	else
-		echo "${@}" "--" "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
-	fi
-}
