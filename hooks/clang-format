@@ -20,7 +20,12 @@ if [ -z "$filepath" ]; then
 	exit 1
 fi
 
-# pre-commit will fail if there are file changes due to formatting if the user
-# enters arg `-i` (change in place).
 # If there are differences, this script will fail (and pre-commit should show this)
-diff "$filepath" <(clang-format "$@")
+if [[ " $* " == *" -i "* ]]; then
+	# pre-commit will fail if there are file changes due to formatting if the user
+	# enters arg `-i` (change in place).
+	clang-format "$@"
+else
+	# Otherwise clang-format should send output to stdout, and can be compared
+	diff "$filepath" <(clang-format "$@")
+fi
