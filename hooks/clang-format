@@ -10,21 +10,20 @@ fi
 # Get the file argument if one exists.
 for arg in "$@"; do
 	if [ -e "$arg" ]; then
-		filepath="$arg"
+		filename="$arg"
 	fi
 done
 
-if [ -z "$filepath" ]; then
+if [ -z "$filename" ]; then
 	echo "ERR: No file arg found. args =" "$@"
 	exit 1
 fi
 
 # If there are differences, this script will fail (and pre-commit should show this)
 if [[ " $* " == *" -i "* ]]; then
-	# pre-commit will fail if there are file changes due to formatting if the user
-	# enters arg `-i` (change in place).
-	clang-format "$@"
+	# Here, diff compares what the file is before and after transform
+	diff "$filename" <(clang-format "$@"; cat "$filename")
 else
 	# Otherwise clang-format should send output to stdout, and can be compared
-	diff "$filepath" <(clang-format "$@")
+	diff "$filename" <(clang-format "$@")
 fi
