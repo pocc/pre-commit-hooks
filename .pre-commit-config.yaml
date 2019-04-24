@@ -13,7 +13,6 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-docstring-first
-      - id: check-json
       - id: check-added-large-files
       - id: check-yaml
       - id: debug-statements
@@ -53,24 +52,8 @@ repos:
         additional_dependencies: [shellcheck]
   - repo: local
     hooks:
-      - id: clang-format
-        name: clang-format
-        entry: hooks/clang-format
-        description: Formats C/CPP code
-        files: \.cp?p?
+      - id: runtests
+        name: runtests
+        entry: tests/run_tests
+        description: Tests expected output of all 3 scripts
         language: script
-        additional_dependencies: [clang-format]
-      - id: clang-tidy
-        name: clang-tidy
-        entry: hooks/clang-tidy
-        description: Find warnings/errors in C/CPP code
-        files: \.cp?p?
-        language: script
-        additional_dependencies: [clang-tidy]
-      - id: oclint
-        name: oclint
-        entry: hooks/oclint
-        description: Find warnings/errors in C/CPP code
-        files: \.cp?p?
-        language: script
-        additional_dependencies: [oclint]

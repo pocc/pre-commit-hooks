@@ -7,12 +7,14 @@ if [ "${DEBUG}" != unset ]; then
   set -x
 fi
 
+# Glorified which, with documentation
 function check_exists {
 	if [ -z "$(command -v "$1")" ]; then
 		proj_site="https://github.com/pocc/pre-commit-hooks#prerequisites"
 		echo -e "ERR: $1 not found."
 		echo -e "Make sure to install $1 and add it to your path."
 		echo -e "For more info: $proj_site"
+		exit 1
 	fi
 }
 
