@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # Wrapper script for clang-tidy
+CMD="clang-tidy"
+if [ -z "$(command -v $CMD)" ]; then
+	echo -e "ERR: $CMD not found.\nMake sure to install $CMD and add it to your path."
+	echo -e "For more info: https://github.com/pocc/pre-commit-hooks#prerequisites"
+	exit 1
+fi
 
-. hooks/utils
-
-check_exists clang-tidy
 # Split text into an array of args that can be passed into clang-tidy
 # tee because of weird stdout issues with clang-tidy
 output="$(clang-tidy "$@" 2>/dev/null | tee)"

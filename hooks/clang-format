@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # Wrapper script for clang-format
+CMD="clang-format"
+if [ -z "$(command -v $CMD)" ]; then
+	echo -e "ERR: $CMD not found.\nMake sure to install $CMD and add it to your path."
+	echo -e "For more info: https://github.com/pocc/pre-commit-hooks#prerequisites"
+	exit 1
+fi
 
-. hooks/utils
-
-check_exists clang-format
 orig_file="${*: -1}"
 # pre-commit will fail if there are file changes due to formatting if the user
 # enters arg `-i` (change in place).

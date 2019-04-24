@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Wrapper script for oclint
-
-. hooks/utils
-
-check_exists oclint
+CMD="oclint"
+if [ -z "$(command -v $CMD)" ]; then
+	echo -e "ERR: $CMD not found.\nMake sure to install $CMD and add it to your path."
+	echo -e "For more info: https://github.com/pocc/pre-commit-hooks#prerequisites"
+	exit 1
+fi
 
 pwd_files="$(ls)"
 # Split text into an array of args that can be passed into oclint
