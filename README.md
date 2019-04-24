@@ -1,6 +1,6 @@
 # pre-commit hooks
 
-Designed to be a part of https://pre-commit.com/hooks.html Inspired by shell
+Designed to be a part of https://pre-commit.com/hooks.html. Inspired by shell
 scripts in https://github.com/jumanjihouse/pre-commit-hooks/
 
 ## Description
@@ -14,25 +14,24 @@ This manages 3 C/CPP Static Code Analyzers:
 It is currently not possible to pass any arguments after `--` due to pre-commit
 architecture.
 
-By default, `-- -DCMAKE_EXPORT_COMPILER_COMMANDS` is added to both clang-tidy
-and oclint to avoid compilation database errors. If you want to use a
-compilation database, reference the command in `- repo: local` in your config.
-
 ## Usage
 
-Add to `.pre-commit-config.yaml` in your git repo:
+Example `.pre-commit-config.yaml` snippet that I use:
 
 ```yaml
 - repo: https://github.com/pocc/pre-commit-hooks
   sha: master
   hooks:
     - id: clang-format
+      args: [-i, --style=Google]
     - id: clang-tidy
+      args: [-fix-errors, -checks=\*, -warnings-as-errors=\*]
     - id: oclint
+      args: [-enable-clang-static-analyzer, -enable-global-analysis]
 ```
 
-Add arguments after the id for the utility. clang-format args example syntax:
-`args: [-i, style=Google]`.
+Note that you can supply your own args or remove the args line entirely,
+depending on your use case.
 
 ## Available Hooks
 
@@ -59,12 +58,9 @@ and fix compiler errors if it can, like missing semicolons.
 
 `clang-tidy` and `oclint` both expect a
 [compilation database](https://clang.llvm.org/docs/JSONCompilationDatabase.html).
-Default behavior for these hooks is to have
-`-- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON` passed in. To preempt this option (and
-have these tools searchg for a compilation database), pass in hook arg
-`-use-comp-db`.
+Both hooks will ignore the error for not having one.
 
 ## Testing
 
 To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are
-working as expected on your system, use `pytest tests/test.py`.
+working as expected on your system, use `pytest tests/test.py --runslow`.
