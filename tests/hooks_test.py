@@ -121,7 +121,7 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
 {0}:1:14: unused local variable [unused|P3] The local variable 'i' is unused.
 
 [OCLint (http://oclint.org) v0.13]
-"""  # noqa: E501
+"""  # noqa: E501 W291
         self.run_oclint(
             filelist=self.errfiles,
             expected_output=oclint_stdout_err,

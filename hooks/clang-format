@@ -7,8 +7,20 @@ if [ -z "$(command -v $CMD)" ]; then
 	exit 1
 fi
 
-orig_file="${*: -1}"
+# Get the file argument if one exists.
+for arg in "$@"; do
+	argpath="$(realpath "$arg")"
+	if test -f "$argpath"; then
+		filepath="$argpath"
+	fi
+done
+
+if [ -z "$filepath" ]; then
+	echo "ERR: No file arg found. args =" "$@"
+	exit 1
+fi
+
 # pre-commit will fail if there are file changes due to formatting if the user
 # enters arg `-i` (change in place).
 # If there are differences, this script will fail (and pre-commit should show this)
-diff "$orig_file" <(clang-format "$@")
+diff "$filepath" <(clang-format "$@")
