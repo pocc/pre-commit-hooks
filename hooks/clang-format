@@ -9,9 +9,8 @@ fi
 
 # Get the file argument if one exists.
 for arg in "$@"; do
-	argpath="$(realpath "$arg" 2>/dev/null)"
-	if test -f "$argpath"; then
-		filepath="$argpath"
+	if [ -e "$arg" ]; then
+		filepath="$arg"
 	fi
 done
 
