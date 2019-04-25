@@ -60,6 +60,15 @@ and fix compiler errors if it can, like missing semicolons.
 [compilation database](https://clang.llvm.org/docs/JSONCompilationDatabase.html).
 Both hooks will ignore the error for not having one.
 
+You can generate with one `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ...` if you
+have a cmake-based project.
+
+### --
+
+Options after `--` like `-std=c++11` will be interpreted correctly for
+`clang-tidy` and `oclint`. Make sure they sequentially follow the `--` argument
+in the hook's args list.
+
 ## Testing
 
 To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are

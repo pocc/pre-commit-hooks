@@ -7,9 +7,22 @@ if [ -z "$(command -v $CMD)" ]; then
 	exit 1
 fi
 
+# pre-commit sends file as last arg, which causes problems when using --
+# This function converts args (1 3 5 7 -- 6 8 0) => (1 3 5 7 0 -- 6 8),
+# Where 0 is the file pre-commit sends to the utility
+# See https://github.com/pre-commit/pre-commit/issues/1000
+last_idx="$(($#-1))"
+args=("$@")
+for i in $(seq 0 $last_idx); do
+  if [ "${args[$i]}" == "--" ] && [ -e "$last_idx" ]; then
+	args=("${args[@]::$i}" "${args[$last_idx]}" "${args[@]:$i:$((last_idx-i))}")
+    break
+  fi
+done
+
 # Split text into an array of args that can be passed into clang-tidy
 # tee because of weird stdout issues with clang-tidy
-output="$(clang-tidy "$@" 2>/dev/null | tee)"
+output="$(clang-tidy "${args[@]}" 2>/dev/null | tee)"
 # If there is any stdout from clang-tidy, that means there are errors
 if [ -z "${output}" ]; then
 	exit 0

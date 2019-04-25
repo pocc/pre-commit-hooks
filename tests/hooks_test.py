@@ -115,13 +115,15 @@ int main() {{ int i; return 10; }}
 
 OCLint Report
 
-Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2
+Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2{0}
 
-{0}:1:14: short variable name [naming|P3] Length of variable name `i` is 1, which is shorter than the threshold of 3
-{0}:1:14: unused local variable [unused|P3] The local variable 'i' is unused.
+{1}:1:14: short variable name [naming|P3] Length of variable name `i` is 1, which is shorter than the threshold of 3
+{1}:1:14: unused local variable [unused|P3] The local variable 'i' is unused.
 
 [OCLint (http://oclint.org) v0.13]
-"""  # noqa: E501 W291
+"""  # noqa: E501
+        # Add extra space to end of line so linters don't complain/autofix
+        oclint_stdout_err = oclint_stdout_err.format(" ", "{0}")
         self.run_oclint(
             filelist=self.errfiles,
             expected_output=oclint_stdout_err,
