@@ -12,9 +12,13 @@ function get_clangtidy_ver { clang-tidy --version | grep version | awk '{print $
 
 
 # Split text into an array of args that can be passed into clang-tidy
-# tee because of weird stdout issues with clang-tidy
+# clang-tidy can complain about # of warnings in systems files
+# in the first line, depending on options. If it does this, discard that line.
 function execute_cmd {
-	output="$(clang-tidy "${args[@]}" 2>/dev/null | tee)"
+	output="$(clang-tidy "${args[@]}" 2>&1)"
+	if printf "%s" "$output" | head -n1 | grep -q " warnings "; then
+		output="$(printf "%s" "$output" | tail -n +2)"
+	fi
 }
 
 

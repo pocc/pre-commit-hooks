@@ -32,20 +32,30 @@ function assert_version {
 function parse_ddash_args {
 	args=($1)
 	last_idx="$((${#args[@]}-1))"
+	caller_proc=$(ps -o comm= $PPID)
 	for i in $(seq 0 $last_idx); do
 		arg="${args[$i]}"
 		if [[ "$arg" == "--version="* ]]; then
 			actual="$2"
 			expected="$(echo "$arg" | cut -d '=' -f 2)"
 			assert_version "$actual" "$expected"
-		elif [ "$arg" == "--" ] && [ -e "$last_idx" ]; then
-		    args=("${args[@]::$i}" "${args[$last_idx]}" "${args[@]:$i:$((last_idx-i))}")
-		    break
+		# Rotate if -- exists AND last arg is file AND pre-commit called $0
+		elif [ "$arg" == "--" ]; then
+			has_ddash="true"
+			if [ -e "$last_idx" ] && [ "$caller_proc" == "pre-commit" ]; then
+				args=("${args[@]::$i}" "${args[$last_idx]}" "${args[@]:$i:$((last_idx-i))}")
+				break
+			fi
 		elif [ -e "$arg" ]; then
 			filename="$arg"
 		fi
 	done
 
+	# Add a -- -DCAMKE_EXPORT_COMPILE_COMMANDS if -- is not specified
+	# To avoid compilation database errors
+	if [ -z $has_ddash ]; then
+		args=("${args[@]}" "--" "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON")
+	fi
 	if [ -z "$filename" ]; then
 		echo "ERR: No file arg found. args =" "${args[@]}"
 	fi
