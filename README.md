@@ -5,7 +5,7 @@ integrates C linters with pre-commit.
 
 ## Description
 
-This manages 3 C/CPP Static Code Analyzers:
+This repo manages 3 C/CPP Static Code Analyzers:
 
 - clang-format
 - clang-tidy
@@ -39,6 +39,8 @@ manager may already have them._
 
 - `brew install llvm oclint`
 - `apt install clang-format clang-tidy oclint`
+
+Bash is required to use these hooks as all 3 invoking scripts are written in it.
 
 ### Hook Info
 
