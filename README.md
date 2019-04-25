@@ -9,7 +9,7 @@ With `int main() { int i; return 10; }` in a file, all three linters should fail
 
 <img src="https://dl.dropboxusercontent.com/s/xluan7x39wx6fss/c_linters_failing.png" width="66%" height="66%">
 
-The above uses this `.pre-commit-config.yaml` with all the arg switches flipped:
+The above uses this `.pre-commit-config.yaml`:
 
 ```yaml
 ---
@@ -19,9 +19,9 @@ repos:
     sha: master
     hooks:
       - id: clang-format
-        args: [-i, --style=Google]
+        args: [--style=Google]
       - id: clang-tidy
-        args: [-fix, -fix-errors, -checks=*, -warnings-as-errors=*]
+        args: [-checks=*, -warnings-as-errors=*]
       - id: oclint
         args: [-enable-clang-static-analyzer, -enable-global-analysis]
 ```
@@ -29,7 +29,7 @@ repos:
 _Note that for your config yaml, you can supply your own args or remove the args line entirely,
 depending on your use case._
 
-## Available Hooks
+## Using the Hooks
 
 ### Prerequisites
 
@@ -51,8 +51,6 @@ Bash is required to use these hooks as all 3 invoking scripts are written in it.
 
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
 and fix compiler errors if it can, like missing semicolons.
-
-## Misc
 
 ### Compilation Database
 
