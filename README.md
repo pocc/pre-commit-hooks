@@ -1,7 +1,7 @@
 # pre-commit hooks
 
-Designed to be a part of https://pre-commit.com/hooks.html. Inspired by shell
-scripts in https://github.com/jumanjihouse/pre-commit-hooks/
+This is a [pre-commit](https://pre-commit.com) hooks repo that
+integrates C linters with pre-commit.
 
 ## Description
 
