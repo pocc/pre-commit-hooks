@@ -1,32 +1,39 @@
 #!/usr/bin/env bash
 # Wrapper script for clang-tidy
+################################################################################
 CMD="clang-tidy"
-if [ -z "$(command -v $CMD)" ]; then
-	echo -e "ERR: $CMD not found.\nMake sure to install $CMD and add it to your path."
-	echo -e "For more info: https://github.com/pocc/pre-commit-hooks#prerequisites"
-	exit 1
-fi
-
-# pre-commit sends file as last arg, which causes problems when using --
-# This function converts args (1 3 5 7 -- 6 8 0) => (1 3 5 7 0 -- 6 8),
-# Where 0 is the file pre-commit sends to the utility
-# See https://github.com/pre-commit/pre-commit/issues/1000
-last_idx="$(($#-1))"
 args=("$@")
-for i in $(seq 0 $last_idx); do
-  if [ "${args[$i]}" == "--" ] && [ -e "$last_idx" ]; then
-	args=("${args[@]::$i}" "${args[$last_idx]}" "${args[@]:$i:$((last_idx-i))}")
-    break
-  fi
-done
+hook_dir="$(dirname "$(readlink -f "$0")")"
+. "$hook_dir/utils"
+
+
+# Get version. Should be the same as clang-format.
+function get_clangtidy_ver { clang-tidy --version | awk '{print $3}'; }
+
 
 # Split text into an array of args that can be passed into clang-tidy
 # tee because of weird stdout issues with clang-tidy
-output="$(clang-tidy "${args[@]}" 2>/dev/null | tee)"
+function execute_cmd {
+	output="$(clang-tidy "${args[@]}" 2>/dev/null | tee)"
+}
+
+
 # If there is any stdout from clang-tidy, that means there are errors
-if [ -z "${output}" ]; then
-	exit 0
-else
-	echo -e "${output}"
-	exit 1
-fi
+function parse_output {
+	if [ -z "${output}" ]; then
+		exit 0
+	else
+		echo -e "${output}"
+		exit 1
+	fi
+}
+
+
+function clangtidy_main {
+	check_installed "$CMD"
+	parse_ddash_args "${args[@]}" "$(get_clangtidy_ver)"
+	execute_cmd
+	parse_output
+}
+
+clangtidy_main

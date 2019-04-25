@@ -48,7 +48,7 @@ repos:
     rev: 1.11.0
     hooks:
       - id: shellcheck
-        args: ["--color=always", "--shell=bash", "-x", "-a"]
+        args: ["--color=always", "--shell=bash", "-x", "-a", "--exclude=SC1090"]
         additional_dependencies: [shellcheck]
   - repo: local
     hooks:

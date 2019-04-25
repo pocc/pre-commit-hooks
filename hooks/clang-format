@@ -1,29 +1,47 @@
 #!/usr/bin/env bash
 # Wrapper script for clang-format
+################################################################################
 CMD="clang-format"
-if [ -z "$(command -v $CMD)" ]; then
-	echo -e "ERR: $CMD not found.\nMake sure to install $CMD and add it to your path."
-	echo -e "For more info: https://github.com/pocc/pre-commit-hooks#prerequisites"
-	exit 1
-fi
+args=("$@")
+hook_dir="$(dirname "$(readlink -f "$0")")"
+. "$hook_dir/utils"
 
-# Get the file argument if one exists.
-for arg in "$@"; do
-	if [ -e "$arg" ]; then
-		filename="$arg"
+
+# Get the file argument if one exists. Assert version as necessary.
+function parse_args {
+	for arg in "${args[@]}"; do
+		if [[ "$arg" == "--version="* ]]; then
+			actual="$(clang-format --version | awk '{print $3}')"
+			expected="$(echo "$arg" | cut -d '=' -f 2)"
+			assert_version "$actual" "$expected"
+		elif [ -e "$arg" ]; then
+			filename="$arg"
+		fi
+	done
+
+	if [ -z "$filename" ]; then
+		echo "ERR: No file arg found. args =" "${args[@]}"
+		exit 1
 	fi
-done
+}
 
-if [ -z "$filename" ]; then
-	echo "ERR: No file arg found. args =" "$@"
-	exit 1
-fi
 
 # If there are differences, this script will fail (and pre-commit should show this)
-if [[ " $* " == *" -i "* ]]; then
-	# Here, diff compares what the file is before and after transform
-	diff "$filename" <(clang-format "$@"; cat "$filename")
-else
-	# Otherwise clang-format should send output to stdout, and can be compared
-	diff "$filename" <(clang-format "$@")
-fi
+function diff_formatted {
+	if [[ " ${args[*]} " == *" -i "* ]]; then
+		# Here, diff compares what the file is before and after transform
+		diff "$filename" <(clang-format "${args[@]}"; cat "$filename")
+	else
+		# Otherwise clang-format should send output to stdout, and can be compared
+		diff "$filename" <(clang-format "${args[@]}")
+	fi
+}
+
+
+function clangformat_main {
+	check_installed "$CMD"
+	parse_args
+	diff_formatted
+}
+
+clangformat_main
