@@ -37,7 +37,7 @@ function parse_output {
 
 function oclint_main {
 	check_installed "$CMD"
-	parse_ddash_args  "${args[@]}" "$(get_oclint_ver)"
+	parse_ddash_args "${args[*]}" "$(get_oclint_ver)"
 	execute_cmd
 	parse_output
 }

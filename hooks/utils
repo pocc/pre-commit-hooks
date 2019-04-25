@@ -18,8 +18,8 @@ function assert_version {
 	actual_version="$1"
 	expected_version="$2"
 	if [ "$actual_version" != "$expected_version" ]; then
-		echo "ERR: Expected version $expected_version, but system version is $actual_version" 1>&2
-		echo "Edit your pre-commit config or use a different version of $CMD" 1>&2
+		echo -e "ERR: Expected version $expected_version, but system version is $actual_version" 1>&2
+		echo -e "Edit your pre-commit config or use a different version of $CMD" 1>&2
 		exit 1
 	fi
 }
@@ -30,7 +30,7 @@ function assert_version {
 # Where 0 is the file pre-commit sends to the utility
 # See https://github.com/pre-commit/pre-commit/issues/1000
 function parse_ddash_args {
-	args="$1"
+	args=($1)
 	last_idx="$((${#args[@]}-1))"
 	for i in $(seq 0 $last_idx); do
 		arg="${args[$i]}"
@@ -39,8 +39,14 @@ function parse_ddash_args {
 			expected="$(echo "$arg" | cut -d '=' -f 2)"
 			assert_version "$actual" "$expected"
 		elif [ "$arg" == "--" ] && [ -e "$last_idx" ]; then
-		  args=("${args[@]::$i}" "${args[$last_idx]}" "${args[@]:$i:$((last_idx-i))}")
-		  break
+		    args=("${args[@]::$i}" "${args[$last_idx]}" "${args[@]:$i:$((last_idx-i))}")
+		    break
+		elif [ -e "$arg" ]; then
+			filename="$arg"
 		fi
 	done
+
+	if [ -z "$filename" ]; then
+		echo "ERR: No file arg found. args =" "${args[@]}"
+	fi
 }

@@ -8,7 +8,7 @@ hook_dir="$(dirname "$(readlink -f "$0")")"
 
 
 # Get version. Should be the same as clang-format.
-function get_clangtidy_ver { clang-tidy --version | awk '{print $3}'; }
+function get_clangtidy_ver { clang-tidy --version | grep version | awk '{print $3}'; }
 
 
 # Split text into an array of args that can be passed into clang-tidy
@@ -31,7 +31,7 @@ function parse_output {
 
 function clangtidy_main {
 	check_installed "$CMD"
-	parse_ddash_args "${args[@]}" "$(get_clangtidy_ver)"
+	parse_ddash_args "${args[*]}" "$(get_clangtidy_ver)"
 	execute_cmd
 	parse_output
 }

@@ -52,6 +52,12 @@ Bash is required to use these hooks as all 3 invoking scripts are written in it.
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
 and fix compiler errors if it can, like missing semicolons.
 
+### Enforcing linter version with --version=
+
+Some linters change behavior between versions. To enforce a linter version
+8.0.0, for example, add `--version=8.0.0` to `args:` for that linter. Note that
+this is a pre-commit hook arg and passing it to the linter will cause an error.
+
 ### Compilation Database
 
 `clang-tidy` and `oclint` both expect a
