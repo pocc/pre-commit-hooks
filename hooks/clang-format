@@ -26,22 +26,10 @@ function parse_args {
 }
 
 
-# If there are differences, this script will fail (and pre-commit should show this)
-function diff_formatted {
-	if [[ " ${args[*]} " == *" -i "* ]]; then
-		# Here, diff compares what the file is before and after transform
-		diff "$filename" <(clang-format "${args[@]}"; cat "$filename")
-	else
-		# Otherwise clang-format should send output to stdout, and can be compared
-		diff "$filename" <(clang-format "${args[@]}")
-	fi
-}
-
-
 function clangformat_main {
 	check_installed "$CMD"
 	parse_args
-	diff_formatted
+	diff_formatted "${args[@]}" "$filename"
 }
 
 clangformat_main

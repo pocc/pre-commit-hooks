@@ -60,3 +60,17 @@ function parse_ddash_args {
 		echo "ERR: No file arg found. args =" "${args[@]}"
 	fi
 }
+
+
+# If there are differences, this script will fail (and pre-commit should show this)
+function diff_formatted {
+	args=($1)
+	filename="$2"
+	if [[ " ${args[*]} " == *" -i "* ]]; then
+		# Here, diff compares what the file is before and after transform
+		diff "$filename" <(clang-format "${args[@]}"; cat "$filename")
+	else
+		# Otherwise clang-format should send output to stdout, and can be compared
+		diff "$filename" <(clang-format "${args[@]}")
+	fi
+}
