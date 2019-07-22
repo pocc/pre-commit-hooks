@@ -55,7 +55,7 @@ class TestCLinters:
         output = sp.check_output(["clang-format", "--version"], text=True)
         cf_version = re.search(r"version ([\S]+)", output).group(1)
 
-        clang_version_err = r"""ERR: Expected version 0, but system version is {}
+        clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
 Edit your pre-commit config or use a different version of clang-format
 """.format(
             cf_version
@@ -64,7 +64,7 @@ Edit your pre-commit config or use a different version of clang-format
             filelist=self.okfiles,
             expected_output=clang_version_err,
             expected_retcode=1,
-            version="0",
+            version="0.0.0",
         )
 
     @staticmethod
@@ -106,7 +106,7 @@ int main() {{ int i; return 10; }}
         output = sp.check_output(["clang-tidy", "--version"], text=True)
         ct_version = re.search(r"version ([\S]+)", output).group(1)
 
-        clang_version_err = r"""ERR: Expected version 0, but system version is {}
+        clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
 Edit your pre-commit config or use a different version of clang-tidy
 """.format(
             ct_version
@@ -115,7 +115,7 @@ Edit your pre-commit config or use a different version of clang-tidy
             filelist=self.okfiles,
             expected_output=clang_version_err,
             expected_retcode=1,
-            version="0",
+            version="0.0.0",
         )
 
     def run_clang_tidy(
@@ -175,7 +175,7 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2{0}
         output = sp.check_output(["oclint", "--version"], text=True)
         oclint_ver = re.search(r"OCLint version ([\S]+)\.", output).group(1)
 
-        clang_version_err = r"""ERR: Expected version 0, but system version is {}
+        clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
 Edit your pre-commit config or use a different version of oclint
 """.format(
             oclint_ver
@@ -184,7 +184,7 @@ Edit your pre-commit config or use a different version of oclint
             filelist=self.okfiles,
             expected_output=clang_version_err,
             expected_retcode=1,
-            version="0",
+            version="0.0.0",
         )
 
     def run_oclint(
@@ -209,6 +209,42 @@ Edit your pre-commit config or use a different version of oclint
             # Expecting error text with a err return code
             assert actual == expected
             assert retcode == expected_retcode
+
+    @staticmethod
+    def test_sticky_version_minor():
+        """Verify that 6.0 matches minor versions like 6.0.1."""
+        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
+        cmds[2] = cmds[2].format("6.0.1")
+        child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
+        child_out, child_err = child.communicate()
+        assert child_out == b""
+        assert child_err == b""
+        assert child.returncode == 0
+
+    @staticmethod
+    def test_sticky_version_extended():
+        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
+        cmds[2] = cmds[2].format("6.0.0-1ubuntu2")
+        child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
+        child_out, child_err = child.communicate()
+        assert child_out == b""
+        assert child_err == b""
+        assert child.returncode == 0
+
+    @staticmethod
+    def test_sticky_version_err():
+        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
+        cmds[2] = cmds[2].format("6.1.0")
+        child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
+        child_out, child_err = child.communicate()
+        print(child_err)
+        assert child_out == b""
+        assert (
+            child_err
+            == b"ERR: Expected version 6.0, but system version is 6.1.0\n"
+            + b"Edit your pre-commit config or use a different version of \n"
+        )
+        assert child.returncode == 1
 
     @staticmethod
     def get_all_output(cmds, filename):

@@ -1,4 +1,6 @@
 __pycache__/
 venv/
 .idea/
-.plist
+.vscode/
+*.plist
+*cache/
