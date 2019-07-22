@@ -17,7 +17,7 @@ function check_installed {
 function assert_version {
 	actual_version="$1"
 	expected_version="$2"
-	if [ "$actual_version" != "$expected_version" ]; then
+	if [[ "$actual_version" != "$expected_version"* ]]; then
 		echo -e "ERR: Expected version $expected_version, but system version is $actual_version" 1>&2
 		echo -e "Edit your pre-commit config or use a different version of $CMD" 1>&2
 		exit 1
@@ -30,6 +30,8 @@ function assert_version {
 # Where 0 is the file pre-commit sends to the utility
 # See https://github.com/pre-commit/pre-commit/issues/1000
 function parse_ddash_args {
+	# Quoting $1 interferes with array creation
+	# shellcheck disable=SC2206
 	args=($1)
 	last_idx="$((${#args[@]}-1))"
 	caller_proc=$(ps -o comm= $PPID)
@@ -58,5 +60,21 @@ function parse_ddash_args {
 	fi
 	if [ -z "$filename" ]; then
 		echo "ERR: No file arg found. args =" "${args[@]}"
+	fi
+}
+
+
+# If there are differences, this script will fail (and pre-commit should show this)
+function diff_formatted {
+	# Quoting $1 interferes with array creation
+	# shellcheck disable=SC2206
+	args=($1)
+	filename="$2"
+	if [[ " ${args[*]} " == *" -i "* ]]; then
+		# Here, diff compares what the file is before and after transform
+		diff "$filename" <(clang-format "${args[@]}"; cat "$filename")
+	else
+		# Otherwise clang-format should send output to stdout, and can be compared
+		diff "$filename" <(clang-format "${args[@]}")
 	fi
 }

@@ -76,7 +76,7 @@ in the hook's args list.
 ## Testing
 
 To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are
-working as expected on your system, use `pytest tests/test.py --runslow`.
+working as expected on your system, use `pytest tests/hooks_test.py --runslow`.
 
 ## Additional Resources
 
