@@ -125,7 +125,7 @@ Edit your pre-commit config or use a different version of clang-tidy
         cmds = [
             "./hooks/clang-tidy",
             "-quiet",
-            "-checks=*",
+            "-checks=*,-modernize-use-trailing-return-type",
             "-warnings-as-errors=*",
         ]
         if version:
