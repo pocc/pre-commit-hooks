@@ -68,8 +68,8 @@ function parse_ddash_args {
 function diff_formatted {
 	# Quoting $1 interferes with array creation
 	# shellcheck disable=SC2206
-	args=($1)
-	filename="$2"
+	local args=($1)
+	local filename="$2"
 	if [[ " ${args[*]} " == *" -i "* ]]; then
 		# Here, diff compares what the file is before and after transform
 		diff "$filename" <(clang-format "${args[@]}"; cat "$filename")
