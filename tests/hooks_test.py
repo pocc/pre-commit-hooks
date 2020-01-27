@@ -10,6 +10,7 @@ With this snippet:
 """
 import os
 import re
+import tempfile
 import subprocess as sp
 
 import pytest
@@ -52,7 +53,7 @@ class TestCLinters:
 
     def test_clang_format_version_err(self):
         """Check that --version=0 errors."""
-        output = sp.check_output(["clang-format", "--version"], text=True)
+        output = sp.check_output(["clang-format", "--version"]).decode("utf-8")
         cf_version = re.search(r"version ([\S]+)", output).group(1)
 
         clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
@@ -67,22 +68,47 @@ Edit your pre-commit config or use a different version of clang-format
             version="0.0.0",
         )
 
+    @pytest.mark.skipif(
+        os.name == "nt", reason="https://docs.python.org/3.5/library/tempfile.html",
+    )
+    def test_clang_format_with_addional_args_inline(self):
+        """Check that -i okay files output"""
+        for ok_file in self.okfiles:
+            with open(ok_file, "rb") as f_ok, tempfile.NamedTemporaryFile() as tmp_ok:
+                # copy the okay file into the tempfile
+                content_ok = f_ok.read()
+                tmp_ok.write(content_ok)
+                # force write to disk
+                tmp_ok.flush()
+                # no output, return code should be 0
+                try:
+                    sp.check_output(
+                        ["hooks/clang-format", "--style=google", "-i", tmp_ok.name]
+                    )
+                except sp.CalledProcessError as e:
+                    print(e)
+                with open(tmp_ok.name, "rb") as tmp_ok_i:
+                    assert tmp_ok_i.read() == content_ok
+
     @staticmethod
     def run_clang_format(
-        filelist, expected_output, expected_retcode, version=""
+        filelist, expected_output, expected_retcode, version="", **kwarg
     ):
         """Test that oclint returns correct retcode & output for files.
 
         Use google style, printing a format diff to stdout."""
         for filename in filelist:
             print("Analyzing file", filename)
-            cmds = ["hooks/clang-format", filename]
+            cmds = ["hooks/clang-format"]
+            if "extra_args" in kwarg and kwarg["extra_args"]:
+                cmds.extend(kwarg["extra_args"])
+            cmds.append(filename)
             if version:
                 cmds += ["--version=" + version]
-            _pipe = sp.Popen(cmds, text=True, stdout=sp.PIPE, stderr=sp.STDOUT)
+            _pipe = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.STDOUT)
             actual = _pipe.communicate()[0]
             # Expecting error text with a err return code
-            assert actual == expected_output
+            assert actual.decode("utf-8") == expected_output
             assert _pipe.returncode == expected_retcode
 
     def test_clang_tidy_ok(self):
@@ -103,7 +129,7 @@ int main() {{ int i; return 10; }}
 
     def test_clang_tidy_version_err(self):
         """Check that --version=0 errors."""
-        output = sp.check_output(["clang-tidy", "--version"], text=True)
+        output = sp.check_output(["clang-tidy", "--version"]).decode("utf-8")
         ct_version = re.search(r"version ([\S]+)", output).group(1)
 
         clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
@@ -118,9 +144,7 @@ Edit your pre-commit config or use a different version of clang-tidy
             version="0.0.0",
         )
 
-    def run_clang_tidy(
-        self, filelist, expected_output, expected_retcode, version=""
-    ):
+    def run_clang_tidy(self, filelist, expected_output, expected_retcode, version=""):
         """Test that clang tidy returns correct retcode & output for files."""
         cmds = [
             "./hooks/clang-tidy",
@@ -144,9 +168,7 @@ Edit your pre-commit config or use a different version of clang-tidy
 
     @pytest.mark.slow
     def test_oclint_ok(self):
-        self.run_oclint(
-            filelist=self.okfiles, expected_output="", expected_retcode=0
-        )
+        self.run_oclint(filelist=self.okfiles, expected_output="", expected_retcode=0)
 
     @pytest.mark.slow
     def test_oclint_err(self):
@@ -172,7 +194,7 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2{0}
     @pytest.mark.slow
     def test_oclint_version_err(self):
         """Check that --version=0 errors."""
-        output = sp.check_output(["oclint", "--version"], text=True)
+        output = sp.check_output(["oclint", "--version"]).decode("utf-8")
         oclint_ver = re.search(r"OCLint version ([\S]+)\.", output).group(1)
 
         clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
@@ -187,9 +209,7 @@ Edit your pre-commit config or use a different version of oclint
             version="0.0.0",
         )
 
-    def run_oclint(
-        self, filelist, expected_output, expected_retcode, version=""
-    ):
+    def run_oclint(self, filelist, expected_output, expected_retcode, version=""):
         """Test that oclint returns correct retcode & output for files."""
         cmds = [
             "./hooks/oclint",
@@ -257,10 +277,8 @@ Edit your pre-commit config or use a different version of oclint
             Text output of function, return code
         """
         combined_cmds = cmds + [filename]
-        _pipe = sp.Popen(
-            combined_cmds, stderr=sp.STDOUT, stdout=sp.PIPE, text=True
-        )
-        retvals = _pipe.communicate()[0], _pipe.returncode
+        _pipe = sp.Popen(combined_cmds, stderr=sp.STDOUT, stdout=sp.PIPE)
+        retvals = _pipe.communicate()[0].decode("utf-8"), _pipe.returncode
         return retvals
 
     @classmethod
