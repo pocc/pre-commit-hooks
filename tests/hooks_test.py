@@ -86,7 +86,9 @@ Edit your pre-commit config or use a different version of clang-format
                         ["hooks/clang-format", "--style=google", "-i", tmp_ok.name]
                     )
                 except sp.CalledProcessError as e:
-                    print(e)
+                    print(e.output)
+                    raise e
+
                 with open(tmp_ok.name, "rb") as tmp_ok_i:
                     assert tmp_ok_i.read() == content_ok
 
