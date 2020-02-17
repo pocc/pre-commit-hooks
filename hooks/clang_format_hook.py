@@ -2,6 +2,7 @@ import sys
 import os
 import difflib
 import subprocess as sp
+
 # import typing
 
 CMT_FAILED = 1  # commit doesn't comply with clang-format
@@ -13,7 +14,9 @@ def _run_command_and_capture(cmd, file_names, retcode=None):
     """
     clang-format --verbose will output to stdout and stderr
     """
-    proc = sp.Popen(cmd + file_names, stdout=sp.PIPE, stderr=sp.STDOUT, encoding="utf-8")
+    proc = sp.Popen(
+        cmd + file_names, stdout=sp.PIPE, stderr=sp.STDOUT, encoding="utf-8"
+    )
     stdout, _ = proc.communicate()
     if retcode is not None and proc.returncode != retcode:
         raise sp.CalledProcessError(proc.returncode, cmd, output=stdout)
@@ -22,11 +25,7 @@ def _run_command_and_capture(cmd, file_names, retcode=None):
 
 def _report_error_stderr(e):
     print(
-        "cmd output:\n",
-        e.output,
-        "\nreturn code:\n",
-        e.returncode,
-        file=sys.stderr,
+        "cmd output:\n", e.output, "\nreturn code:\n", e.returncode, file=sys.stderr,
     )
 
 
@@ -35,7 +34,7 @@ def _split_files_from_cmd(cmd):
     for (ii, item) in enumerate(reversed(cmd)):
         if item.startswith("-"):
             # modify cmd inplace
-            return cmd[:len(cmd) - ii], file_names
+            return cmd[: len(cmd) - ii], file_names
         else:
             file_names.append(item)
 
@@ -62,7 +61,7 @@ def _run_files_in_batches(batch_size, cmd, file_names, retcode, inplace=False):
     """
     ii = 0
     while ii < len(file_names):
-        batch_names = file_names[ii:ii + batch_size]
+        batch_names = file_names[ii : ii + batch_size]
         try:
             stdout = _run_command_and_capture(cmd, batch_names, retcode)
         except sp.CalledProcessError as e:

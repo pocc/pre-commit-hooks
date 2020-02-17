@@ -9,18 +9,17 @@
   description: Formats C/CPP code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
   language: python
-  # additional_dependencies: [clang-format]
-# - id: clang-tidy
-#   name: clang-tidy
-#   entry: hooks/clang-tidy
-#   description: Find warnings/errors in C/CPP code
-#   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
-#   language: script
-#   additional_dependencies: [clang-tidy]
-# - id: oclint
-#   name: oclint
-#   entry: hooks/oclint
-#   description: Find warnings/errors in C/CPP code
-#   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
-#   language: script
-#   additional_dependencies: [oclint]
+- id: clang-tidy
+  name: clang-tidy
+  entry: hooks/clang-tidy
+  description: Find warnings/errors in C/CPP code
+  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+  language: script
+  additional_dependencies: [clang-tidy]
+- id: oclint
+  name: oclint
+  entry: hooks/oclint
+  description: Find warnings/errors in C/CPP code
+  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+  language: script
+  additional_dependencies: [oclint]

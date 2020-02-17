@@ -68,9 +68,7 @@ Edit your pre-commit config or use a different version of clang-format
         )
 
     @staticmethod
-    def run_clang_format(
-        filelist, expected_output, expected_retcode, version=""
-    ):
+    def run_clang_format(filelist, expected_output, expected_retcode, version=""):
         """Test that oclint returns correct retcode & output for files.
 
         Use google style, printing a format diff to stdout."""
@@ -118,9 +116,7 @@ Edit your pre-commit config or use a different version of clang-tidy
             version="0.0.0",
         )
 
-    def run_clang_tidy(
-        self, filelist, expected_output, expected_retcode, version=""
-    ):
+    def run_clang_tidy(self, filelist, expected_output, expected_retcode, version=""):
         """Test that clang tidy returns correct retcode & output for files."""
         cmds = [
             "./hooks/clang-tidy",
@@ -144,9 +140,7 @@ Edit your pre-commit config or use a different version of clang-tidy
 
     @pytest.mark.slow
     def test_oclint_ok(self):
-        self.run_oclint(
-            filelist=self.okfiles, expected_output="", expected_retcode=0
-        )
+        self.run_oclint(filelist=self.okfiles, expected_output="", expected_retcode=0)
 
     @pytest.mark.slow
     def test_oclint_err(self):
@@ -187,9 +181,7 @@ Edit your pre-commit config or use a different version of oclint
             version="0.0.0",
         )
 
-    def run_oclint(
-        self, filelist, expected_output, expected_retcode, version=""
-    ):
+    def run_oclint(self, filelist, expected_output, expected_retcode, version=""):
         """Test that oclint returns correct retcode & output for files."""
         cmds = [
             "./hooks/oclint",
@@ -257,9 +249,7 @@ Edit your pre-commit config or use a different version of oclint
             Text output of function, return code
         """
         combined_cmds = cmds + [filename]
-        _pipe = sp.Popen(
-            combined_cmds, stderr=sp.STDOUT, stdout=sp.PIPE, text=True
-        )
+        _pipe = sp.Popen(combined_cmds, stderr=sp.STDOUT, stdout=sp.PIPE, text=True)
         retvals = _pipe.communicate()[0], _pipe.returncode
         return retvals
 

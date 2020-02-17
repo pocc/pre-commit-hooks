@@ -7,10 +7,8 @@ from testing.utils import get_resource_path
 
 
 @pytest.mark.parametrize(
-    ('filename', 'expected_retval'), (
-        ('test_free_style.cpp', CMT_FAILED),
-        ('test_google_style.cpp', 0),
-    ),
+    ("filename", "expected_retval"),
+    (("test_free_style.cpp", CMT_FAILED), ("test_google_style.cpp", 0),),
 )
 def test_main(filename, expected_retval):
     ret = main([get_resource_path(filename)])
@@ -18,10 +16,8 @@ def test_main(filename, expected_retval):
 
 
 @pytest.mark.parametrize(
-    ('filename', 'expected_retval'), (
-        ('test_free_style.cpp', CMT_FAILED),
-        ('test_google_style.cpp', 0),
-    ),
+    ("filename", "expected_retval"),
+    (("test_free_style.cpp", CMT_FAILED), ("test_google_style.cpp", 0),),
 )
 def test_main_verbose(filename, expected_retval):
     ret = main(["--verbose", get_resource_path(filename)])
@@ -32,10 +28,8 @@ def test_main_verbose(filename, expected_retval):
 
 
 @pytest.mark.parametrize(
-    "filename, expected_retval", [
-        ('test_free_style.cpp', CMD_MODIFIED),
-        ('test_google_style.cpp', 0),
-    ],
+    "filename, expected_retval",
+    [("test_free_style.cpp", CMD_MODIFIED), ("test_google_style.cpp", 0),],
 )
 def test_inline(tmpdir, filename, expected_retval):
     f = tmpdir.join(filename)
@@ -45,10 +39,8 @@ def test_inline(tmpdir, filename, expected_retval):
 
 
 @pytest.mark.parametrize(
-    "filename, expected_retval", [
-        ('test_free_style.cpp', CMD_MODIFIED),
-        ('test_google_style.cpp', 0),
-    ],
+    "filename, expected_retval",
+    [("test_free_style.cpp", CMD_MODIFIED), ("test_google_style.cpp", 0),],
 )
 def test_inline_verbose(tmpdir, filename, expected_retval):
     f = tmpdir.join(filename)
@@ -58,10 +50,8 @@ def test_inline_verbose(tmpdir, filename, expected_retval):
 
 
 @pytest.mark.parametrize(
-    "filename, expected_retval", [
-        ('test_free_style.cpp', CMD_FAILED),
-        ('test_google_style.cpp', CMD_FAILED),
-    ],
+    "filename, expected_retval",
+    [("test_free_style.cpp", CMD_FAILED), ("test_google_style.cpp", CMD_FAILED),],
 )
 def test_invalid_options(tmpdir, filename, expected_retval):
     f = tmpdir.join(filename)
@@ -72,10 +62,8 @@ def test_invalid_options(tmpdir, filename, expected_retval):
 
 
 @pytest.mark.parametrize(
-    "filename, expected_retval", [
-        ('test_free_style', CMD_FAILED),
-        ('some/test_google_style', CMD_FAILED),
-    ],
+    "filename, expected_retval",
+    [("test_free_style", CMD_FAILED), ("some/test_google_style", CMD_FAILED),],
 )
 def test_invalid_file(tmpdir, filename, expected_retval):
     invalid_path = os.path.join(tmpdir.strpath, filename)
