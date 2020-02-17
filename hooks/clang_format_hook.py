@@ -2,6 +2,7 @@ import sys
 import os
 import difflib
 import subprocess as sp
+import packaging.version as version
 
 # import typing
 
@@ -51,6 +52,12 @@ def _interpret_cmd_options(argv):
         elif item == "--verbose":
             del_indices.add(ii)
             state["verbose"] = True
+        elif item.startswith("--version"):
+            if item == "--version":
+                print("--version needs operator and version number")
+                return CMD_FAILED
+            state["version"] = item[9:]
+            del_indices.add(ii)
 
     new_argv = [item for (ii, item) in enumerate(argv) if ii not in del_indices]
     return new_argv, state
@@ -103,6 +110,71 @@ def _show_diff_result(cmd, file_names, verbose):
     return retval
 
 
+def _parse_version_operator_and_operand(op_and_ver):
+    """ supports >, >=, =, <, <=
+    """
+    missing_err = ValueError("--version{} is invalid".format(op_and_ver))
+
+    if len(op_and_ver) == 1:
+        raise missing_err
+
+    if op_and_ver[0] == "=":
+        return "=", op_and_ver[1:].strip()
+    elif op_and_ver[0] == ">":
+        if op_and_ver[1] == "=":
+            if len(op_and_ver) < 3:
+                raise missing_err
+            return ">=", op_and_ver[2:].strip()
+        else:
+            return ">", op_and_ver[1:].strip()
+    elif op_and_ver[0] == "<":
+        if op_and_ver[1] == "=":
+            if len(op_and_ver) < 3:
+                raise missing_err
+            return "<=", op_and_ver[2:].strip()
+        else:
+            return "<", op_and_ver[1:].strip()
+
+
+def _get_system_version():
+    _version = sp.check_output(["clang-format", "--version"], encoding="utf-8")
+    return _version.split()[2]
+
+
+def _assert_version(system_version, op_and_ver):
+    retval = 0
+    op, expected_version = _parse_version_operator_and_operand(op_and_ver)
+    system_version = version.parse(system_version)
+    expected_version = version.parse(expected_version)
+    if op == "=":
+        if system_version != expected_version:
+            retval = CMD_FAILED
+    elif op == ">":
+        if not (system_version > expected_version):
+            retval = CMD_FAILED
+    elif op == ">=":
+        if not (system_version >= expected_version):
+            retval = CMD_FAILED
+    elif op == "<":
+        if not (system_version < expected_version):
+            retval = CMD_FAILED
+    elif op == "<=":
+        if not (system_version <= expected_version):
+            retval = CMD_FAILED
+
+    if retval == CMD_FAILED:
+        print(
+            "ERR: --version{}. Expected version {}, but "
+            "system version is {}".format(op_and_ver, expected_version, system_version),
+            file=sys.stderr,
+        )
+        print(
+            "Edit your pre-commit config or " "use a different version of clang-format",
+            file=sys.stderr,
+        )
+    return retval
+
+
 def _prompt_before_return(retval, cmd, file_names):
     print()
     if retval == CMD_FAILED:
@@ -114,8 +186,8 @@ def _prompt_before_return(retval, cmd, file_names):
 def main(argv=None):
     """same with argparse behavior.
 
-    If argv is None, use sys.argv, otherwise use argv. That says argv and sys.argv
-    are exclusive.
+    If argv is None, use sys.argv, otherwise use argv. That says argv and
+    sys.argv are exclusive.
 
     The way how sys.argv is handled is based on the assumption this `main`
     is invoked difrectly as console command.
@@ -133,6 +205,11 @@ def main(argv=None):
 
     cmd, state = _interpret_cmd_options(cmd)
     cmd.insert(0, "clang-format")
+
+    if "version" in state:
+        retval = _assert_version(_get_system_version(), state["version"])
+        if retval != 0:
+            return retval
 
     retval = 0
     # if -i is provided, we need check whether file is modified
