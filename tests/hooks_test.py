@@ -14,6 +14,10 @@ import subprocess as sp
 
 import pytest
 
+from hooks.clangformat import ClangFormatCmd
+from hooks.clangtidy import ClangTidyCmd
+from hooks.oclint import OCLintCmd
+
 
 class TestCLinters:
     """Test all C Linters: clang-format, clang-tidy, and oclint."""
@@ -36,13 +40,13 @@ class TestCLinters:
         )
 
     def test_clang_format_err(self):
-        clang_format_err = r"""1c1,4
-< int main() { int i; return 10; }
+        clang_format_err = r"""
+<  int main() { int i; return 10; }
 ---
-> int main() {
->   int i;
->   return 10;
-> }
+>  int main() {
+>    int i;
+>    return 10;
+>  }
 """
         self.run_clang_format(
             filelist=self.errfiles,
@@ -54,17 +58,20 @@ class TestCLinters:
         """Check that --version=0 errors."""
         output = sp.check_output(["clang-format", "--version"], text=True)
         cf_version = re.search(r"version ([\S]+)", output).group(1)
+        error_version = "0.0.0"
 
-        clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
-Edit your pre-commit config or use a different version of clang-format
-""".format(
-            cf_version
+        clang_version_err = """\
+Problem with clang-format: Version of clang-format is wrong
+Expected version is {} but actual system version is {}.
+Edit your pre-commit config or use a\
+ different version of clang-format""".format(
+            error_version, cf_version
         )
         self.run_clang_format(
             filelist=self.okfiles,
             expected_output=clang_version_err,
             expected_retcode=1,
-            version="0.0.0",
+            version=error_version,
         )
 
     @staticmethod
@@ -74,16 +81,21 @@ Edit your pre-commit config or use a different version of clang-format
         """Test that oclint returns correct retcode & output for files.
 
         Use google style, printing a format diff to stdout."""
+        args = []
+        if version:
+            args += ["--version", version]
         for filename in filelist:
-            print("Analyzing file", filename)
-            cmds = ["hooks/clang-format", filename]
-            if version:
-                cmds += ["--version=" + version]
-            _pipe = sp.Popen(cmds, text=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-            actual = _pipe.communicate()[0]
+            print("\nAnalyzing file", filename)
+            cmd = ClangFormatCmd([filename] + args)
+            if version and cmd.retcode != 0:
+                actual = cmd.stderr
+            else:
+                cmd.run()
+                actual = cmd.stdout + cmd.stderr
+            retcode = cmd.retcode
             # Expecting error text with a err return code
             assert actual == expected_output
-            assert _pipe.returncode == expected_retcode
+            assert retcode == expected_retcode
 
     def test_clang_tidy_ok(self):
         self.run_clang_tidy(
@@ -91,62 +103,81 @@ Edit your pre-commit config or use a different version of clang-format
         )
 
     def test_clang_tidy_err(self):
-        clang_tidy_error = r"""{0}:1:28: error: 10 is a magic number; consider replacing it with a named constant [cppcoreguidelines-avoid-magic-numbers,-warnings-as-errors]
+        clang_tidy_error = """Problem with clang-tidy: On running command with \
+args, -quiet -checks=* -warnings-as-errors=* -- \
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+Return code:1
+
+STDOUT:
+/Users/rj/code/pre-commit-hooks/tests/files/err.c{}:1:28: error: 10 is a \
+magic number; consider replacing it with a named constant \
+[cppcoreguidelines-avoid-magic-numbers,-warnings-as-errors]
 int main() {{ int i; return 10; }}
                            ^
-"""  # noqa: E501
+
+STDERR:"""
+        clang_tidy_error1 = clang_tidy_error.format("")
+        clang_tidy_error2 = clang_tidy_error.format("pp")
+        # noqa: E501
         self.run_clang_tidy(
-            filelist=self.errfiles,
-            expected_output=clang_tidy_error,
+            filelist=[self.errfiles[0]],
+            expected_output=clang_tidy_error1,
+            expected_retcode=1,
+        )
+        self.run_clang_tidy(
+            filelist=[self.errfiles[1]],
+            expected_output=clang_tidy_error2,
             expected_retcode=1,
         )
 
     def test_clang_tidy_version_err(self):
         """Check that --version=0 errors."""
         output = sp.check_output(["clang-tidy", "--version"], text=True)
-        ct_version = re.search(r"version ([\S]+)", output).group(1)
+        ct_version = re.search(r"LLVM version ([\S]+)", output).group(1)
+        error_version = "0.0.0"
 
-        clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
-Edit your pre-commit config or use a different version of clang-tidy
-""".format(
-            ct_version
+        clang_version_err = r"""Problem with clang-tidy: Version of clang-tidy is wrong
+Expected version is {} but actual system version is {}.
+Edit your pre-commit config or use a different version of clang-tidy""".format(
+            error_version, ct_version
         )
         self.run_clang_tidy(
             filelist=self.okfiles,
             expected_output=clang_version_err,
             expected_retcode=1,
-            version="0.0.0",
+            version=error_version,
         )
 
+    @pytest.mark.slow
     def run_clang_tidy(
         self, filelist, expected_output, expected_retcode, version=""
     ):
         """Test that clang tidy returns correct retcode & output for files."""
-        cmds = [
-            "./hooks/clang-tidy",
-            "-quiet",
-            "-checks=*",
-            "-warnings-as-errors=*",
-        ]
+        args = ["-quiet", "-checks=*", "-warnings-as-errors=*"]
         if version:
-            cmds += ["--version=" + version]
+            args += ["--version", version]
         for filename in filelist:
-            if version:  # Version docstring doesn't contain a {0}
-                expected = expected_output
+            print("\nAnalyzing file", filename)
+            cmd = ClangTidyCmd([filename] + args)
+            # Version docstring doesn't contain a {0}
+            if version and cmd.retcode != 0:
+                actual = cmd.stderr
             else:
-                expected = expected_output.format(filename)
-            # In case num warnings changes due to more checks
-            actual, retcode = self.get_all_output(cmds, filename)
-            actual = re.sub(r"^\d+", "2", actual)
-            # Expecting error text with a err return code
-            assert actual == expected
+                cmd.run()
+                # If stdout exists, it's formatted in stderr due to clang-tidy
+                # switching stdout/stderr (see parsing comment in file)
+                actual = cmd.stdout + cmd.stderr
+            retcode = cmd.retcode
+            assert actual == expected_output
             assert retcode == expected_retcode
 
     @pytest.mark.slow
     def test_oclint_ok(self):
-        self.run_oclint(
-            filelist=self.okfiles, expected_output="", expected_retcode=0
-        )
+        expected_output = """\n\nOCLint Report\n
+Summary: TotalFiles=1 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n
+[OCLint (http://oclint.org) v0.13]\n"""
+        self.run_oclint(self.okfiles, expected_output, expected_retcode=0)
 
     @pytest.mark.slow
     def test_oclint_err(self):
@@ -160,6 +191,7 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2{0}
 {1}:1:14: unused local variable [unused|P3] The local variable 'i' is unused.
 
 [OCLint (http://oclint.org) v0.13]
+Problem with oclint: OCLint Violations found
 """  # noqa: E501
         # Add extra space to end of line so linters don't complain/autofix
         oclint_stdout_err = oclint_stdout_err.format(" ", "{0}")
@@ -173,11 +205,11 @@ Summary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2{0}
     def test_oclint_version_err(self):
         """Check that --version=0 errors."""
         output = sp.check_output(["oclint", "--version"], text=True)
-        oclint_ver = re.search(r"OCLint version ([\S]+)\.", output).group(1)
+        oclint_ver = re.search(r"OCLint version ([\d.]+)", output).group(1)
 
-        clang_version_err = r"""ERR: Expected version 0.0.0, but system version is {}
-Edit your pre-commit config or use a different version of oclint
-""".format(
+        clang_version_err = r"""Problem with oclint: Version of oclint is wrong
+Expected version is 0.0.0 but actual system version is {}.
+Edit your pre-commit config or use a different version of oclint""".format(
             oclint_ver
         )
         self.run_oclint(
@@ -187,81 +219,29 @@ Edit your pre-commit config or use a different version of oclint
             version="0.0.0",
         )
 
-    def run_oclint(
-        self, filelist, expected_output, expected_retcode, version=""
-    ):
+    @staticmethod
+    def run_oclint(filelist, expected_output, expected_retcode, version=""):
         """Test that oclint returns correct retcode & output for files."""
-        cmds = [
-            "./hooks/oclint",
-            "-enable-global-analysis",
-            "-enable-clang-static-analyzer",
-        ]
+        args = ["-enable-global-analysis", "-enable-clang-static-analyzer"]
         if version:
-            cmds += ["--version=" + version]
+            args += ["--version", version]
         for filename in filelist:
-            print("Analyzing file", filename)
-            if version:  # Version docstring doesn't contain a {0}
+            print("\nAnalyzing file", filename)
+            # Version docstring doesn't contain a {0} (see above docstring)
+            if version:
                 expected = expected_output
             else:
                 expected = expected_output.format(filename)
-            print(" ".join(cmds))
-            actual, retcode = self.get_all_output(cmds, filename)
+            cmd = OCLintCmd([filename] + args)
+            if version and cmd.retcode != 0:
+                actual = cmd.stderr
+            else:
+                cmd.run()
+                actual = cmd.stdout + cmd.stderr
+            retcode = cmd.retcode
             # Expecting error text with a err return code
             assert actual == expected
             assert retcode == expected_retcode
-
-    @staticmethod
-    def test_sticky_version_minor():
-        """Verify that 6.0 matches minor versions like 6.0.1."""
-        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
-        cmds[2] = cmds[2].format("6.0.1")
-        child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
-        child_out, child_err = child.communicate()
-        assert child_out == b""
-        assert child_err == b""
-        assert child.returncode == 0
-
-    @staticmethod
-    def test_sticky_version_extended():
-        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
-        cmds[2] = cmds[2].format("6.0.0-1ubuntu2")
-        child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
-        child_out, child_err = child.communicate()
-        assert child_out == b""
-        assert child_err == b""
-        assert child.returncode == 0
-
-    @staticmethod
-    def test_sticky_version_err():
-        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
-        cmds[2] = cmds[2].format("6.1.0")
-        child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
-        child_out, child_err = child.communicate()
-        print(child_err)
-        assert child_out == b""
-        assert (
-            child_err
-            == b"ERR: Expected version 6.0, but system version is 6.1.0\n"
-            + b"Edit your pre-commit config or use a different version of \n"
-        )
-        assert child.returncode == 1
-
-    @staticmethod
-    def get_all_output(cmds, filename):
-        """Helper fn to get stderr and stdout from llvm command.
-
-        Args:
-            cmds (list): List of commands to send to Popen
-            filename (str): Name of file to run commands against
-        Returns (tuple):
-            Text output of function, return code
-        """
-        combined_cmds = cmds + [filename]
-        _pipe = sp.Popen(
-            combined_cmds, stderr=sp.STDOUT, stdout=sp.PIPE, text=True
-        )
-        retvals = _pipe.communicate()[0], _pipe.returncode
-        return retvals
 
     @classmethod
     def teardown_class(cls):

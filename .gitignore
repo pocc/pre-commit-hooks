@@ -1,6 +1,6 @@
-__pycache__/
 venv/
 .idea/
 .vscode/
 *.plist
-*cache/
+*cache*/
+.DS_Store

@@ -12,7 +12,6 @@ With `int main() { int i; return 10; }` in a file, all three linters should fail
 The above uses this `.pre-commit-config.yaml`:
 
 ```yaml
----
 fail_fast: false
 repos:
   - repo: https://github.com/pocc/pre-commit-hooks
@@ -52,7 +51,7 @@ Bash is required to use these hooks as all 3 invoking scripts are written in it.
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
 and fix compiler errors if it can, like missing semicolons.
 
-### Enforcing linter version with --version=
+### Enforcing linter version with --version
 
 Some linters change behavior between versions. To enforce a linter version
 8.0.0, for example, add `--version=8.0.0` to `args:` for that linter. Note that
