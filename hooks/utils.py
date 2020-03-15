@@ -100,7 +100,7 @@ class Command:
                 + actual_version
                 + ".\nEdit your pre-commit config or use "
                 + "a different version of "
-                + self.command
+                + self.command + "."
             )
             self.raise_error(problem, details)
 

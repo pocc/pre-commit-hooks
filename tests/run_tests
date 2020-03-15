@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# Run pytest on tests
-pytest tests/hooks_test.py
