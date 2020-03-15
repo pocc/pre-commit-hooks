@@ -140,5 +140,5 @@ class Command:
 
     def pipe_to_std_files(self):
         """Send stdout/stderr of this command to system stdout/stderr"""
-        sys.stdout.write(self.stdout)
-        sys.stderr.write(self.stderr)
+        sys.stdout.buffer.write(self.stdout)
+        sys.stderr.buffer.write(self.stderr)

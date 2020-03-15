@@ -13,7 +13,7 @@ class OCLintCmd(Command):
     command = "oclint"
     lookbehind = "OCLint version "
 
-    def __init__(self, args=sys.argv):
+    def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
 
@@ -44,8 +44,8 @@ class OCLintCmd(Command):
                 os.remove(filename)
 
 
-def main():
-    cmd = OCLintCmd()
+def main(argv=[]):
+    cmd = OCLintCmd(argv)
     cmd.run()
     cmd.pipe_to_std_files()
     return cmd.retcode

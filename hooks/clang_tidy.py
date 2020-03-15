@@ -12,7 +12,7 @@ class ClangTidyCmd(Command):
     command = "clang-tidy"
     lookbehind = "LLVM version "
 
-    def __init__(self, args=sys.argv):
+    def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
 
@@ -42,8 +42,8 @@ class ClangTidyCmd(Command):
             self.retcode = 1
 
 
-def main():
-    cmd = ClangTidyCmd()
+def main(argv=[]):
+    cmd = ClangTidyCmd(argv)
     cmd.run()
     cmd.pipe_to_std_files()
     return cmd.retcode

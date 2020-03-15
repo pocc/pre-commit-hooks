@@ -13,7 +13,7 @@ class ClangFormatCmd(Command):
     command = "clang-format"
     lookbehind = "clang-format version "
 
-    def __init__(self, args=sys.argv):
+    def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
 
@@ -49,8 +49,8 @@ class ClangFormatCmd(Command):
                 return
 
 
-def main():
-    cmd = ClangFormatCmd()
+def main(argv=[]):
+    cmd = ClangFormatCmd(argv)
     cmd.run()
     cmd.pipe_to_std_files()
     return cmd.retcode
