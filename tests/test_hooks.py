@@ -87,14 +87,10 @@ class TestHooks:
         print("\nAnalyzing file", filename)
         cmd = cmd_class([filename] + args)
         cmd.run()
+        if cmd_class.command == "oclint":
+            cmd.cleanup()  # Cleanup oclint-generated plist files
         actual = cmd.stdout + cmd.stderr
         retcode = cmd.retcode
         assert actual == expected_output
         assert retcode == expected_retcode
 
-    @classmethod
-    def teardown_class(cls):
-        """oclint creates a plist file in the same directory, so remove that
-            -> See https://github.com/oclint/oclint/issues/537"""
-        if os.path.exists("test.plist"):
-            os.remove("test.plist")

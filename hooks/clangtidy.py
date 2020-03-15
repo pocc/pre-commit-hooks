@@ -40,3 +40,14 @@ class ClangTidyCmd(Command):
         self.stderr = self.stderr.strip()  # Remove extra newlines just added
         if len(self.stderr) > 0 or len(self.stdout) > 0:
             self.retcode = 1
+
+
+def main():
+    cmd = ClangTidyCmd()
+    cmd.run()
+    cmd.pipe_to_std_files()
+    return cmd.retcode
+
+
+if __name__ == '__main__':
+    main()

@@ -42,3 +42,14 @@ class OCLintCmd(Command):
         for filename in new_files:
             if filename not in existing_files:
                 os.remove(filename)
+
+
+def main():
+    cmd = OCLintCmd()
+    cmd.run()
+    cmd.pipe_to_std_files()
+    return cmd.retcode
+
+
+if __name__ == '__main__':
+    main()

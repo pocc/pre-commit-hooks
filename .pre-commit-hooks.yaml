@@ -5,22 +5,22 @@
 
 - id: clang-format
   name: clang-format
-  entry: hooks/clang-format
+  entry: hooks/clang-format.py
   description: Formats C/CPP code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
-  language: script
+  language: python
   additional_dependencies: [clang-format]
 - id: clang-tidy
   name: clang-tidy
-  entry: hooks/clang-tidy
+  entry: hooks/clang-tidy.py
   description: Find warnings/errors in C/CPP code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
-  language: script
+  language: python
   additional_dependencies: [clang-tidy]
 - id: oclint
   name: oclint
-  entry: hooks/oclint
+  entry: hooks/oclint.py
   description: Find warnings/errors in C/CPP code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
-  language: script
+  language: python
   additional_dependencies: [oclint]

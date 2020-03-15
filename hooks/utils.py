@@ -4,6 +4,7 @@
 import argparse
 import shutil
 import subprocess as sp
+import sys
 
 
 class Command:
@@ -136,3 +137,8 @@ class Command:
             other_args += ["--", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"]
         self.files = known_args.filenames
         self.args = other_args
+
+    def pipe_to_std_files(self):
+        """Send stdout/stderr of this command to system stdout/stderr"""
+        sys.stdout.write(self.stdout)
+        sys.stderr.write(self.stderr)

@@ -22,22 +22,22 @@ Edit your pre-commit config or use a different version of {0}."""
         """Check that --version=0 errors."""
         output = sp.check_output(["clang-format", "--version"], text=True)
         actual_ver = re.search(r"version ([\S]+)", output).group(1)
-        self.run_table_tests(ClangFormatCmd, 'clang-format', actual_ver)
+        self.run_table_tests(ClangFormatCmd, actual_ver)
 
     def test_clang_tidy_version_err(self):
         """Check that --version=0 errors."""
         output = sp.check_output(["clang-tidy", "--version"], text=True)
         actual_ver = re.search(r"LLVM version ([\S]+)", output).group(1)
-        self.run_table_tests(ClangTidyCmd, 'clang-tidy', actual_ver)
+        self.run_table_tests(ClangTidyCmd, actual_ver)
 
     def test_oclint_version_err(self):
         """Check that --version=0 errors."""
         output = sp.check_output(["oclint", "--version"], text=True)
         actual_ver = re.search(r"OCLint version ([\d.]+)", output).group(1)
-        self.run_table_tests(OCLintCmd, 'oclint', actual_ver)
+        self.run_table_tests(OCLintCmd, actual_ver)
 
-    def run_table_tests(self, cmd, cmd_name, actual_ver):
-        err_str = self.err_str.format(cmd_name, self.err_ver, actual_ver)
+    def run_table_tests(self, cmd, actual_ver):
+        err_str = self.err_str.format(cmd.command, self.err_ver, actual_ver)
         # Removing last char ~= having actual version be $ver-beta or $ver.5
         fuzzy_version = actual_ver[:-1]
 
