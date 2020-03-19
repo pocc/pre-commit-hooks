@@ -3,8 +3,8 @@
 import re
 import subprocess as sp
 
-from hooks.clangformat import ClangFormatCmd
-from hooks.clangtidy import ClangTidyCmd
+from hooks.clang_format import ClangFormatCmd
+from hooks.clang_tidy import ClangTidyCmd
 from hooks.oclint import OCLintCmd
 
 
@@ -13,9 +13,11 @@ class TestVersions:
     @classmethod
     def setup_class(cls):
         """Create test files that will be used by other tests"""
-        cls.err_str = r"""Problem with {0}: Version of {0} is wrong
-Expected version is {1} but actual system version is {2}.
-Edit your pre-commit config or use a different version of {0}."""
+        cls.err_str = """Problem with {0}: Version of {0} is wrong
+Expected version: {1}
+Found version: {2}
+Edit your pre-commit config or use a different version of {0}.
+"""
         cls.err_ver = "0.0.0"
 
     def test_clang_format_version_err(self):
@@ -51,6 +53,9 @@ Edit your pre-commit config or use a different version of {0}."""
 
     @staticmethod
     def check_version(cmd_class, version, expected_stderr, expected_retcode):
-        cmd = cmd_class(["--version", version])
-        assert cmd.stderr == expected_stderr
-        assert cmd.retcode == expected_retcode
+        args = [cmd_class.command + "-hook", "--version", version]
+        sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
+        actual_stderr = str(sp_child.stderr, encoding="utf-8")
+        actual_retcode = sp_child.returncode
+        assert actual_stderr == expected_stderr
+        assert actual_retcode == expected_retcode

@@ -12,9 +12,10 @@ class OCLintCmd(Command):
 
     command = "oclint"
     lookbehind = "OCLint version "
+    uses_ddash = True
 
     def __init__(self, args):
-        super().__init__(self.command, self.lookbehind, args)
+        super().__init__(self.command, self.lookbehind, args, self.uses_ddash)
         self.parse_args(args)
 
     def run(self):
@@ -22,18 +23,22 @@ class OCLintCmd(Command):
         # Split text into an array of args that can be passed into oclint
         for filename in self.files:
             current_files = os.listdir()
-            self.run_command(filename)
-            self.parse_output()
+            child = self.run_command(filename)
+            if child.returncode != 0:
+                details = str(child.stdout + child.stderr, encoding="utf-8")
+                self.raise_error("Problem running OCLint", details)
+            self.parse_output(child.stdout, child.stderr)
             self.cleanup(current_files)
 
-    def parse_output(self):
+    def parse_output(self, stdout, stderr):
         """ oclint return code is usually wrong (github.com/oclint/oclint/issues/538)
         Figure out what it is based on stdout and return that instead
         clang-tidy can complain about # of warnings in systems files
         """
-        no_errors = "FilesWithViolations=0"
-        if no_errors not in self.stdout:
-            self.raise_error("OCLint Violations found", "")
+        no_errors = b"FilesWithViolations=0"
+        if no_errors not in stdout:
+            output = str(stdout + stderr, encoding="utf-8")
+            self.raise_error("OCLint Violations found", output)
 
     @staticmethod
     def cleanup(existing_files):
@@ -44,11 +49,9 @@ class OCLintCmd(Command):
                 os.remove(filename)
 
 
-def main(argv=[]):
+def main(argv=None):
     cmd = OCLintCmd(argv)
     cmd.run()
-    cmd.pipe_to_std_files()
-    return cmd.retcode
 
 
 if __name__ == '__main__':

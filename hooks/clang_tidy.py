@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Wrapper script for clang-tidy."""
 #############################################################################
 import sys
@@ -11,42 +11,30 @@ class ClangTidyCmd(Command):
 
     command = "clang-tidy"
     lookbehind = "LLVM version "
+    uses_ddash = True
 
     def __init__(self, args):
-        super().__init__(self.command, self.lookbehind, args)
+        super().__init__(self.command, self.lookbehind, args, self.uses_ddash)
         self.parse_args(args)
 
     def run(self):
         """Run OCLint and remove generated temporary files"""
         for filename in self.files:
-            self.run_command(filename)
-            self.parse_output()
-
-    def parse_output(self):
-        """clang-tidy creates warnings about systems files (i.e. non-user code)
-        and sends these to stderr. Delete these three lines.
-
-        Paradoxically, stdout indicates an error, and stderr is where
-        messages from this utility are sent."""
-        output = self.stderr
-        self.stderr = ""
-        for line in output.split("\n"):
-            if not (
-                " warnings generated" in line
-                or "in non-user-code" in line
-                or "non system headers. Use -system-headers" in line
-            ):
-                self.stderr += line + "\n"
-        self.stderr = self.stderr.strip()  # Remove extra newlines just added
-        if len(self.stderr) > 0 or len(self.stdout) > 0:
-            self.retcode = 1
+            child = self.run_command(filename)
+            self.stdout = str(child.stdout, encoding="utf-8")
+            sys.stdout.buffer.write(child.stdout)
+            # Don't output stderr if it's complaining about problems in system files
+            if len(child.stdout) > 0 and b"warnings generated" not in child.stderr:
+                self.stderr = str(child.stderr, encoding="utf-8")
+                sys.stderr.buffer.write(child.stderr)
+            if child.returncode != 0:
+                self.returncode = child.returncode
+                sys.exit(child.returncode)
 
 
-def main(argv=[]):
+def main(argv=None):
     cmd = ClangTidyCmd(argv)
     cmd.run()
-    cmd.pipe_to_std_files()
-    return cmd.retcode
 
 
 if __name__ == '__main__':

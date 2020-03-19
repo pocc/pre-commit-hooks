@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Wrapper script for oclint"""
 ###############################################################################
 import difflib
@@ -12,48 +12,61 @@ class ClangFormatCmd(Command):
 
     command = "clang-format"
     lookbehind = "clang-format version "
+    uses_ddash = False
 
     def __init__(self, args):
-        super().__init__(self.command, self.lookbehind, args)
+        super().__init__(self.command, self.lookbehind, args, self.uses_ddash)
+        self.check_installed()
         self.parse_args(args)
 
     @staticmethod
-    def filter_lines(lines):
-        """Function to remove empty diff lines and convert to diff format"""
+    def format_as_diff(lines):
+        """Function to remove empty diff lines, convert to bash diff format"""
         output = []
-        left_toggle = False  # to imitate bash diff
+        left_toggle = True  # to imitate bash diff
         for line in lines:
-            if line[0] == "-":
-                if left_toggle:
-                    output += ["---"]
-                    left_toggle = False
-                output += ["> " + line[1:]]
-            elif line[0] == "+":
+            if line[0] == "+":
+                if not left_toggle:
+                    output += ["\n"]
                 output += ["< " + line[1:]]
                 left_toggle = True
+            elif line[0] == "-":
+                if left_toggle:
+                    output += ["---"]
+                output += ["> " + line[1:]]
+                left_toggle = False
         return output
+
+    def get_clang_format_lines(self, filename: str) -> [bytes]:
+        child = self.run_command(filename)
+        if len(child.stderr) > 0:
+            problem = "Unexpected Stderr received from clang-format"
+            self.raise_error(problem, child.stderr)
+        return str(child.stdout, encoding="utf-8").split("\n")
+
+    @staticmethod
+    def get_filelines(filename) -> [bytes]:
+        with open(filename, 'rb') as f:
+            filetext = f.read()
+        return str(filetext, encoding="utf-8").split("\n")
 
     def run(self):
         """Run clang-format. Error if diff is incorrect."""
         for filename in self.files:
-            self.run_command(filename)
-            with open(filename) as f:
-                filetext = f.read()
-            diff = difflib.ndiff(self.stdout.split("\n"), filetext.split("\n"))
-            diff_list = self.filter_lines(diff)
-            diff_lines = "\n".join(diff_list)
-            self.stdout = ""
-            if len(diff_lines) > 0:
-                self.stdout = "\n" + "".join(diff_lines) + "\n"
-                self.retcode = 1
-                return
+            expected = self.get_clang_format_lines(filename)
+            actual = self.get_filelines(filename)
+            python_diff = list(difflib.ndiff(expected, actual))
+            diff = self.format_as_diff(python_diff)
+            if len(diff) > 0:
+                self.stderr = "\n" + "\n".join(diff) + "\n"
+                sys.stdout.write(self.stderr)
+                self.returncode = 1
+                sys.exit(self.returncode)
 
 
-def main(argv=[]):
+def main(argv=None):
     cmd = ClangFormatCmd(argv)
     cmd.run()
-    cmd.pipe_to_std_files()
-    return cmd.retcode
 
 
 if __name__ == '__main__':
