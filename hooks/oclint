@@ -3,8 +3,31 @@
 ################################################################################
 CMD="oclint"
 args=("$@")
-hook_dir="$(dirname "$(readlink -f "$0")")"
-. "$hook_dir/utils"
+
+# Check if $CMD is installed and fail exit if not
+function check_installed {
+    if [[ -z "$(command -v "$CMD")" ]]; then
+        echo -e "ERR: $CMD not found.\nMake sure to install $CMD and add it to your path." 1>&2
+        echo -e "For more info: https://github.com/pocc/pre-commit-hooks#prerequisites" 1>&2
+        exit 1
+    fi
+}
+
+
+# If --version=* hook arg is passed in, can be used to enforce specific versions of tools
+function assert_version {
+	actual_version="$1"
+	expected_version="$2"
+	if [[ "$actual_version" != "$expected_version"* ]]; then
+		echo -e "ERR: Expected version $expected_version, but system version is $actual_version" 1>&2
+		echo -e "Edit your pre-commit config or use a different version of $CMD" 1>&2
+		exit 1
+	else  # Otherwise remove version arg from args
+	    args=($(echo "${args[@]}" | tr " " "\n" | grep -v '\--version'))
+	fi
+}
+
+
 
 function get_oclint_ver {
 	oclint --version | grep "OCLint version" | \
@@ -20,12 +43,49 @@ function execute_cmd {
 	echo "$pwd_files $(ls)" | tr ' ' '\n' | sort | uniq -u | grep .plist | xargs rm
 }
 
+# pre-commit sends file as last arg, which causes problems when using --
+# This function converts args (1 3 5 7 -- 6 8 0) => (1 3 5 7 0 -- 6 8),
+# Where 0 is the file pre-commit sends to the utility
+# See https://github.com/pre-commit/pre-commit/issues/1000
+function parse_ddash_args {
+	# Quoting $1 interferes with array creation
+	# shellcheck disable=SC2206
+	args=($1)
+	last_idx="$((${#args[@]}-1))"
+	caller_proc=$(ps -o comm= $PPID)
+	for i in $(seq 0 "$last_idx"); do
+		arg="${args[$i]}"
+		if [[ "$arg" == "--version="* ]]; then
+			actual="$(get_oclint_ver)"
+			expected="$(echo "$arg" | cut -d '=' -f 2)"
+			assert_version "$actual" "$expected"
+		# Rotate if -- exists AND last arg is file AND pre-commit called $0
+		elif [[ "$arg" == "--" ]]; then
+			has_ddash="true"
+			if [[ -e "$last_idx" ]] && [[ "$caller_proc" == "pre-commit" ]]; then
+				args=("${args[@]::$i}" "${args[$last_idx]}" "${args[@]:$i:$((last_idx-i))}")
+				break
+			fi
+		elif [[ -e "$arg" ]]; then
+			filename="$arg"
+		fi
+	done
+
+	# Add a -- -DCAMKE_EXPORT_COMPILE_COMMANDS if -- is not specified
+	# To avoid compilation database errors
+	if [[ -z "$has_ddash" ]]; then
+		args=("${args[@]}" "--" "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON")
+	fi
+	if [[ -z "$filename" ]]; then
+		echo "ERR: No file arg found. args =" "${args[@]}"
+	fi
+}
 
 # oclint return code is usually wrong (github.com/oclint/oclint/issues/538)
 # Figure out what it is based on stdout and return that instead
 function parse_output {
 	no_errors="FilesWithViolations=0"
-	if grep -q $no_errors <<<"$output"; then
+	if grep -q "$no_errors" <<<"$output"; then
 		exit 0
 	else
 		# Following standard of printing to stdout ONLY if there are errors
@@ -36,8 +96,8 @@ function parse_output {
 
 
 function oclint_main {
-	check_installed "$CMD"
-	parse_ddash_args "${args[*]}" "$(get_oclint_ver)"
+	check_installed
+	parse_ddash_args "${args[*]}"
 	execute_cmd
 	parse_output
 }

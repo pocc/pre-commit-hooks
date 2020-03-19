@@ -29,6 +29,14 @@ class TestCLinters:
         okfiles = ["tests/files/ok.c", "tests/files/ok.cpp"]
         cls.errfiles = [os.path.abspath(filename) for filename in errfiles]
         cls.okfiles = [os.path.abspath(filename) for filename in okfiles]
+        version_info = sp.check_output(["clang-format", "--version"]).decode('utf-8')
+        regex = r"clang-format version ([\d.]+)"
+        cls.clang_format_version = re.search(regex, version_info).group(1)
+        cls.version_cmds = [
+            "./hooks/clang-format",
+            "--version={}",
+            "tests/files/ok.c"
+        ]
 
     def test_clang_format_ok(self):
         self.run_clang_format(
@@ -210,40 +218,28 @@ Edit your pre-commit config or use a different version of oclint
             assert actual == expected
             assert retcode == expected_retcode
 
-    @staticmethod
-    def test_sticky_version_minor():
-        """Verify that 6.0 matches minor versions like 6.0.1."""
-        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
-        cmds[2] = cmds[2].format("6.0.1")
+    def test_sticky_version_minor(self):
+        """Verify that version minus one char matches current version"""
+        cmds = list(self.version_cmds)
+        cmds[1] = cmds[1].format(self.clang_format_version[:-1])
         child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
         child_out, child_err = child.communicate()
         assert child_out == b""
         assert child_err == b""
         assert child.returncode == 0
 
-    @staticmethod
-    def test_sticky_version_extended():
-        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
-        cmds[2] = cmds[2].format("6.0.0-1ubuntu2")
+    def test_sticky_clang_format_version_err(self):
+        cmds = list(self.version_cmds)
+        err_version = "0.0.0"
+        cmds[1] = cmds[1].format(err_version)
         child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
+        print(cmds)
         child_out, child_err = child.communicate()
         assert child_out == b""
-        assert child_err == b""
-        assert child.returncode == 0
-
-    @staticmethod
-    def test_sticky_version_err():
-        cmds = ["bash", "-c", ". ./hooks/utils; assert_version '{}' '6.0'"]
-        cmds[2] = cmds[2].format("6.1.0")
-        child = sp.Popen(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
-        child_out, child_err = child.communicate()
-        print(child_err)
-        assert child_out == b""
-        assert (
-            child_err
-            == b"ERR: Expected version 6.0, but system version is 6.1.0\n"
-            + b"Edit your pre-commit config or use a different version of \n"
-        )
+        expected_err = """ERR: Expected version {}, but system version is {}
+Edit your pre-commit config or use a different version of clang-format\n"""\
+            .format(err_version, self.clang_format_version)
+        assert child_err == bytes(expected_err, encoding="utf-8")
         assert child.returncode == 1
 
     @staticmethod

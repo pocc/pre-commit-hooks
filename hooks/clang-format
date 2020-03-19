@@ -3,31 +3,65 @@
 ################################################################################
 CMD="clang-format"
 args=("$@")
-hook_dir="$(dirname "$(readlink -f "$0")")"
-. "$hook_dir/utils"
 
+# Check if $CMD is installed and fail exit if not
+function check_installed {
+    if [[ -z "$(command -v "$CMD")" ]]; then
+        echo -e "ERR: $CMD not found.\nMake sure to install $CMD and add it to your path." 1>&2
+        echo -e "For more info: https://github.com/pocc/pre-commit-hooks#prerequisites" 1>&2
+        exit 1
+    fi
+}
+
+# If --version=* hook arg is passed in, can be used to enforce specific versions of tools
+function assert_version {
+	actual_version="$1"
+	expected_version="$2"
+	if [[ "$actual_version" != "$expected_version"* ]]; then
+		echo -e "ERR: Expected version $expected_version, but system version is $actual_version" 1>&2
+		echo -e "Edit your pre-commit config or use a different version of $CMD" 1>&2
+		exit 1
+	else  # Otherwise remove version arg from args
+	    args=($(echo "${args[@]}" | tr " " "\n" | grep -v '\--version'))
+	fi
+}
 
 # Get the file argument if one exists. Assert version as necessary.
 function parse_args {
+    # Modified args removes --version=* if present
 	for arg in "${args[@]}"; do
 		if [[ "$arg" == "--version="* ]]; then
 			actual="$(clang-format --version | awk '{print $3}')"
 			expected="$(echo "$arg" | cut -d '=' -f 2)"
 			assert_version "$actual" "$expected"
-		elif [ -e "$arg" ]; then
+		elif [[ -e "$arg" ]]; then
 			filename="$arg"
 		fi
 	done
 
-	if [ -z "$filename" ]; then
+	if [[ -z "$filename" ]]; then
 		echo "ERR: No file arg found. args =" "${args[@]}"
 		exit 1
 	fi
 }
 
+# If there are differences, this script will fail (and pre-commit should show this)
+function diff_formatted {
+	# Quoting $1 interferes with array creation
+	# shellcheck disable=SC2206
+	args=($1)
+	filename="$2"
+	if [[ " ${args[*]} " == *" -i "* ]]; then
+		# Here, diff compares what the file is before and after transform
+		diff "$filename" <(clang-format "${args[@]}"; cat "$filename")
+	else
+		# Otherwise clang-format should send output to stdout, and can be compared
+		diff "$filename" <(clang-format "${args[@]}")
+	fi
+}
 
 function clangformat_main {
-	check_installed "$CMD"
+	check_installed
 	parse_args
 	diff_formatted "${args[@]}" "$filename"
 }
