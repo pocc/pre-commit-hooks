@@ -75,7 +75,26 @@ in the hook's args list.
 ## Testing
 
 To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are
-working as expected on your system, use `pytest tests/hooks_test.py --runslow`.
+working as expected on your system, use `pytest --runslow`. This will work
+on both bash and python branches.
+
+### Example testing with python branch
+
+```bash
+pre-commit-hooks$ pytest -x -vvv
+============================= test session starts ==============================
+platform darwin -- Python 3.7.6, pytest-5.4.1, py-1.7.0, pluggy-0.13.1 -- /usr/local/opt/python/bin/python3.7
+cachedir: .pytest_cache
+rootdir: /Users/pre-commit-hooks/code/pre-commit-hooks, inifile: pytest.ini
+collected 27 items
+
+tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-format on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  3%]
+tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-tidy on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  7%]
+...
+
+============================= 27 passed in 19.32s ==============================
+```
+
 
 ## Additional Resources
 

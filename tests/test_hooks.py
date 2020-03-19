@@ -7,6 +7,11 @@ With this snippet:
 - Triggers clang-format because what should be on 4 lines is on 1
 - Triggers clang-tidy because "magical number" 10 is used
 - Triggers oclint because short variable name is used
+
+pytest_generate_tests comes from pytest documentation and allows for
+table tests to be generated and each treated as a test by pytest.
+This allows for 24 tests with a descrition instead of 3 which
+functionally tests the same thing.
 """
 import os
 import subprocess as sp
@@ -18,79 +23,98 @@ from hooks.clang_tidy import ClangTidyCmd
 from hooks.oclint import OCLintCmd
 
 
+def pytest_generate_tests(metafunc):
+    """Taken from pytest documentation to allow for table tests:
+    https://docs.pytest.org/en/latest/example/parametrize.html#paramexamples"""
+    metafunc.cls.setup_class()
+    idlist = []
+    argvalues = []
+    argnames = []
+    for scenario in metafunc.cls.scenarios:
+        idlist.append(scenario[0])
+        items = scenario[1].items()
+        argnames = [x[0] for x in items]
+        argvalues.append([x[1] for x in items])
+    metafunc.parametrize(argnames, argvalues, ids=idlist, scope="class")
+
+
+def generate_list_tests():
+    """Generate the scenarios for class (24)
+
+    Test looks like ["""
+    pwd = os.getcwd()
+    err_c = os.path.join(pwd, "tests/files/err.c")
+    err_cpp = os.path.join(pwd, "tests/files/err.cpp")
+    ok_c = os.path.join(pwd, "tests/files/ok.c")
+    ok_cpp = os.path.join(pwd, "tests/files/ok.cpp")
+
+    ok_str = ""
+
+    clang_format_args = []
+    clang_format_err = """\n<  int main() { int i; return 10; }\n---\n>  int main() {\n>    int i;\n>    return 10;\n>  }\n"""  # noqa: E501
+    clang_format_output = [ok_str, ok_str, clang_format_err, clang_format_err]
+
+    clang_tidy_args = ["-quiet", "-checks=*", "-warnings-as-errors=*"]
+    clang_tidy_err_str = """{}:1:28: error: 10 is a magic number; consider replacing it with a named constant [cppcoreguidelines-avoid-magic-numbers,-warnings-as-errors]\nint main() {{ int i; return 10; }}\n                           ^\n"""  # noqa: E501
+    clang_tidy_str_c = clang_tidy_err_str.format(err_c)
+    clang_tidy_str_cpp = clang_tidy_err_str.format(err_cpp)
+    clang_tidy_output = [ok_str, ok_str, clang_tidy_str_c, clang_tidy_str_cpp]
+
+    oclint_args = ["-enable-global-analysis", "-enable-clang-static-analyzer"]
+    oclint_err_str = """Problem with oclint: OCLint Violations found\n\n\nOCLint Report\n\nSummary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2 \n
+{0}:1:14: short variable name [naming|P3] Length of variable name `i` is 1, which is shorter than the threshold of 3
+{0}:1:14: unused local variable [unused|P3] The local variable 'i' is unused.\n\n[OCLint (http://oclint.org) v0.13]\n\n"""  # noqa: E501
+
+    oclint_err_str_c = oclint_err_str.format(err_c)
+    oclint_err_str_cpp = oclint_err_str.format(err_cpp)
+    oclint_output = [ok_str, ok_str, oclint_err_str_c, oclint_err_str_cpp]
+
+    files = [ok_c, ok_cpp, err_c, err_cpp]
+    retcodes = [0, 0, 1, 1]
+    scenarios = []
+    for i in range(len(files)):
+        cf_scenario = [ClangFormatCmd, clang_format_args]
+        cf_scenario += [files[i], clang_format_output[i], retcodes[i]]
+
+        ct_scenario = [ClangTidyCmd, clang_tidy_args]
+        ct_scenario += [files[i], clang_tidy_output[i], retcodes[i]]
+
+        oc_scenario = [OCLintCmd, oclint_args]
+        oc_scenario += [files[i], oclint_output[i], retcodes[i]]
+
+        scenarios += [cf_scenario, ct_scenario, oc_scenario]
+    return scenarios
+
+
 class TestHooks:
     """Test all C Linters: clang-format, clang-tidy, and oclint."""
     @classmethod
     def setup_class(cls):
-        """Create test files that will be used by other tests.
+        """Create test files that will be used by other tests."""
+        scenarios = generate_list_tests()
+        cls.scenarios = []
+        for test_type in [cls.run_cmd_class, cls.run_shell_cmd]:
+            for scenario in scenarios:
+                desc = test_type.__name__ + " " + scenario[0].command + " on " + scenario[2]
+                test_scenario = [
+                    desc,
+                    {
+                        'test_type': test_type,
+                        'cmd': scenario[0],
+                        'args': scenario[1],
+                        'filename': scenario[2],
+                        'expected_output': scenario[3],
+                        'expected_retcode': scenario[4]
+                    }
+                ]
+                cls.scenarios += [test_scenario]
 
-        "err" files are expected to error for all linters
-        "ok" files are expected to pass for all listers
-        """
-        pwd = os.getcwd()
-        cls.err_c = os.path.join(pwd, "tests/files/err.c")
-        cls.err_cpp = os.path.join(pwd, "tests/files/err.cpp")
-        cls.ok_c = os.path.join(pwd, "tests/files/ok.c")
-        cls.ok_cpp = os.path.join(pwd, "tests/files/ok.cpp")
-
-    @pytest.fixture(scope="function", params=[])
-    def run_table_tests(self, cmd, args, tests):
+    def test_run(self, test_type, cmd, args, filename, expected_output, expected_retcode):
         """Test each command's class from its python file
-        and the command for each generated by setup.py.
-
-        tests are in a table format and so are run in a loop."""
-        name = cmd.command
-        for t in tests:
-            [filename, exp_output, exp_retcode] = t
-            print("With", name, "class, testing file", filename)
-            self.run_cmd_class(cmd, args, filename, exp_output, exp_retcode)
-            print("With", name + "-hook command, testing file", filename)
-            self.run_shell_cmd(cmd, args, filename, exp_output, exp_retcode)
-
-    def test_clang_format(self):
-        ok_str = ""
-        err_str = """\n<  int main() { int i; return 10; }\n---\n>  int main() {\n>    int i;\n>    return 10;\n>  }\n"""  # noqa: E501
-        cf_tests = [
-            [self.ok_c, ok_str, 0],
-            [self.ok_cpp, ok_str, 0],
-            [self.err_c, err_str, 1],
-            [self.err_cpp, err_str, 1],
-        ]
-
-        self.run_table_tests(ClangFormatCmd, [], cf_tests)
-
-    def test_clang_tidy(self):
-        ok_str = ""
-        err_str = """{}:1:28: error: 10 is a magic number; consider replacing it with a named constant [cppcoreguidelines-avoid-magic-numbers,-warnings-as-errors]\nint main() {{ int i; return 10; }}\n                           ^\n"""  # noqa: E501
-        err_str_c = err_str.format(self.err_c)
-        err_str_cpp = err_str.format(self.err_cpp)
-        ct_tests = [
-            [self.ok_c, ok_str, 0],
-            [self.ok_cpp, ok_str, 0],
-            [self.err_c, err_str_c, 1],
-            [self.err_cpp, err_str_cpp, 1],
-        ]
-
-        args = ["-quiet", "-checks=*", "-warnings-as-errors=*"]
-        self.run_table_tests(ClangTidyCmd, args, ct_tests)
-
-    #@pytest.mark.slow
-    def test_oclint_err(self):
-        ok_str = ""
-        err_str = """Problem with oclint: OCLint Violations found\n\n\nOCLint Report\n\nSummary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2 \n
-{0}:1:14: short variable name [naming|P3] Length of variable name `i` is 1, which is shorter than the threshold of 3
-{0}:1:14: unused local variable [unused|P3] The local variable 'i' is unused.\n\n[OCLint (http://oclint.org) v0.13]\n\n"""  # noqa: E501
-        err_str_c = err_str.format(self.err_c)
-        err_str_cpp = err_str.format(self.err_cpp)
-        ocl_tests = [
-            [self.ok_c, ok_str, 0],
-            [self.ok_cpp, ok_str, 0],
-            [self.err_c, err_str_c, 1],
-            [self.err_cpp, err_str_cpp, 1],
-        ]
-
-        args = ["-enable-global-analysis", "-enable-clang-static-analyzer"]
-        self.run_table_tests(OCLintCmd, args, ocl_tests)
+        and the command for each generated by setup.py."""
+        test_type_name = test_type.__name__
+        print("Testing file", filename, "with class", cmd.command, "with test type", test_type_name)
+        test_type(cmd, args, filename, expected_output, expected_retcode)
 
     @staticmethod
     def run_cmd_class(cmd_class, args, fname, target_output, target_retcode):
