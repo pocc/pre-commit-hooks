@@ -50,17 +50,20 @@ def generate_list_tests():
 
     ok_str = ""
 
-    clang_format_args = []
+    clang_format_args_sets = [[], ["-i"]]
     clang_format_err = """\n<  int main() { int i; return 10; }\n---\n>  int main() {\n>    int i;\n>    return 10;\n>  }\n"""  # noqa: E501
     clang_format_output = [ok_str, ok_str, clang_format_err, clang_format_err]
 
-    clang_tidy_args = ["-quiet", "-checks=*", "-warnings-as-errors=*"]
+    base_args = ["-quiet", "-checks=*", "-warnings-as-errors=*"]
+    # Run normal, plus two in-place arguments
+    additional_args = [[], ["-fix"], ["--fix-errors"]]
+    clang_tidy_args_sets = [base_args + arg for arg in additional_args]
     clang_tidy_err_str = """{}:1:28: error: 10 is a magic number; consider replacing it with a named constant [cppcoreguidelines-avoid-magic-numbers,-warnings-as-errors]\nint main() {{ int i; return 10; }}\n                           ^\n"""  # noqa: E501
     clang_tidy_str_c = clang_tidy_err_str.format(err_c)
     clang_tidy_str_cpp = clang_tidy_err_str.format(err_cpp)
     clang_tidy_output = [ok_str, ok_str, clang_tidy_str_c, clang_tidy_str_cpp]
 
-    oclint_args = ["-enable-global-analysis", "-enable-clang-static-analyzer"]
+    oclint_arg_sets = [["-enable-global-analysis", "-enable-clang-static-analyzer"]]
     oclint_err_str = """Problem with oclint: OCLint Violations found\n\n\nOCLint Report\n\nSummary: TotalFiles=1 FilesWithViolations=1 P1=0 P2=0 P3=2 \n
 {0}:1:14: short variable name [naming|P3] Length of variable name `i` is 1, which is shorter than the threshold of 3
 {0}:1:14: unused local variable [unused|P3] The local variable 'i' is unused.\n\n[OCLint (http://oclint.org) v0.13]\n\n"""  # noqa: E501
@@ -73,16 +76,18 @@ def generate_list_tests():
     retcodes = [0, 0, 1, 1]
     scenarios = []
     for i in range(len(files)):
-        cf_scenario = [ClangFormatCmd, clang_format_args]
-        cf_scenario += [files[i], clang_format_output[i], retcodes[i]]
-
-        ct_scenario = [ClangTidyCmd, clang_tidy_args]
-        ct_scenario += [files[i], clang_tidy_output[i], retcodes[i]]
-
-        oc_scenario = [OCLintCmd, oclint_args]
-        oc_scenario += [files[i], oclint_output[i], retcodes[i]]
-
-        scenarios += [cf_scenario, ct_scenario, oc_scenario]
+        for arg_set in clang_format_args_sets:
+            clang_format_scenario = [ClangFormatCmd, arg_set, files[i],
+                                     clang_format_output[i], retcodes[i]]
+            scenarios += [clang_format_scenario]
+        for arg_set in clang_tidy_args_sets:
+            clang_tidy_scenario = [ClangTidyCmd, arg_set, files[i],
+                                   clang_tidy_output[i], retcodes[i]]
+            scenarios += [clang_tidy_scenario]
+        for arg_set in oclint_arg_sets:
+            oclint_scenario = [OCLintCmd, arg_set, files[i],
+                               oclint_output[i], retcodes[i]]
+            scenarios += [oclint_scenario]
     return scenarios
 
 
@@ -115,6 +120,15 @@ class TestHooks:
         test_type_name = test_type.__name__
         print("Testing file", filename, "with class", cmd.command, "with test type", test_type_name)
         test_type(cmd, args, filename, expected_output, expected_retcode)
+        self.revert_files_changed(args, filename)
+
+    @staticmethod
+    def revert_files_changed(args, filename):
+        """Revert file changes made by this test to error files."""
+        # Fix options don't overlap between utilities
+        fix_inplace = "-fix" in args or "--fix-errors" in args or "-i" in args
+        if fix_inplace and "err.c" in filename:
+            sp.run(["git", "checkout", "tests/files"])
 
     @staticmethod
     def run_cmd_class(cmd_class, args, fname, target_output, target_retcode):
