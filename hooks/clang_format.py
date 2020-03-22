@@ -53,11 +53,11 @@ class ClangFormatCmd(Command):
         lines_str = str(child.stdout, encoding="utf-8")
         if lines_str == "":
             return []
-        return lines_str.split('\n')
+        return lines_str.split("\n")
 
     @staticmethod
     def get_filelines(filename) -> [str]:
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             filetext = f.read()
         return str(filetext, encoding="utf-8").split("\n")
 
@@ -73,12 +73,8 @@ class ClangFormatCmd(Command):
             python_diff = list(difflib.ndiff(expected, actual))
             diff = self.format_as_diff(python_diff)
             if len(diff) > 0:
-                if len(expected) == 0 and "-i" in self.args:
-                    # If command has no stdout, expected is meaningless.
-                    sys.stdout.write("clang-format reformatted " + filename)
-                else:
-                    self.stderr = "\n" + "\n".join(diff) + "\n"
-                    sys.stdout.write(self.stderr)
+                self.stderr = "\n" + "\n".join(diff) + "\n"
+                sys.stdout.write(self.stderr)
                 self.returncode = 1
                 sys.exit(self.returncode)
 
@@ -88,5 +84,5 @@ def main(argv=None):
     cmd.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

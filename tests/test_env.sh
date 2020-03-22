@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Test whether the test files produce the expected return code for each utility
+# These are the most basic versions of commands that should return 0/1 correctly
 # If this script returns 0, all tests passed
 
 #### FUNCTIONS ####
@@ -13,7 +14,7 @@ function testfn {
 }
 
 function run_clang_format {
-  diff <(clang-format $1) $1
+  diff <(clang-format "$1") "$1"
 }
 
 function run_clang_tidy {
@@ -21,7 +22,7 @@ function run_clang_tidy {
 }
 
 function run_oclint {
-  if [[ "$(oclint $1 2>&1)" != *'Violations=0'* ]]
+  if [[ "$(oclint "$1" 2>&1)" != *'Violations=0'* ]]
     then return 1
   fi
 }
@@ -35,8 +36,8 @@ function run_cppcheck {
 }
 
 function assert_eq {
-  if [[ $1 != $2 ]]
-    then printf "[FAILED] $4: Expected error code $1 but got $2 for file $3\n"
+  if [[ "$1" != "$2" ]]
+    then echo "[FAILED] $4: Expected error code $1 but got $2 for file $3"
     exit 1
   fi
 }

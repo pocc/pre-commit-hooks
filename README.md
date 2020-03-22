@@ -80,8 +80,20 @@ on both bash and python branches.
 
 ### Example testing with python branch
 
+The default is to skip most (29/51) tests as to run them all takes ~60s. These
+pytest options are available to add test types:
+
+* `--runslow`: oclint and clang-tidy `-fix`/`--fix-errors` tests take extra time
+* `--internal`: Internal class tests to ensure internal/shell APIs match
+
+
+**Note**: You can parallelize these tests with `pytest-xdist`.
+Adding `-n 16` to the command divides runtime by ~6x in my testing.
+
+To run all tests serially, run `pytest -x -vvv --internal --runslow` like so:
+
 ```bash
-pre-commit-hooks$ pytest -x -vvv
+pre-commit-hooks$ pytest -x -vvv --internal --runslow
 ============================= test session starts ==============================
 platform darwin -- Python 3.7.6, pytest-5.4.1, py-1.7.0, pluggy-0.13.1 -- /usr/local/opt/python/bin/python3.7
 cachedir: .pytest_cache
@@ -92,9 +104,8 @@ tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-format on /Users/pr
 tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-tidy on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  7%]
 ...
 
-============================= 27 passed in 19.32s ==============================
+============================= 51 passed in 61.86s ==============================
 ```
-
 
 ## Additional Resources
 

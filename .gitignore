@@ -4,3 +4,7 @@ venv/
 *.plist
 *cache*/
 .DS_Store
+dist/
+build/
+temp/
+*.egg-info/
