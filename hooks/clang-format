@@ -22,7 +22,7 @@ function assert_version {
 		echo -e "Edit your pre-commit config or use a different version of $CMD" 1>&2
 		exit 1
 	else  # Otherwise remove version arg from args
-	    args=($(echo "${args[@]}" | tr " " "\n" | grep -v '\--version'))
+	    args=("$(echo "${args[@]}" | tr " " "\n" | grep -v '\--version')")
 	fi
 }
 
@@ -63,7 +63,7 @@ function diff_formatted {
 function clangformat_main {
 	check_installed
 	parse_args
-	diff_formatted "${args[@]}" "$filename"
+	diff_formatted "${args[*]}" "$filename"
 }
 
 clangformat_main
