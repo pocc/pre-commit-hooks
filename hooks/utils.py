@@ -49,13 +49,27 @@ class Command:
     def add_if_missing(self, new_args):
         """Add a default if it's missing from the command. This library
         exists to force checking, so prefer those options.
+        len(new_args) should be 1 or 2 for options like --key value
 
         If arg is missing, add new_args to command's args"""
-        new_args_len = len(new_args)
-        for i in range(len(self.args) - new_args_len):
-            if self.args[i : i + new_args_len] == new_args:
-                return
-        self.args += new_args
+        args = []
+        # Treat args with '=' as 2 args, not 1. Create two new arrays so that
+        # discrepancies in '=' usage don't cause an arg to be misidentified.
+        for arg in self.args:
+            args += arg.split("=")
+        temp_new_args = []
+        for arg in new_args:
+            temp_new_args += arg.split("=")
+
+        new_args_len = len(temp_new_args)
+        if new_args_len == 1:
+            if temp_new_args[0] not in args:
+                self.args += new_args
+        else:
+            for i in range(len(self.args) - new_args_len):
+                if args[i : i + new_args_len] == temp_new_args:
+                    return
+            self.args += new_args
 
     def assert_version(self, actual_ver, expected_ver):
         """--version hook arg enforces specific versions of tools."""
@@ -179,7 +193,7 @@ class FormatterCmd(Command):
         if self.command == "uncrustify" and b"Parsing:" in child.stderr:
             child.stderr = b""
         if len(child.stderr) > 0:
-            problem = "Unexpected Stderr received from clang-format"
+            problem = "Unexpected Stderr received from " + self.command
             self.raise_error(problem, str(child.stderr, encoding="utf-8"))
         lines_str = child.stdout.decode("utf-8")
         if lines_str == "":

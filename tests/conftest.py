@@ -2,6 +2,7 @@
 Taken from
     https://docs.pytest.org/en/latest/example/simple.html
 """
+import os
 import shutil
 
 import pytest
@@ -34,3 +35,7 @@ def pytest_exception_interact(node, call, report):
     if report.failed:
         # Clean up temp dirs in tests/files if a test failed.
         shutil.rmtree("tests/files/temp")
+        # Delete generated files
+        for filename in ["ok.plist", "err.plist", "defaults.cfg"]:
+            if os.path.exists(filename):
+                os.remove(filename)

@@ -28,7 +28,7 @@ class UncrustifyCmd(FormatterCmd):
     def fix_defaults():
         """If defaults file doesn't exist, create and write it
         This is required and uncrustify will error if one is not provided"""
-        if "defaults.cfg" not in os.listdir():
+        if "defaults.cfg" not in os.listdir(os.getcwd()):
             # --show-config prints the current config to stdout
             cmds = ["uncrustify", "--show-config"]
             defaults = sp.check_output(cmds).decode("utf-8")

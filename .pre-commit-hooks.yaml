@@ -24,6 +24,12 @@
 - id: uncrustify
   name: uncrustify
   entry: uncrustify-hook
+  description: Formats C/CPP code
+  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+  language: python
+- id: cppcheck
+  name: cppcheck
+  entry: cppcheck
   description: Find warnings/errors in C/CPP code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
   language: python

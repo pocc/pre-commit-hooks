@@ -19,14 +19,12 @@ class OCLintCmd(ClangAnalyzerCmd):
         # If a compilation database is not used, suppress errors
         if "-p" not in self.args:
             self.add_if_missing(["--", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"])
-        # Enable all of the checks
-        self.add_if_missing(["-checks=*"])
 
     def run(self):
         """Run OCLint and remove generated temporary files"""
         # Split text into an array of args that can be passed into oclint
         for filename in self.files:
-            current_files = os.listdir()
+            current_files = os.listdir(os.getcwd())
             child = self.run_command(filename)
             if child.returncode != 0:
                 details = str(child.stdout + child.stderr, encoding="utf-8")
@@ -46,7 +44,7 @@ class OCLintCmd(ClangAnalyzerCmd):
     @staticmethod
     def cleanup(existing_files):
         """Delete the plist files that oclint generates."""
-        new_files = os.listdir()
+        new_files = os.listdir(os.getcwd())
         for filename in new_files:
             if filename not in existing_files:
                 os.remove(filename)

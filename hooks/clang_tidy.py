@@ -11,7 +11,6 @@ class ClangTidyCmd(ClangAnalyzerCmd):
 
     command = "clang-tidy"
     lookbehind = "LLVM version "
-    defaults = ["-checks=*"]
 
     def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
@@ -22,6 +21,7 @@ class ClangTidyCmd(ClangAnalyzerCmd):
         if "-p" not in self.args:
             self.add_if_missing(["--", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"])
         # Enable all of the checks
+        self.add_if_missing(["-checks=*"])
         self.add_if_missing(["-enable-clang-static-analyzer"])
 
     def run(self):

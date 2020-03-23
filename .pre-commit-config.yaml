@@ -45,7 +45,6 @@ repos:
     hooks:
       - id: tests
         name: tests
-        entry: pytest -vvv -x -n 32 --runslow --internal
+        entry: tests/run_tests
         description: Tests expected output of all 3 scripts
-        language: system
-        types: [python]
+        language: script

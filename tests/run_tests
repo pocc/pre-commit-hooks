@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Run pytest
+pytest -vvv -x -n 32 --runslow --internal
