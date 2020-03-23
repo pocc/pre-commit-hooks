@@ -4,3 +4,6 @@ venv/
 .vscode/
 *.plist
 *cache/
+*.egg-info/
+dist/
+build/
