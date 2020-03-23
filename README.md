@@ -9,7 +9,7 @@ With `int main() { int i; return 10; }` in a file, all three linters should fail
 
 <img src="https://dl.dropboxusercontent.com/s/xluan7x39wx6fss/c_linters_failing.png" width="66%" height="66%">
 
-With clang-format=8.0.0 / clang-tidy=8.0.0 / oclint=0.13
+Using clang-format `8.0.0`; clang-tidy `8.0.0`; oclint `0.13`
 
 The above uses this `.pre-commit-config.yaml`:
 
@@ -89,8 +89,8 @@ pytest options are available to add test types:
 * `--internal`: Internal class tests to ensure internal/shell APIs match
 
 
-**Note**: You can parallelize these tests with `pytest-xdist`. Adding `-n 16`
-to the command creates 16 workers and divides runtime by ~6x in my testing.
+**Note**: You can parallelize these tests with `pytest-xdist`. Adding `-n 32`
+to the command creates 32 workers and divides runtime by ~6x in my testing.
 
 To run all tests serially, run `pytest -x -vvv --internal --runslow` like so:
 
@@ -100,13 +100,13 @@ pre-commit-hooks$ pytest -x -vvv --internal --runslow
 platform darwin -- Python 3.7.6, pytest-5.4.1, py-1.7.0, pluggy-0.13.1 -- /usr/local/opt/python/bin/python3.7
 cachedir: .pytest_cache
 rootdir: /Users/pre-commit-hooks/code/pre-commit-hooks, inifile: pytest.ini
-collected 51 items
+collected 68 items
 
 tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-format on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  3%]
 tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-tidy on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  7%]
 ...
 
-============================= 51 passed in 61.86s ==============================
+============================= 68 passed in 61.86s ==============================
 ```
 
 ## Additional Resources

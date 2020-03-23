@@ -2,21 +2,25 @@
 """Wrapper script for oclint"""
 #############################################################################
 import os
-import sys
 
-from hooks.utils import Command
+from hooks.utils import ClangAnalyzerCmd
 
 
-class OCLintCmd(Command):
+class OCLintCmd(ClangAnalyzerCmd):
     """Class for the OCLint command."""
 
     command = "oclint"
     lookbehind = "OCLint version "
-    uses_ddash = True
 
     def __init__(self, args):
-        super().__init__(self.command, self.lookbehind, args, self.uses_ddash)
+        super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
+        self.parse_ddash_args()
+        # If a compilation database is not used, suppress errors
+        if "-p" not in self.args:
+            self.add_if_missing(["--", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"])
+        # Enable all of the checks
+        self.add_if_missing(["-checks=*"])
 
     def run(self):
         """Run OCLint and remove generated temporary files"""
@@ -33,7 +37,6 @@ class OCLintCmd(Command):
     def parse_output(self, stdout, stderr):
         """ oclint return code is usually wrong (github.com/oclint/oclint/issues/538)
         Figure out what it is based on stdout and return that instead
-        clang-tidy can complain about # of warnings in systems files
         """
         no_errors = b"FilesWithViolations=0"
         if no_errors not in stdout:
@@ -54,5 +57,5 @@ def main(argv=None):
     cmd.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

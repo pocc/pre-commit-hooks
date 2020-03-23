@@ -4,7 +4,7 @@
 #   https://github.com/pre-commit/pre-commit-hooks
 #   https://github.com/jumanjihouse/pre-commit-hooks
 # to use specific hooks and options.
-fail_fast: false
+fail_fast: true
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -17,14 +17,6 @@ repos:
       - id: check-yaml
       - id: debug-statements
       - id: requirements-txt-fixer
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 98beabdcc50ee352a8a5eded1009b0914a3645b9
-    hooks:
-      - id: flake8
-  - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.4.4
-    hooks:
-      - id: autopep8
   - repo: https://github.com/pre-commit/pre-commit
     rev: b8300268bf2d8797f28edf9063d7e5659ad4d535
     hooks:
@@ -53,7 +45,7 @@ repos:
     hooks:
       - id: tests
         name: tests
-        entry: pytest -vvv -x -n 16 --runslow --internal
+        entry: pytest -vvv -x -n 32 --runslow --internal
         description: Tests expected output of all 3 scripts
         language: system
         types: [python]

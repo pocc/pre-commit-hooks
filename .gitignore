@@ -8,3 +8,4 @@ dist/
 build/
 temp/
 *.egg-info/
+defaults.cfg

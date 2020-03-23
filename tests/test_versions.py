@@ -6,10 +6,12 @@ import subprocess as sp
 from hooks.clang_format import ClangFormatCmd
 from hooks.clang_tidy import ClangTidyCmd
 from hooks.oclint import OCLintCmd
+from hooks.uncrustify import UncrustifyCmd
 
 
 class TestVersions:
     """Test the --version flag for hooks: clang-format, clang-tidy, and oclint."""
+
     @classmethod
     def setup_class(cls):
         """Create test files that will be used by other tests"""
@@ -22,21 +24,27 @@ Edit your pre-commit config or use a different version of {0}.
 
     def test_clang_format_version_err(self):
         """Check that --version=0 errors."""
-        output = sp.check_output(["clang-format", "--version"], text=True)
+        output = sp.check_output(["clang-format", "--version"]).decode("utf-8")
         actual_ver = re.search(r"version ([\S]+)", output).group(1)
         self.run_table_tests(ClangFormatCmd, actual_ver)
 
     def test_clang_tidy_version_err(self):
         """Check that --version=0 errors."""
-        output = sp.check_output(["clang-tidy", "--version"], text=True)
+        output = sp.check_output(["clang-tidy", "--version"]).decode("utf-8")
         actual_ver = re.search(r"LLVM version ([\S]+)", output).group(1)
         self.run_table_tests(ClangTidyCmd, actual_ver)
 
     def test_oclint_version_err(self):
         """Check that --version=0 errors."""
-        output = sp.check_output(["oclint", "--version"], text=True)
+        output = sp.check_output(["oclint", "--version"]).decode("utf-8")
         actual_ver = re.search(r"OCLint version ([\d.]+)", output).group(1)
         self.run_table_tests(OCLintCmd, actual_ver)
+
+    def test_uncrustify_version_err(self):
+        """Check that --version=0 errors."""
+        output = sp.check_output(["uncrustify", "--version"]).decode("utf-8")
+        actual_ver = re.search(r"Uncrustify-([\d._a-z]+)", output).group(1)
+        self.run_table_tests(UncrustifyCmd, actual_ver)
 
     def run_table_tests(self, cmd, actual_ver):
         err_str = self.err_str.format(cmd.command, self.err_ver, actual_ver)
@@ -46,7 +54,7 @@ Edit your pre-commit config or use a different version of {0}.
         table_tests = [
             [actual_ver, "", 0],
             [fuzzy_version, "", 0],
-            [self.err_ver, err_str, 1]
+            [self.err_ver, err_str, 1],
         ]
         for t in table_tests:
             self.check_version(cmd, *t)

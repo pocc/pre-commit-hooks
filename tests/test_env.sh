@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Test whether the test files produce the expected return code for each utility
+# in *your* environment. Note that oclint is not available on Windows.
 # These are the most basic versions of commands that should return 0/1 correctly
 # If this script returns 0, all tests passed
 
