@@ -22,7 +22,6 @@ class ClangTidyCmd(ClangAnalyzerCmd):
             self.add_if_missing(["--", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"])
         # Enable all of the checks
         self.add_if_missing(["-checks=*"])
-        self.add_if_missing(["-enable-clang-static-analyzer"])
 
     def run(self):
         """Run clang-tidy"""
