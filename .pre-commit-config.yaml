@@ -48,3 +48,4 @@ repos:
         entry: tests/run_tests
         description: Tests expected output of all 3 scripts
         language: script
+        files: \.py$

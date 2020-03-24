@@ -1,11 +1,24 @@
 # pre-commit hooks
 
 This is a [pre-commit](https://pre-commit.com) hooks repo that
-integrates C/C++ linters [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html), [clang-tidy](https://clang.llvm.org/extra/clang-tidy/), and [oclint](http://oclint.org/).
+integrates five C/C++ linters:
+> [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html),
+[clang-tidy](https://clang.llvm.org/extra/clang-tidy/),
+[oclint](http://oclint.org/),
+[uncrustify](http://uncrustify.sourceforge.net/),
+[cppcheck](http://cppcheck.sourceforge.net/)
+
+**Why not wrap as `$command "$@"`
+
+Many of these linters will return 0 on error, which pre-commit will then
+mark as passing. Additionally, pre-commit has
+[a bug](https://github.com/pre-commit/pre-commit/issues/1000)
+where arguments after `--` are dropped. This repo's hooks for each command
+will fail correctly and honor all `--` arguments.
 
 ## Example Usage
 
-With `int main() { int i; return 10; }` in a file, all five linters should fail on commit:
+With `int main() { int i; return 10; }` in a file `err.cpp`, all five linters should fail on commit:
 
 <p align="center">
   <img src="media/clinters_err.png" width="80%">
@@ -37,22 +50,34 @@ depending on your use case._
 
 ## Using the Hooks
 
-### Prerequisites
+Python3.6+ is required to use these hooks as all 5 invoking scripts are written in it.
+As this is also the minimum version of pre-commit, this should not be an issue.
 
-_You will need to install these utilities in order to use them._ _Your package
-manager may already have them._
+### Installation
 
-- `brew install llvm oclint`
-- `apt install clang-format clang-tidy`
+_You will need to install these utilities in order to use them. Your package
+manager may already have them. Below are the package names for each package manager, if available:_
 
-Bash is required to use these hooks as all 3 invoking scripts are written in it.
+- `apt install clang-format clang-tidy uncrustify cppcheck` [1]
+- `yum install llvm uncrustify cppcheck` [1]
+- `brew install llvm oclint uncrustify cppcheck`
+- `choco install llvm uncrustify cppcheck` [2]
+
+[1] oclint takes a couple hours to compile. I've compiled and tarred
+[oclint-v0.15](https://dl.dropboxusercontent.com/s/nu474emafxj2nn5/oclint.tar.gz)
+for those using linux who want to skip the wait (built on Ubuntu-18.04).
+
+[2] oclint is not available on windows.
+
+If your package manager is not listed here, it will have similar names for these tools.
+You can build all of these from source.
 
 ### Hook Info
 
 | Hook Info                                                                | Type                 | Languages                             |
 | ------------------------------------------------------------------------ | -------------------- | ------------------------------------- |
 | [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | Formatter            | C, C++, ObjC                          |
-| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | Stacic code analyzer | C, C++, ObjC                          |
+| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | Static code analyzer | C, C++, ObjC                          |
 | [oclint](http://oclint.org/)                                             | Static code analyzer | C, C++, ObjC                          |
 | [uncrustify](http://uncrustify.sourceforge.net/)                         | Formatter            | C, C++, C#, ObjC, D, Java, Pawn, VALA |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             | Static code analyzer | C, C++                                |
@@ -88,11 +113,21 @@ Both of the hooks for them will ignore the error for not having one.
 You can generate with one `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ...` if you
 have a cmake-based project.
 
-### The -- option
+### The '--' doubledash option
 
 Options after `--` like `-std=c++11` will be interpreted correctly for
 `clang-tidy` and `oclint`. Make sure they sequentially follow the `--` argument
 in the hook's args list.
+
+### Standalone Hooks
+
+If you want to have predictable return codes for your C linters outside of pre-commit,
+these hooks are available via [PyPI](https://pypi.org/project/CLinters/).
+Install it with `pip install CLinters`.
+They are named as `$cmd-hook`, so `clang-format` becomes `clang-format-hook`.
+
+If you want to run the tests below, you will need to install them from PyPI
+or locally with `pip install .`.
 
 ## Testing
 
