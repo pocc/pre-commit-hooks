@@ -3,8 +3,6 @@ language: python
 matrix:
   include:
   - os: linux
-    dist: trusty
-  - os: linux
     dist: xenial
   - os: linux
     dist: bionic
