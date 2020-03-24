@@ -5,6 +5,7 @@ import subprocess as sp
 
 from hooks.clang_format import ClangFormatCmd
 from hooks.clang_tidy import ClangTidyCmd
+from hooks.cppcheck import CppcheckCmd
 from hooks.oclint import OCLintCmd
 from hooks.uncrustify import UncrustifyCmd
 
@@ -45,6 +46,12 @@ Edit your pre-commit config or use a different version of {0}.
         output = sp.check_output(["uncrustify", "--version"]).decode("utf-8")
         actual_ver = re.search(r"Uncrustify-([\d._a-z]+)", output).group(1)
         self.run_table_tests(UncrustifyCmd, actual_ver)
+
+    def test_cppcheck_version_err(self):
+        """Check that --version=0 errors."""
+        output = sp.check_output(["cppcheck", "--version"]).decode("utf-8")
+        actual_ver = re.search(r"Cppcheck ([\d.]+)", output).group(1)
+        self.run_table_tests(CppcheckCmd, actual_ver)
 
     def run_table_tests(self, cmd, actual_ver):
         err_str = self.err_str.format(cmd.command, self.err_ver, actual_ver)

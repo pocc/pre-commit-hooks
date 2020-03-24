@@ -12,6 +12,7 @@ matrix:
 addons:
   apt:
     packages:
+    - clang
     - clang-format
     - clang-tidy
     - uncrustify

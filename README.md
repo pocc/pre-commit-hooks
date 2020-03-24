@@ -58,16 +58,18 @@ As this is also the minimum version of pre-commit, this should not be an issue.
 _You will need to install these utilities in order to use them. Your package
 manager may already have them. Below are the package names for each package manager, if available:_
 
-- `apt install clang-format clang-tidy uncrustify cppcheck` [1]
-- `yum install llvm uncrustify cppcheck` [1]
+- `apt install clang clang-format clang-tidy uncrustify cppcheck` [1] [2]
+- `yum install llvm uncrustify cppcheck` [2]
 - `brew install llvm oclint uncrustify cppcheck`
-- `choco install llvm uncrustify cppcheck` [2]
+- `choco install llvm uncrustify cppcheck` [3]
 
-[1] oclint takes a couple hours to compile. I've compiled and tarred
+[1]: `clang` is a required install for `clang-format` or `clang-tidy` to work.
+
+[2]: oclint takes a couple hours to compile. I've compiled and tarred
 [oclint-v0.15](https://dl.dropboxusercontent.com/s/nu474emafxj2nn5/oclint.tar.gz)
 for those using linux who want to skip the wait (built on Ubuntu-18.04).
 
-[2] oclint is not available on windows.
+[3]: oclint is not available on windows.
 
 If your package manager is not listed here, it will have similar names for these tools.
 You can build all of these from source.
