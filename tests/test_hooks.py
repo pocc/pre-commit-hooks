@@ -230,6 +230,10 @@ class TestHooks:
         else:
             with pytest.raises(SystemExit):
                 cmd.run()
+                # If this continues with no system exit, print info
+                print("stdout:`" + cmd.stdout + "`")
+                print("stderr:`" + cmd.stderr + "`")
+                print("returncode:", cmd.returncode)
         actual = cmd.stdout + cmd.stderr
         retcode = cmd.returncode
         assert_equal(target_output, actual)
