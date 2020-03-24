@@ -5,9 +5,11 @@ integrates C/C++ linters [clang-format](https://clang.llvm.org/docs/ClangFormatS
 
 ## Example Usage
 
-With `int main() { int i; return 10; }` in a file, all three linters should fail on commit:
+With `int main() { int i; return 10; }` in a file, all five linters should fail on commit:
 
-<img src="https://dl.dropboxusercontent.com/s/xluan7x39wx6fss/c_linters_failing.png" width="66%" height="66%">
+<p align="center">
+  <img src="media/clinters_err.png" width="80%">
+</p>
 
 Using clang-format `8.0.0`; clang-tidy `8.0.0`; oclint `0.13`
 
