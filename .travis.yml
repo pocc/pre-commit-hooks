@@ -1,0 +1,35 @@
+language: python
+
+matrix:
+  include:
+  - os: linux
+    dist: trusty
+  - os: linux
+    dist: xenial
+  - os: linux
+    dist: bionic
+  - os: osx
+  # - os: windows
+
+addons:
+  apt:
+    packages:
+    - clang-format
+    - clang-tidy
+    - uncrustify
+    - cppcheck
+  homebrew:
+    packages:
+    - llvm
+    - oclint
+    - uncrustify
+    - cppcheck
+# Windows does not yet support Python
+python:
+- '3.6'
+branches:
+  only:
+  - python
+install:
+- pip3 install -r requirements.txt
+script: "./tests/run_tests"
