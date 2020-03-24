@@ -20,14 +20,14 @@ repos:
     rev: python
     hooks:
       - id: clang-format
-        args: [--style=Google, -i]
+        args: [--style=Google]
       - id: clang-tidy
         args: [-checks=*, -warnings-as-errors=*]
       - id: oclint
         args: [-enable-clang-static-analyzer, -enable-global-analysis]
       - id: uncrustify
       - id: cppcheck
-        args: [-enable=all]
+        args: [--enable=all]
 ```
 
 _Note that for your config yaml, you can supply your own args or remove the args line entirely,
@@ -47,13 +47,23 @@ Bash is required to use these hooks as all 3 invoking scripts are written in it.
 
 ### Hook Info
 
-|                                                                          | Type                 | Languages                             | Fix Inplace               | Enable all checks                                     |
-| ------------------------------------------------------------------------ | -------------------- | ------------------------------------- | ------------------------- | ----------------------------------------------------- |
-| [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | Formatter            | C, C++, ObjC                          | -i                        |                                                       |
-| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | Stacic code analyzer | C, C++, ObjC                          | --fix-errors [1]          | -checks=*, -warnings-as-errors=*                      |
-| [oclint](http://oclint.org/)                                             | Static code analyzer | C, C++, ObjC                          |                           | -enable-global-analysis -enable-clang-static-analyzer |
-| [uncrustify](http://uncrustify.sourceforge.net/)                         | Formatter            | C, C++, C#, ObjC, D, Java, Pawn, VALA | --replace --no-backup [2] |                                                       |
-| [cppcheck](http://cppcheck.sourceforge.net/)                             | Static code analyzer | C, C++                                |                           | -enable=all                                           |
+| Hook Info                                                                | Type                 | Languages                             |
+| ------------------------------------------------------------------------ | -------------------- | ------------------------------------- |
+| [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | Formatter            | C, C++, ObjC                          |
+| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | Stacic code analyzer | C, C++, ObjC                          |
+| [oclint](http://oclint.org/)                                             | Static code analyzer | C, C++, ObjC                          |
+| [uncrustify](http://uncrustify.sourceforge.net/)                         | Formatter            | C, C++, C#, ObjC, D, Java, Pawn, VALA |
+| [cppcheck](http://cppcheck.sourceforge.net/)                             | Static code analyzer | C, C++                                |
+
+### Hoop Option Comparison
+
+| Hook Options                                                             | Fix In Place | Enable all Checks                             | Set key/value |
+| ------------------------------------------------------------------------ | ------------ | --------------------------------------------- | --------------- |
+| [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | `-i`         |                   | |
+| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | `--fix-errors` [1] | `-checks=*` `-warnings-as-errors=*` | |
+| [oclint](http://oclint.org/)                                             |  | `-enable-global-analysis` `-enable-clang-static-analyzer` | `-rc=<key>=<value>` |
+| [uncrustify](http://uncrustify.sourceforge.net/)                         | `--replace` `--no-backup` [2] |  | `--set key=value` |
+| [cppcheck](http://cppcheck.sourceforge.net/)                             |  | `-enable=all` | |
 
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
 and fix compiler errors if it can, like missing semicolons.
@@ -65,7 +75,7 @@ Therefore, it is recommended to avoid needless backup creation by using `--no-ba
 
 Some linters change behavior between versions. To enforce a linter version
 8.0.0, for example, add `--version=8.0.0` to `args:` for that linter. Note that
-this is a pre-commit hook arg and passing it to the linter will cause an error.
+this is a pre-commit hook arg and will be filtered before args are passed to the linter.
 
 ### Compilation Database
 
