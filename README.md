@@ -62,17 +62,21 @@ manager may already have them. Below are the package names for each package mana
 
 - `apt install clang clang-format clang-tidy uncrustify cppcheck` [1] [2]
 - `yum install llvm uncrustify cppcheck` [2]
-- `brew install llvm oclint uncrustify cppcheck`
-- `choco install llvm uncrustify cppcheck` [3]
+- `brew install llvm oclint uncrustify cppcheck` [3]
+- `choco install llvm uncrustify cppcheck` [4]
 
 [1]: `clang` is a required install for `clang-format` or `clang-tidy` to work.
 
 [2]: oclint takes a couple hours to compile. I've compiled and tarred
 [oclint-v0.15](https://dl.dropboxusercontent.com/s/nu474emafxj2nn5/oclint.tar.gz)
 for those using linux who want to skip the wait (built on Ubuntu-18.04).
-You need to have clang installed prior (`sudo apt install clang`).
+You can also download the older [oclint-v0.13.1](https://github.com/oclint/oclint/releases/download/v0.13.1/oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz)
+for linux from oclint's github page (see [releases](https://github.com/oclint/oclint/releases)).
 
-[3]: oclint is not available on windows.
+[3]: Depending on your brew installation, you may need to install
+oclint with `brew cask install oclint`.
+
+[4]: oclint is not available on windows.
 
 If your package manager is not listed here, it will have similar names for these tools.
 You can build all of these from source.

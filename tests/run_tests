@@ -1,13 +1,30 @@
 #!/usr/bin/env bash
-# Run pytest
+# Run pytest on various platforms to test pre-commit-hooks
+
+# Print path and pypthon path as diagnostic information.
+echo "PATH:$PATH"
+python -c "import sys; print('\n'.join(sys.path))"
+
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   printf "starting script on linux\n"
-  wget https://dl.dropboxusercontent.com/s/rgd1b4xe85avyow/oclint-v0.15_clanglib.tar.gz
-  tar -xvzf oclint-v0.15_clanglib.tar.gz
+  wget https://github.com/oclint/oclint/releases/download/v0.13.1/oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz
+  tar -xvzf oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz
   sudo cp -v oclint/bin/oclint /usr/local/bin/
   sudo cp -vr oclint/lib/* /usr/local/lib/
+  # verify install
+  command -v clang-format clang-tidy oclint uncrustify cppcheck
   pytest -vvv -x -n 32 --oclint --internal
+
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   printf "starting script on macos\n"
-  pytest -vvv -x -n 32 --oclint --internal
+  # travis has issues running brew via yaml
+  brew install llvm uncrustify cppcheck
+  brew cask install oclint
+  # verify install
+  command -v clang-format clang-tidy oclint uncrustify cppcheck
+  pytest -vvv -x --oclint --internal
+
+else  # windows
+  printf "starting script on windows\n"
+  pytest -vvv -x --internal
 fi
