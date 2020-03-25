@@ -3,14 +3,15 @@
 
 # Print path and pypthon path as diagnostic information.
 echo "PATH:$PATH"
+alias python='python3'
 python -c "import sys; print('\n'.join(sys.path))"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   printf "starting script on linux\n"
   wget https://github.com/oclint/oclint/releases/download/v0.13.1/oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz
   tar -xvzf oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz
-  sudo cp -v oclint/bin/oclint /usr/local/bin/
-  sudo cp -vr oclint/lib/* /usr/local/lib/
+  sudo cp -v oclint-0.13.1/bin/oclint /usr/local/bin/
+  sudo cp -vr oclint-0.13.1/lib/* /usr/local/lib/
   # verify install
   command -v clang-format clang-tidy oclint uncrustify cppcheck
   pytest -vvv -x -n 32 --oclint --internal
@@ -20,11 +21,15 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   # travis has issues running brew via yaml
   brew install llvm uncrustify cppcheck
   brew cask install oclint
+  # Symlink clang tools per https://stackoverflow.com/questions/53111082
+  ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
+  ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
   # verify install
   command -v clang-format clang-tidy oclint uncrustify cppcheck
   pytest -vvv -x --oclint --internal
 
 else  # windows
   printf "starting script on windows\n"
+  chocolately install python3 llvm uncrustify cppcheck
   pytest -vvv -x --internal
 fi
