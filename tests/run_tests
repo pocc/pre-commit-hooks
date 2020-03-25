@@ -1,3 +1,13 @@
 #!/usr/bin/env bash
 # Run pytest
-pytest -vvv -x -n 32 --oclint --internal
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  printf "starting script on linux\n"
+  wget https://dl.dropboxusercontent.com/s/nu474emafxj2nn5/oclint.tar.gz
+  tar -xvzf oclint.tar.gz
+  sudo cp oclint/bin/oclint /usr/local/bin/
+  sudo cp -rp oclint/lib/oclint /usr/local/lib/
+  pytest -vvv -x -n 32 --oclint --internal
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  printf "starting script on macos\n"
+  pytest -vvv -x -n 32 --oclint --internal
+fi

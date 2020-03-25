@@ -8,13 +8,15 @@ integrates five C/C++ linters:
 [uncrustify](http://uncrustify.sourceforge.net/),
 [cppcheck](http://cppcheck.sourceforge.net/)
 
-**Why not wrap as `$command "$@"`
-
 Many of these linters will return 0 on error, which pre-commit will then
 mark as passing. Additionally, pre-commit has
 [a bug](https://github.com/pre-commit/pre-commit/issues/1000)
 where arguments after `--` are dropped. This repo's hooks for each command
 will fail correctly and honor all `--` arguments.
+
+This repo is available in both python and bash. To use a language, use `rev: $lang`
+in your `.pre-commit-config.yaml`. Master is set to python as the default as it is
+easier to maintain and troubleshoot.
 
 ## Example Usage
 
@@ -68,6 +70,7 @@ manager may already have them. Below are the package names for each package mana
 [2]: oclint takes a couple hours to compile. I've compiled and tarred
 [oclint-v0.15](https://dl.dropboxusercontent.com/s/nu474emafxj2nn5/oclint.tar.gz)
 for those using linux who want to skip the wait (built on Ubuntu-18.04).
+You need to have clang installed prior (`sudo apt install clang`).
 
 [3]: oclint is not available on windows.
 
@@ -131,7 +134,9 @@ They are named as `$cmd-hook`, so `clang-format` becomes `clang-format-hook`.
 If you want to run the tests below, you will need to install them from PyPI
 or locally with `pip install .`.
 
-## Testing
+## Development
+
+### Testing
 
 To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are
 working as expected on your system, use `pytest --runslow --internal -vvv`.
@@ -165,6 +170,13 @@ tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-tidy on /Users/pre-
 
 ============================= 76 passed in 61.86s ==============================
 ```
+
+### Why have a script when your hook could be `$command "$@"`?
+
+shellcheck keeps things simple by relaying arguments as `shellcheck "$@"`.
+This is not possible with several C/C++ linters because they exit 0 when
+there are errors. pre-commit registers failures by non-zero exit codes,
+which results in false "passes".
 
 ## Additional Resources
 
