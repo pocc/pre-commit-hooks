@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Wrapper script for clang-tidy."""
 #############################################################################
+import re
 import sys
 
 from hooks.utils import ClangAnalyzerCmd
@@ -26,17 +27,25 @@ class ClangTidyCmd(ClangAnalyzerCmd):
     def run(self):
         """Run clang-tidy"""
         for filename in self.files:
-            child = self.run_command(filename)
-            self.stdout = str(child.stdout, encoding="utf-8")
-            sys.stdout.buffer.write(child.stdout)
+            self.run_command(filename)
+            sys.stdout.write(self.stdout)
+            # The number of warnings depends on errors in system files
+            self.stderr = re.sub(r"\d+ warnings and ", "", self.stderr)
             # Don't output stderr if it's complaining about problems in system files
-            sysfile_warning = b"warnings generated" not in child.stderr
-            if len(child.stdout) > 0 and sysfile_warning:
-                self.stderr = str(child.stderr, encoding="utf-8")
-                sys.stderr.buffer.write(child.stderr)
-            if child.returncode != 0:
-                self.returncode = child.returncode
-                sys.exit(child.returncode)
+            no_sysfile_warning = "non-user code" not in self.stderr
+            # On good clang-tidy checks, it will spew warnings to stderr
+            if len(self.stdout) > 0 and no_sysfile_warning:
+                sys.stderr.write(self.stderr)
+            else:
+                self.stderr = ""
+            has_errors = (
+                "error generated." in self.stderr
+                or "errors generated." in self.stderr
+            )
+            if has_errors:  # Change return code if errors are generated
+                self.returncode = 1
+            if self.returncode != 0:
+                sys.exit(self.returncode)
 
 
 def main(argv=None):

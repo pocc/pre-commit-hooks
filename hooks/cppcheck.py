@@ -25,19 +25,14 @@ class CppcheckCmd(Command):
     def run(self):
         """Run cppcheck"""
         for filename in self.files:
-            child = self.run_command(filename)
-            self.stdout = str(child.stdout, encoding="utf-8")
+            self.run_command(filename)
             # Useless error see https://stackoverflow.com/questions/6986033
-            useless_error_part = (
-                b"(information) Cppcheck cannot " b"find all the include files"
-            )
-            if useless_error_part in child.stderr:
-                child.stderr = b""
-            self.stderr = str(child.stderr, encoding="utf-8")
-            self.returncode = child.returncode
-            if child.returncode != 0:
-                sys.stderr.buffer.write(child.stderr)
-                sys.exit(child.returncode)
+            useless_error_part = "Cppcheck cannot find all the include files"
+            if useless_error_part in self.stderr:
+                self.stderr = ""
+            if self.returncode != 0:
+                sys.stderr.write(self.stdout + self.stderr)
+                sys.exit(self.returncode)
 
 
 def main(argv=None):

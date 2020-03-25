@@ -23,7 +23,8 @@ function run_clang_tidy {
 }
 
 function run_oclint {
-  if [[ "$(oclint "$1" 2>&1)" != *'Violations=0'* ]]
+  output="$(oclint "$1" 2>&1)"
+  if [[ "$output" != *'Violations=0'* || "$output" == *'Compiler Errors:'* ]]
     then return 1
   fi
 }

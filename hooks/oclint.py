@@ -2,6 +2,7 @@
 """Wrapper script for oclint"""
 #############################################################################
 import os
+import sys
 
 from hooks.utils import ClangAnalyzerCmd
 
@@ -25,24 +26,27 @@ class OCLintCmd(ClangAnalyzerCmd):
         # Split text into an array of args that can be passed into oclint
         for filename in self.files:
             current_files = os.listdir(os.getcwd())
-            child = self.run_command(filename)
-            if child.returncode != 0:
-                details = str(child.stdout + child.stderr, encoding="utf-8")
-                self.raise_error("Problem running OCLint", details)
-            self.parse_output(child.stdout, child.stderr)
-            self.cleanup(current_files)
+            self.run_command(filename)
+            if self.returncode != 0:
+                sys.stdout.write(self.stdout)
+                self.returncode = 1
+                sys.exit(self.returncode)
+            self.parse_output()
+            self.cleanup_files(current_files)
 
-    def parse_output(self, stdout, stderr):
+    def parse_output(self):
         """ oclint return code is usually wrong (github.com/oclint/oclint/issues/538)
         Figure out what it is based on stdout and return that instead
         """
-        no_errors = b"FilesWithViolations=0"
-        if no_errors not in stdout:
-            output = str(stdout + stderr, encoding="utf-8")
+        violations = "FilesWithViolations=0" not in self.stdout
+        compiler_errors = "Compiler Errors" in self.stdout
+        if violations or compiler_errors:
+            output = self.stdout + self.stderr
             self.raise_error("OCLint Violations found", output)
+        self.stdout = ""
 
     @staticmethod
-    def cleanup(existing_files):
+    def cleanup_files(existing_files):
         """Delete the plist files that oclint generates."""
         new_files = os.listdir(os.getcwd())
         for filename in new_files:

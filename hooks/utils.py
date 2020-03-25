@@ -108,7 +108,10 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
         """Run the command and check for errors"""
         args = [self.command, filename] + self.args
         sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
-        return sp_child
+        # Set class stdout/stderr/retcode so there's a local copy for testing
+        self.stdout = str(sp_child.stdout, encoding="utf-8")
+        self.stderr = str(sp_child.stderr, encoding="utf-8")
+        self.returncode = sp_child.returncode
 
 
 class ClangAnalyzerCmd(Command):
