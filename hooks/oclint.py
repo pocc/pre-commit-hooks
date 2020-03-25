@@ -50,7 +50,7 @@ class OCLintCmd(ClangAnalyzerCmd):
         """Delete the plist files that oclint generates."""
         new_files = os.listdir(os.getcwd())
         for filename in new_files:
-            if filename not in existing_files:
+            if filename not in existing_files and filename[-6:] == ".plist":
                 os.remove(filename)
 
 
