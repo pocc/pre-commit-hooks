@@ -44,7 +44,8 @@ Edit your pre-commit config or use a different version of {0}.
     def test_uncrustify_version_err(self):
         """Check that --version=0 errors."""
         output = sp.check_output(["uncrustify", "--version"]).decode("utf-8")
-        actual_ver = re.search(r"Uncrustify-([\d._a-z]+)", output).group(1)
+        regex = r"[uU]ncrustify[- ]([\d\-._+a-z]+)"
+        actual_ver = re.search(regex, output).group(1)
         self.run_table_tests(UncrustifyCmd, actual_ver)
 
     def test_cppcheck_version_err(self):

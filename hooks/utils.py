@@ -3,6 +3,7 @@
 ###############################################################################
 import argparse
 import difflib
+import re
 import shutil
 import subprocess as sp
 import sys
@@ -97,11 +98,12 @@ Edit your pre-commit config or use a different version of {}.""".format(
         sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         version_str = str(sp_child.stdout, encoding="utf-8")
         # After version like `8.0.0` is expected to be '\n' or ' '
-        if self.look_behind not in version_str:
+        if not re.search(self.look_behind, version_str):
             details = """The version format for this command has changed.
 Create an issue at github.com/pocc/pre-commit-hooks."""
             self.raise_error("getting version", details)
-        version = version_str.split(self.look_behind)[1].split()[0]
+        regex = self.look_behind + r"([\d\._+a-z]+)"
+        version = re.search(regex, version_str).group(1)
         return version
 
     def run_command(self, filename):

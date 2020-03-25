@@ -12,7 +12,7 @@ class UncrustifyCmd(FormatterCmd):
     """Class for the uncrustify command."""
 
     command = "uncrustify"
-    lookbehind = "Uncrustify-"
+    lookbehind = "[uU]ncrustify[- ]"
 
     def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
