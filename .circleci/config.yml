@@ -9,13 +9,9 @@ jobs:
     steps:
       - checkout
       - run:
-          command: ./tests/run_tests
+          command: ./tests/run_tests.sh
           shell: powershell.exe
           name: powershell_test
-      - run:
-          command: ./tests/run_tests
-          shell: bash.exe
-          name: bash_test
 workflows:
   main:
     jobs:

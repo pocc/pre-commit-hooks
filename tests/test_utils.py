@@ -31,23 +31,22 @@ def assert_equal(expected, actual):
 
 def get_versions():
     """Returns a dict of commands and their versions."""
-    commands = [
-        "clang-format",
-        "clang-tidy",
-        "oclint",
-        "uncrustify",
-        "cppcheck",
-    ]
+    commands = ["clang-format", "clang-tidy", "uncrustify", "cppcheck"]
+    if os.name != "nt":  # oclint doesn't work on windows
+        commands += ["oclint"]
     # Regex for all versions. Unit tests: https://regex101.com/r/ciqAuO/5/tests
     regex = r"[- ]((?:\d+\.)+\d+[_+\-a-z]*)(?![\s\S]*[- ]\d\.)"
     versions = {}
     for cmd in commands:
-        output = sp.check_output([cmd, "--version"]).decode("utf-8")
-        # Choose last one for sake of oclint, which outputs clang version as well
+        if not shutil.which(cmd):
+            sys.exit("Command " + cmd + " not found.")
+        cmds = [cmd, "--version"]
+        child = sp.run(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
+        output = child.stdout.decode("utf-8")
         try:
             versions[cmd] = re.search(regex, output).group(1)
         except AttributeError:
-            print("Version regexes have broken.")
+            print("Received `" + output + "`. Version regexes have broken.")
             print("Please file a bug (github.com/pocc/pre-commit-hooks).")
             sys.exit(1)
     return versions

@@ -17,4 +17,4 @@ addons:
     - clang-tidy
     - uncrustify
     - cppcheck
-script: "./tests/run_tests"
+script: "./tests/run_tests.sh"

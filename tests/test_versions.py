@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Test that --version works for each hook correctly"""
+import os
 import subprocess as sp
 
 import tests.test_utils as utils
@@ -33,10 +34,11 @@ Edit your pre-commit config or use a different version of {0}.
         commands = [
             ClangFormatCmd,
             ClangTidyCmd,
-            OCLintCmd,
             UncrustifyCmd,
             CppcheckCmd,
         ]  # noqa: E501
+        if os.name != "nt":  # oclint is not supported on windows
+            commands.append(OCLintCmd)
         for cmd in commands:
             actual_ver = cls.versions[cmd.command]
             err_str = cls.err_str.format(cmd.command, cls.err_ver, actual_ver)
