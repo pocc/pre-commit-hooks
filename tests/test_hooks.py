@@ -30,7 +30,7 @@ from hooks.uncrustify import UncrustifyCmd
 
 
 def compare_versions(expected_list, actual_versions, cmd_name):
-    """Compare versions and error if they don't match. Don't compare fix."""
+    """Compare versions and alert if they don't match. Don't compare fix."""
     actl_maj, actl_min, actl_fix = actual_versions[cmd_name].split(".")[:3]
     for ver in expected_list:
         expd_maj, expd_min, expd_fix = ver.split(".")[:3]
@@ -44,19 +44,28 @@ def compare_versions(expected_list, actual_versions, cmd_name):
 def assert_command_versions(versions):
     """Raise an error if a new minor version of $cmd came out.
     Theses tests should work with command versions listed here."""
-    clang_format_versions = ["6.0", "8.0", "9.0"]
-    compare_versions(clang_format_versions, versions, "clang-format")
+    # 7.0.0 on Ubuntu-16.04/18.04
+    # 9.0.0 on Macos 10.13.6/brew
+    clang_versions = ["6.0.0", "7.0.0", "8.0.0", "9.0.1"]
+    compare_versions(clang_versions, versions, "clang-format")
+    compare_versions(clang_versions, versions, "clang-tidy")
 
-    clang_tidy_versions = ["6.0.0", "8.0.0", "9.0.1"]
-    compare_versions(clang_tidy_versions, versions, "clang-tidy")
-
+    # 0.13.1, manually installed on Ubuntu-16.04/18.04
+    # 0.13.1 on Macos 10.13.6/brew
     oclint_versions = ["0.13.1", "0.15"]
     compare_versions(oclint_versions, versions, "oclint")
 
-    uncrustify_versions = ["0.59", "0.70.1_f"]
+    # 0.59 on Ubuntu-16.04
+    # 0.66.1_f on Ubuntu-18.04
+    # 0.70.1_f on Macos 10.13.6/brew
+    uncrustify_versions = ["0.59", "0.66.1_f", "0.70.1_f"]
     compare_versions(uncrustify_versions, versions, "uncrustify")
 
-    cppcheck_versions = ["1.72", "1.87", "1.90"]
+    # 1.72 on Ubuntu-16.04
+    # 1.82 on Ubuntu-18.04
+    # 1.89 on Macos 10.13.6/brew
+    # 1.90 on Macos 10.14/brew
+    cppcheck_versions = ["1.72", "1.82", "1.89", "1.90"]
     compare_versions(cppcheck_versions, versions, "cppcheck")
 
 
@@ -142,17 +151,18 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
     # cppcheck adds unnecessary error information.
     # See https://stackoverflow.com/questions/6986033
     cppc_ok = ""
-    if versions["cppcheck"] <= "1.87":
+    if versions["cppcheck"] <= "1.88":
         cppcheck_err = "[{}:1]: (style) Unused variable: i\n"
     # They've made changes to messaging
-    elif versions["cppcheck"] >= "1.90":
+    elif versions["cppcheck"] >= "1.89":
         cppcheck_err = """{}:1:16: style: Unused variable: i [unusedVariable]
 int main(){{int i;return;}}
                ^
 """
     else:
         print("Problem parsing version for cppcheck", versions["cppcheck"])
-        sys.exit(1)
+        print("Please create an issue on github.com/pocc/pre-commit-hooks")
+        cppcheck_err = ""
     cppcheck_err_c = cppcheck_err.format(err_c)
     cppcheck_err_cpp = cppcheck_err.format(err_cpp)
     cppcheck_output = [cppc_ok, cppc_ok, cppcheck_err_c, cppcheck_err_cpp]

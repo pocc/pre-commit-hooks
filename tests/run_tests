@@ -37,8 +37,12 @@ install_linux_cmds () {
 }
 
 install_macos_cmds () {
-  HOMEBREW_NO_AUTO_UPDATE=1 brew install llvm uncrustify cppcheck
-  HOMEBREW_NO_AUTO_UPDATE=1 brew cask install oclint
+  export HOMEBREW_NO_INSTALL_CLEANUP=1
+  export HOMEBREW_NO_AUTO_UPDATE=1
+  {
+    brew install llvm uncrustify cppcheck
+  } || 0
+  brew cask install oclint
   # So that system llvm tools like clang-format and clang-tidy are available.
   export PATH="/usr/local/opt/llvm/bin:$PATH"
 }
@@ -67,7 +71,8 @@ run_tests () {
 
   pip_install
   print_command_versions
-  $COMMAND
+  # Try to parallelize with xdist, but fall back if there's an error.
+  $COMMAND -n 32 || $COMMAND
 }
 
 run_tests

@@ -38,8 +38,9 @@ def pytest_exception_interact(node, call, report):
             shutil.rmtree("tests/files/temp")
         # Delete generated files
         for filename in ["ok.plist", "err.plist", "defaults.cfg"]:
-            if os.path.exists(filename):
-                os.remove(filename)
+            abs_filename = os.path.abspath(filename)
+            if os.path.exists(abs_filename):
+                os.remove(abs_filename)
 
 
 def pytest_generate_tests(metafunc):
