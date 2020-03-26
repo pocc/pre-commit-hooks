@@ -8,8 +8,6 @@ matrix:
     dist: bionic
   - os: osx
     language: generic
-  - os: windows
-    language: generic
 
 addons:
   apt:
@@ -19,7 +17,4 @@ addons:
     - clang-tidy
     - uncrustify
     - cppcheck
-branches:
-  only:
-  - python
 script: "./tests/run_tests"

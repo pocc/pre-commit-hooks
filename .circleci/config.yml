@@ -1,0 +1,19 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.2.0
+
+jobs:
+  build-and-test:
+    executor: win/default
+    steps:
+      - checkout
+      - run:
+          command: ./tests/run_tests
+          shell: bash.exe
+          name: Test
+
+workflows:
+  main:
+    jobs:
+      - build-and-test

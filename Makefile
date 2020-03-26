@@ -3,6 +3,9 @@
 clean:
 	rm -rf dist *.egg-info
 
+test:
+    ./tests/run_tests
+
 install:
 	pip3 install . --user
 
