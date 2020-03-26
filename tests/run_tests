@@ -1,33 +1,73 @@
 #!/usr/bin/env bash
 # Run pytest on various platforms to test pre-commit-hooks
 
-# Print path and pypthon path as diagnostic information.
-echo "PATH:$PATH"
-python3 -c "import sys; print('\n'.join(sys.path))"
+print_system_info () {
+  # Print path and pypthon path as diagnostic information.
+  echo "SYSTEM:$OSTYPE"
+  echo "PATH:$PATH"
+}
 
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  printf "starting script on linux\n"
+pip_install () {
+  python3 -c "import sys; print('PYTHON PATH:' + '\n'.join(sys.path))"
+  pip3 install -r requirements.txt
+  pip3 install .
+}
+
+print_command_versions () {
+  clang-format --version
+  clang-tidy --version
+  if [[ "$OSTYPE" == "darwin"* || "$OSTYPE" == "linux" ]]; then
+    oclint --version
+  fi
+  uncrustify --version
+  cppcheck --version
+}
+
+install_linux_oclint () {
   wget https://github.com/oclint/oclint/releases/download/v0.13.1/oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz
   tar -xvzf oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz
   sudo cp -v oclint-0.13.1/bin/oclint /usr/local/bin/
   sudo cp -vr oclint-0.13.1/lib/* /usr/local/lib/
-  # verify install
-  command -v clang-format clang-tidy oclint uncrustify cppcheck
-  pytest -vvv -x -n 32 --oclint --internal
+}
 
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  printf "starting script on macos\n"
-  # travis has issues running brew via yaml
+install_linux_cmds () {
+  # apt installs taken care of by travis
+  # sudo apt -y install clang clang-format clang-tidy uncrustify cppcheck
+  install_linux_oclint
+}
+
+install_macos_cmds () {
   brew install llvm uncrustify cppcheck
-  # So that brew llvm tools like clang-format and clang-tidy are available.
+  # So that system llvm tools like clang-format and clang-tidy are available.
   export PATH="/usr/local/opt/llvm/bin:$PATH"
   brew cask install oclint
-  # verify install
-  command -v clang-format clang-tidy oclint uncrustify cppcheck
-  pytest -vvv -x -n 32 --oclint --internal
+}
 
-else  # windows
-  printf "starting script on windows\n"
-  chocolately install python3 llvm uncrustify cppcheck
-  pytest -vvv -x --internal
-fi
+install_windows_cmds () {
+  choco install python --version 3.7.5 -a
+  # llvm is already installed
+  choco install uncrustify cppcheck -a
+}
+
+
+run_tests () {
+  print_system_info
+  local COMMAND="pytest -vvv -x --internal"
+
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    install_linux_cmds
+    COMMAND="$COMMAND --oclint -n 32"
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    install_macos_cmds
+    COMMAND="$COMMAND --oclint -n 32"
+  else  # windows
+    echo "Windows OS type $OSTYPE"
+    install_windows_cmds
+  fi
+
+  pip_install
+  print_command_versions
+  $COMMAND
+}
+
+run_tests
