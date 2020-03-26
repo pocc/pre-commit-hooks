@@ -3,8 +3,7 @@
 
 # Print path and pypthon path as diagnostic information.
 echo "PATH:$PATH"
-alias python='python3'
-python -c "import sys; print('\n'.join(sys.path))"
+python3 -c "import sys; print('\n'.join(sys.path))"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   printf "starting script on linux\n"
@@ -20,13 +19,12 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   printf "starting script on macos\n"
   # travis has issues running brew via yaml
   brew install llvm uncrustify cppcheck
+  # So that brew llvm tools like clang-format and clang-tidy are available.
+  export PATH="/usr/local/opt/llvm/bin:$PATH"
   brew cask install oclint
-  # Symlink clang tools per https://stackoverflow.com/questions/53111082
-  ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
-  ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
   # verify install
   command -v clang-format clang-tidy oclint uncrustify cppcheck
-  pytest -vvv -x --oclint --internal
+  pytest -vvv -x -n 32 --oclint --internal
 
 else  # windows
   printf "starting script on windows\n"

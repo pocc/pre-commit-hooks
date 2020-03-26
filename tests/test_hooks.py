@@ -90,7 +90,7 @@ def generate_list_tests():
 """  # noqa: E501
     clang_format_output = [ok_str, ok_str, clang_format_err, clang_format_err]
 
-    ct_base_args = ["-quiet", "-checks=*", "-warnings-as-errors=*"]
+    ct_base_args = ["-quiet", "-checks=clang-diagnostic-return-type"]
     # Run normal, plus two in-place arguments
     additional_args = [[], ["-fix"], ["--fix-errors"]]
     clang_tidy_args_sets = [ct_base_args + arg for arg in additional_args]

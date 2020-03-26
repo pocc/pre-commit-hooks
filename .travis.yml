@@ -7,9 +7,9 @@ matrix:
   - os: linux
     dist: bionic
   - os: osx
-    language: generic
+    language: bash
   - os: windows
-    language: generic
+    language: bash
 
 addons:
   apt:
