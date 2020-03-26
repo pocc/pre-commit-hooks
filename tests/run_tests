@@ -37,10 +37,10 @@ install_linux_cmds () {
 }
 
 install_macos_cmds () {
-  brew install llvm uncrustify cppcheck
+  HOMEBREW_NO_AUTO_UPDATE=1 brew install llvm uncrustify cppcheck
+  HOMEBREW_NO_AUTO_UPDATE=1 brew cask install oclint
   # So that system llvm tools like clang-format and clang-tidy are available.
   export PATH="/usr/local/opt/llvm/bin:$PATH"
-  brew cask install oclint
 }
 
 install_windows_cmds () {
@@ -56,10 +56,10 @@ run_tests () {
 
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     install_linux_cmds
-    COMMAND="$COMMAND --oclint -n 32"
+    COMMAND="$COMMAND --oclint"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     install_macos_cmds
-    COMMAND="$COMMAND --oclint -n 32"
+    COMMAND="$COMMAND --oclint"
   else  # windows
     echo "Windows OS type $OSTYPE"
     install_windows_cmds

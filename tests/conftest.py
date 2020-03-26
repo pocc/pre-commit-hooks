@@ -18,8 +18,8 @@ def pytest_addoption(parser):
 
 
 def pytest_collection_modifyitems(config, items):
-    """Add pytest.mark.slow option to mark tests that take > 1s.
-    Add pytest.mark.develop option to mark tests that check internals."""
+    """Add pytest.mark.oclint option to mark tests that require oclint.
+    Add pytest.mark.internal option to mark tests that check internals."""
     skip_oclint = pytest.mark.skip(reason="need --oclint option to run")
     skip_internal = pytest.mark.skip(reason="need --internal option to run")
     for item in items:
@@ -40,3 +40,18 @@ def pytest_exception_interact(node, call, report):
         for filename in ["ok.plist", "err.plist", "defaults.cfg"]:
             if os.path.exists(filename):
                 os.remove(filename)
+
+
+def pytest_generate_tests(metafunc):
+    """Taken from pytest documentation to allow for table tests:
+    https://docs.pytest.org/en/latest/example/parametrize.html#paramexamples"""
+    metafunc.cls.setup_class()
+    idlist = []
+    argvalues = []
+    argnames = []
+    for scenario in metafunc.cls.scenarios:
+        idlist.append(scenario[0])
+        items = scenario[1].items()
+        argnames = [x[0] for x in items]
+        argvalues.append([x[1] for x in items])
+    metafunc.parametrize(argnames, argvalues, ids=idlist, scope="class")

@@ -91,7 +91,7 @@ Edit your pre-commit config or use a different version of {}.""".format(
             details = """The version format for this command has changed.
 Create an issue at github.com/pocc/pre-commit-hooks."""
             self.raise_error("getting version", details)
-        regex = self.look_behind + r"([\d\._+a-z]+)"
+        regex = self.look_behind + r"((?:\d+\.)+[\d+_\+\-a-z]+)"
         version = re.search(regex, version_str).group(1)
         return version
 

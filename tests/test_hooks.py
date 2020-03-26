@@ -13,15 +13,15 @@ table tests to be generated and each treated as a test by pytest.
 This allows for 45 tests with a descrition instead of 3 which
 functionally tests the same thing.
 """
-import difflib
 import os
 import re
 import shutil
 import subprocess as sp
-import uuid
+import sys
 
 import pytest
 
+import tests.test_utils as utils
 from hooks.clang_format import ClangFormatCmd
 from hooks.clang_tidy import ClangTidyCmd
 from hooks.cppcheck import CppcheckCmd
@@ -29,39 +29,35 @@ from hooks.oclint import OCLintCmd
 from hooks.uncrustify import UncrustifyCmd
 
 
-def pytest_generate_tests(metafunc):
-    """Taken from pytest documentation to allow for table tests:
-    https://docs.pytest.org/en/latest/example/parametrize.html#paramexamples"""
-    metafunc.cls.setup_class()
-    idlist = []
-    argvalues = []
-    argnames = []
-    for scenario in metafunc.cls.scenarios:
-        idlist.append(scenario[0])
-        items = scenario[1].items()
-        argnames = [x[0] for x in items]
-        argvalues.append([x[1] for x in items])
-    metafunc.parametrize(argnames, argvalues, ids=idlist, scope="class")
+def compare_versions(expected_list, actual_versions, cmd_name):
+    """Compare versions and error if they don't match. Don't compare fix."""
+    actl_maj, actl_min, actl_fix = actual_versions[cmd_name].split(".")[:3]
+    for ver in expected_list:
+        expd_maj, expd_min, expd_fix = ver.split(".")[:3]
+        if expd_fix == actl_maj and expd_min == actl_min:
+            return
+    print("Unknown version ", actual_versions[cmd_name], " of", cmd_name)
+    print("Known version:", expected_list)
+    sys.exit(1)
 
 
-def create_temp_dir_for(filename):
-    """Create a temporary dir for a file, returning the file path."""
-    uuid_dir = str(uuid.uuid4())
-    temp_dir = os.path.join("tests/files/temp", uuid_dir)
-    os.makedirs(temp_dir)
-    new_temp_name = shutil.copy2(filename, temp_dir)
-    return os.path.join(os.getcwd(), new_temp_name)
+def assert_command_versions(versions):
+    """Raise an error if a new minor version of $cmd came out.
+    Theses tests should work with command versions listed here."""
+    clang_format_versions = ["6.0", "8.0", "9.0"]
+    compare_versions(clang_format_versions, versions, "clang-format")
 
+    clang_tidy_versions = ["6.0.0", "8.0.0", "9.0.1"]
+    compare_versions(clang_tidy_versions, versions, "clang-tidy")
 
-def assert_equal(expected, actual):
-    """Stand in for Python's assert which is annoying to work with."""
-    if expected != actual:
-        print("Expected:`" + str(expected) + "`")
-        print("Actual:`" + str(actual) + "`")
-        print(
-            "\n".join(difflib.ndiff(expected.split("\n"), actual.split("\n")))
-        )
-        pytest.fail("Test failed!")
+    oclint_versions = ["0.13.1", "0.15"]
+    compare_versions(oclint_versions, versions, "oclint")
+
+    uncrustify_versions = ["0.59", "0.70.1_f"]
+    compare_versions(uncrustify_versions, versions, "uncrustify")
+
+    cppcheck_versions = ["1.72", "1.87", "1.90"]
+    compare_versions(cppcheck_versions, versions, "cppcheck")
 
 
 def generate_list_tests():
@@ -71,6 +67,8 @@ def generate_list_tests():
     +2x tests:
         * Call the shell hooks installed with pip to mimic end user use
         * Call via importing the command classes to verify expectations"""
+    versions = utils.get_versions()
+
     pwd = os.getcwd()
     err_c = os.path.join(pwd, "tests/files/err.c")
     err_cpp = os.path.join(pwd, "tests/files/err.cpp")
@@ -144,7 +142,17 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
     # cppcheck adds unnecessary error information.
     # See https://stackoverflow.com/questions/6986033
     cppc_ok = ""
-    cppcheck_err = "[{}:1]: (style) Unused variable: i\n"
+    if versions["cppcheck"] <= "1.87":
+        cppcheck_err = "[{}:1]: (style) Unused variable: i\n"
+    # They've made changes to messaging
+    elif versions["cppcheck"] >= "1.90":
+        cppcheck_err = """{}:1:16: style: Unused variable: i [unusedVariable]
+int main(){{int i;return;}}
+               ^
+"""
+    else:
+        print("Problem parsing version for cppcheck", versions["cppcheck"])
+        sys.exit(1)
     cppcheck_err_c = cppcheck_err.format(err_c)
     cppcheck_err_cpp = cppcheck_err.format(err_cpp)
     cppcheck_output = [cppc_ok, cppc_ok, cppcheck_err_c, cppcheck_err_cpp]
@@ -248,7 +256,7 @@ class TestHooks:
         # None of these commands should have overlap
         fix_in_place = self.determine_edit_in_place(cmd.command, args)
         if fix_in_place and "err.c" in fname:
-            temp_file = create_temp_dir_for(fname)
+            temp_file = utils.create_temp_dir_for(fname)
             expd_output = expd_output.replace(fname, temp_file)
             fname = temp_file
         test_type(cmd, args, fname, expd_output, expd_retcode)
@@ -271,7 +279,7 @@ class TestHooks:
                 print("returncode:", cmd.returncode)
         actual = cmd.stdout + cmd.stderr
         retcode = cmd.returncode
-        assert_equal(target_output, actual)
+        utils.assert_equal(target_output, actual)
         assert target_retcode == retcode
 
     @staticmethod
@@ -282,7 +290,7 @@ class TestHooks:
         sp_child = sp.run(all_args, stdout=sp.PIPE, stderr=sp.PIPE)
         actual = str(sp_child.stdout + sp_child.stderr, encoding="utf-8")
         retcode = sp_child.returncode
-        assert_equal(target_output, actual)
+        utils.assert_equal(target_output, actual)
         assert target_retcode == retcode
 
     @staticmethod
