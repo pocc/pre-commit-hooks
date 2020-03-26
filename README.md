@@ -1,5 +1,7 @@
 # pre-commit hooks
 
+[![Build Status](https://travis-ci.com/pocc/pre-commit-hooks.svg?branch=master)](https://travis-ci.com/pocc/pre-commit-hooks)
+
 This is a [pre-commit](https://pre-commit.com) hooks repo that
 integrates five C/C++ linters:
 > [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html),
@@ -55,6 +57,8 @@ depending on your use case._
 Python3.6+ is required to use these hooks as all 5 invoking scripts are written in it.
 As this is also the minimum version of pre-commit, this should not be an issue.
 
+
+
 ### Installation
 
 _You will need to install these utilities in order to use them. Your package
@@ -91,7 +95,7 @@ You can build all of these from source.
 | [uncrustify](http://uncrustify.sourceforge.net/)                         | Formatter            | C, C++, C#, ObjC, D, Java, Pawn, VALA |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             | Static code analyzer | C, C++                                |
 
-### Hoop Option Comparison
+### Hook Option Comparison
 
 | Hook Options                                                             | Fix In Place | Enable all Checks                             | Set key/value |
 | ------------------------------------------------------------------------ | ------------ | --------------------------------------------- | --------------- |

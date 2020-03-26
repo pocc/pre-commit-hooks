@@ -48,9 +48,12 @@ install_macos_cmds () {
 }
 
 install_windows_cmds () {
-  choco install python --version 3.7.5 -a
+  # Windows powershell
+  choco install python --version 3.7.5 -y
   # llvm is already installed
-  choco install uncrustify cppcheck -a
+  choco install uncrustify cppcheck -y
+  # Restart powershell so that these paths are recognized
+  refreshenv
 }
 
 
@@ -58,14 +61,14 @@ run_tests () {
   print_system_info
   local COMMAND="pytest -vvv -x --internal"
 
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  if [[ "$OSTYPE" == "linux-gnu" ]]; then
+    # Will trigger for both ubuntu and WSL bash
     install_linux_cmds
     COMMAND="$COMMAND --oclint"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     install_macos_cmds
     COMMAND="$COMMAND --oclint"
-  else  # windows
-    echo "Windows OS type $OSTYPE"
+  else  # In windows powershell, this var is not set
     install_windows_cmds
   fi
 
