@@ -21,12 +21,14 @@ pip_install () {
 
 print_command_versions () {
   num_cmds="$(command -v cppcheck clang-format oclint uncrustify cppcheck | wc -l)"
-  if [[ ${num_cmds} -eq "5" ]]; then
+  if [[ ${num_cmds} -ge "4" ]]; then
     clang-format --version
     clang-tidy --version
-    oclint --version
     uncrustify --version
     cppcheck --version
+  fi
+  if [[ ${num_cmds} -eq "5" ]]; then
+    oclint --version
   fi
 }
 
@@ -38,6 +40,7 @@ install_linux_oclint () {
 }
 
 install_linux_cmds () {
+  # If these are not already installed
   apt -y install clang clang-format clang-tidy uncrustify cppcheck
   install_linux_oclint
 }
@@ -56,24 +59,6 @@ install_macos_cmds () {
   export PATH="/usr/local/opt/llvm/bin:$PATH"
 }
 
-install_windows_cmds () {
-  # Windows powershell
-  choco install python --version 3.7.5 -y
-  # llvm is already installed
-  choco install llvm uncrustify cppcheck -y -f
-  # Check installations
-  command -v python clang-format clang-tidy uncrustify cppcheck
-  cd /c/ProgramData/chocolatey/bin/
-  /c/tools/miniconda3/python --version
-  /c/Program\ Files/LLVM/bin/clang-format --version
-  /c/Program\ Files/LLVM/bin/clang-tidy --version
-  /c/ProgramData/chocolatey/bin/uncrustify --version
-  /c/Program\ Files/Cppcheck/cppcheck.exe --version
-  # Manually add programs to path
-  export PATH="$PATH:/c/Python37:/c/Program Files/LLVM/bin:/c/Program Files/Cppcheck"
-}
-
-
 run_tests () {
   print_system_info
   COMMAND="pytest -vvv -x --internal"
@@ -85,12 +70,6 @@ run_tests () {
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     install_macos_cmds
     COMMAND="$COMMAND --oclint"
-  elif [[ "$OSTYPE" == "msys" ]]; then
-    # CircleCI "bash"
-    install_windows_cmds
-  else
-    # In windows powershell, this var is not set
-    install_windows_cmds
   fi
 
   print_command_versions
