@@ -18,7 +18,12 @@ class OCLintCmd(ClangAnalyzerCmd):
         self.parse_args(args)
         self.parse_ddash_args()
         # If a compilation database is not used, suppress errors
-        if "-p" not in self.args:
+        cdb_found = False
+        for arg in self.args:
+            if arg.startswith("-p"):
+                cdb_found = True
+                break
+        if not cdb_found:
             self.add_if_missing(["--", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"])
 
     def run(self):
