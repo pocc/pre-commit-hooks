@@ -52,6 +52,7 @@ def assert_command_versions(versions):
 
     if os.name != "nt":  # oclint does not target windows
         # 0.13.1, manually installed on Ubuntu-16.04/18.04
+        # 0.15, manually installed on Ubuntu-16.04/18.0
         # 0.13.1 on Macos 10.13.6/brew
         oclint_versions = ["0.13.1", "0.15"]
         compare_versions(oclint_versions, versions, "oclint")
@@ -70,11 +71,8 @@ def assert_command_versions(versions):
     compare_versions(cppcheck_versions, versions, "cppcheck")
 
 
-def set_compilation_db():
+def set_compilation_db(filenames):
     """Create a compilation database for clang static analyzers."""
-    filenames = [
-        "tests/files/" + f for f in ["ok.c", "ok.cpp", "err.c", "err.cpp"]
-    ]
     cdb = "["
     clang_location = shutil.which("clang")
     file_dir = os.path.dirname(os.path.abspath(filenames[0]))
@@ -262,7 +260,10 @@ class TestHooks:
         """Create test files that will be used by other tests."""
         os.makedirs("tests/files/temp", exist_ok=True)
         scenarios = generate_list_tests()
-        set_compilation_db()
+        filenames = [
+            "tests/files/" + f for f in ["ok.c", "ok.cpp", "err.c", "err.cpp"]
+        ]
+        set_compilation_db(filenames)
         cls.scenarios = []
         for test_type in [cls.run_cmd_class, cls.run_shell_cmd]:
             for s in scenarios:
@@ -304,6 +305,7 @@ class TestHooks:
             temp_file = utils.create_temp_dir_for(fname)
             expd_output = expd_output.replace(fname, temp_file)
             fname = temp_file
+            set_compilation_db([fname])
         test_type(cmd, args, fname, expd_output, expd_retcode)
         if fix_in_place and "err.c" in fname:
             temp_dir = os.path.dirname(fname)

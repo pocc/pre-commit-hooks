@@ -34,8 +34,8 @@ def get_versions():
     commands = ["clang-format", "clang-tidy", "uncrustify", "cppcheck"]
     if os.name != "nt":  # oclint doesn't work on windows
         commands += ["oclint"]
-    # Regex for all versions. Unit tests: https://regex101.com/r/ciqAuO/5/tests
-    regex = r"[- ]((?:\d+\.)+\d+[_+\-a-z]*)(?![\s\S]*[- ]\d\.)"
+    # Regex for all versions. Unit tests: https://regex101.com/r/ciqAuO/6/tests
+    regex = r"[- ]((?:\d+\.)+\d+[_+\-a-z\d]*)(?![\s\S]*[- ]\d\.)"
     versions = {}
     for cmd in commands:
         if not shutil.which(cmd):
