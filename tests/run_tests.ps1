@@ -5,8 +5,9 @@ function install_windows_cmds {
   choco install python --version 3.7.5 -y
   # llvm is already installed
   choco install llvm uncrustify cppcheck -y
+  refreshenv
   # Check installations
-  where python clang-format clang-tidy uncrustify cppcheck
+  Get-Command @("python", "clang-format", "clang-tidy", "uncrustify", "cppcheck")
 }
 
 function pip_install {
@@ -17,7 +18,8 @@ function pip_install {
 function run {
   install_windows_cmds
   pip_install
-  pytest -vvv -x --internal -n 32
+  # pytest -vvv -x --internal -n 32
+  pytest -vvv -x --internal
 }
 
 run
