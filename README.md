@@ -41,7 +41,7 @@ repos:
       - id: clang-format
         args: [--style=Google]
       - id: clang-tidy
-        args: [-checks=*, -warnings-as-errors=*]
+        args: [-checks=clang-diagnostic-return-type]
       - id: oclint
         args: [-enable-clang-static-analyzer, -enable-global-analysis]
       - id: uncrustify
@@ -100,15 +100,20 @@ You can build all of these from source.
 | Hook Options                                                             | Fix In Place | Enable all Checks                             | Set key/value |
 | ------------------------------------------------------------------------ | ------------ | --------------------------------------------- | --------------- |
 | [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | `-i`         |                   | |
-| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | `--fix-errors` [1] | `-checks=*` `-warnings-as-errors=*` | |
+| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | `--fix-errors` [1] | `-checks=*` `-warnings-as-errors=*` [2] | |
 | [oclint](http://oclint.org/)                                             |  | `-enable-global-analysis` `-enable-clang-static-analyzer` | `-rc=<key>=<value>` |
-| [uncrustify](http://uncrustify.sourceforge.net/)                         | `--replace` `--no-backup` [2] |  | `--set key=value` |
+| [uncrustify](http://uncrustify.sourceforge.net/)                         | `--replace` `--no-backup` [3] |  | `--set key=value` |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             |  | `-enable=all` | |
 
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
 and fix compiler errors if it can, like missing semicolons.
 
-[2]: By definition, if you are using `pre-commit`, you are using version control.
+[2]: Be careful with `-checks=*`.  can have self-contradictory rules in newer versions of llvm (9+):
+modernize wants to use [trailing return type](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-trailing-return-type.html)
+but Fuchsia [disallows it](https://clang.llvm.org/extra/clang-tidy/checks/fuchsia-trailing-return.html).
+*Thanks to @rambo.*
+
+[3]: By definition, if you are using `pre-commit`, you are using version control.
 Therefore, it is recommended to avoid needless backup creation by using `--no-backup`.
 
 ### Enforcing linter version with --version
@@ -176,7 +181,7 @@ tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-format on /Users/pr
 tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-tidy on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  7%]
 ...
 
-============================= 76 passed in 61.86s ==============================
+============================= 89 passed in 61.86s ==============================
 ```
 
 ### Why have a script when your hook could be `$command "$@"`?

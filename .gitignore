@@ -9,3 +9,4 @@ build/
 temp/
 *.egg-info/
 defaults.cfg
+compile_commands.json

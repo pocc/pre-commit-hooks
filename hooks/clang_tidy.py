@@ -18,16 +18,6 @@ class ClangTidyCmd(ClangAnalyzerCmd):
         self.parse_args(args)
         self.edit_in_place = "-fix" in self.args or "--fix-errors" in self.args
         self.parse_ddash_args()
-        # If a compilation database is not used, suppress errors
-        cdb_found = False
-        for arg in self.args:
-            if arg.startswith("-p"):
-                cdb_found = True
-                break
-        if not cdb_found:
-            self.add_if_missing(["--", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"])
-        # Enable all of the checks
-        self.add_if_missing(["-checks=*"])
 
     def run(self):
         """Run clang-tidy"""

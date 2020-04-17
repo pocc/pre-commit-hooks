@@ -59,6 +59,13 @@ install_macos_cmds () {
   export PATH="/usr/local/opt/llvm/bin:$PATH"
 }
 
+cleanup () {
+  # Run a cleanup function in test script as
+  # its not possible in parallelized pytest
+  rm tests/files/*.json
+  rmdir tests/files/temp
+}
+
 run_tests () {
   print_system_info
   COMMAND="pytest -vvv -x --internal"
@@ -75,7 +82,8 @@ run_tests () {
   print_command_versions
   pip_install
   # Try to parallelize with xdist, but fall back if there's an error.
-  ${COMMAND} -n 32 || ${COMMAND}
+  ${COMMAND} -n "32" || ${COMMAND}
+  cleanup
 }
 
 run_tests
