@@ -114,15 +114,18 @@ def generate_list_tests():
     ok_str = ""
 
     clang_format_args_sets = [["--style=google"], ["--style=google", "-i"]]
-    clang_format_err = """
-<  int main(){int i;return;}
+    clang_format_err = """{}
+{}
+<  int main(){{int i;return;}}
 ---
->  int main() {
+>  int main() {{
 >    int i;
 >    return;
->  }
+>  }}
 """  # noqa: E501
-    clang_format_output = [ok_str, ok_str, clang_format_err, clang_format_err]
+    cf_c_err = clang_format_err.format(err_c, 20 * "=")
+    cf_cpp_err = clang_format_err.format(err_cpp, 20 * "=")
+    clang_format_output = [ok_str, ok_str, cf_c_err, cf_cpp_err]
 
     ct_base_args = ["-quiet", "-checks=clang-diagnostic-return-type"]
     # Run normal, plus two in-place arguments
@@ -143,8 +146,13 @@ Error while processing {0}.
     unc_base_args = ["-c", "tests/uncrustify_defaults.cfg"]
     unc_addtnl_args = [[], ["--replace", "--no-backup"]]
     uncrustify_arg_sets = [unc_base_args + arg for arg in unc_addtnl_args]
-    uncrustify_err = """\n<  int main(){int i;return;}\n---\n>  int main(){\n>    int i; return;\n>  }\n"""  # noqa: E501
-    uncrustify_output = [ok_str, ok_str, uncrustify_err, uncrustify_err]
+    unc_err = """{}\n====================\n<  int main(){{int i;return;}}\n---\n>  int main(){{\n>    int i; return;\n>  }}\n"""  # noqa: E501
+    uncrustify_output = [
+        ok_str,
+        ok_str,
+        unc_err.format(err_c),
+        unc_err.format(err_cpp),
+    ]
 
     cppcheck_arg_sets = [[]]
     # cppcheck adds unnecessary error information.

@@ -4,6 +4,7 @@
 import os
 import re
 import subprocess as sp
+import sys
 
 from hooks.utils import FormatterCmd
 
@@ -42,6 +43,8 @@ class UncrustifyCmd(FormatterCmd):
         """Run uncrustify with the arguments provided."""
         for filename in self.files:
             self.compare_to_formatted(filename)
+        if self.returncode != 0:
+            sys.exit(self.returncode)
 
 
 def main(argv=None):

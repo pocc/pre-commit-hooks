@@ -160,6 +160,7 @@ class FormatterCmd(Command):
         return output
 
     def compare_to_formatted(self, filename):
+        """Compare the expected formatted output to file contents."""
         actual = self.get_filelines(filename)
         expected = self.get_formatted_lines(filename)
         if self.edit_in_place:
@@ -169,10 +170,10 @@ class FormatterCmd(Command):
         python_diff = list(difflib.ndiff(expected, actual))
         diff = self.format_as_diff(python_diff)
         if len(diff) > 0:
-            self.stderr = "\n" + "\n".join(diff) + "\n"
+            header = filename + "\n" + 20 * "=" + "\n"
+            self.stderr = header + "\n".join(diff) + "\n"
             sys.stdout.write(self.stderr)
             self.returncode = 1
-            sys.exit(self.returncode)
 
     def get_filename_opts(self, filename):
         """uncrustify, to get stdout like clang-format, requires -f flag"""
@@ -181,6 +182,7 @@ class FormatterCmd(Command):
         return [filename]
 
     def get_formatted_lines(self, filename: str) -> [str]:
+        """Get the expected output for a command applied to a file."""
         filename_opts = self.get_filename_opts(filename)
         args = [self.command, *self.args, *filename_opts]
         child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
@@ -196,6 +198,7 @@ class FormatterCmd(Command):
 
     @staticmethod
     def get_filelines(filename) -> [str]:
+        """Get the lines in a file."""
         with open(filename, "rb") as f:
             filetext = f.read()
         return str(filetext, encoding="utf-8").split("\n")

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Wrapper script for clang-format"""
 ###############################################################################
+import sys
+
 from hooks.utils import FormatterCmd
 
 
@@ -20,6 +22,8 @@ class ClangFormatCmd(FormatterCmd):
         """Run clang-format. Error if diff is incorrect."""
         for filename in self.files:
             self.compare_to_formatted(filename)
+        if self.returncode != 0:
+            sys.exit(self.returncode)
 
 
 def main(argv=None):
