@@ -100,8 +100,8 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
         args = [self.command, filename] + self.args
         sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         # Set class stdout/stderr/retcode so there's a local copy for testing
-        self.stdout = str(sp_child.stdout, encoding="utf-8")
-        self.stderr = str(sp_child.stderr, encoding="utf-8")
+        self.stdout += str(sp_child.stdout, encoding="utf-8")
+        self.stderr += str(sp_child.stderr, encoding="utf-8")
         self.returncode = sp_child.returncode
 
 
@@ -171,8 +171,7 @@ class FormatterCmd(Command):
         diff = self.format_as_diff(python_diff)
         if len(diff) > 0:
             header = filename + "\n" + 20 * "=" + "\n"
-            self.stderr = header + "\n".join(diff) + "\n"
-            sys.stdout.write(self.stderr)
+            self.stderr += header + "\n".join(diff) + "\n"
             self.returncode = 1
 
     def get_filename_opts(self, filename):
