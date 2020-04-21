@@ -23,6 +23,7 @@ class ClangFormatCmd(FormatterCmd):
         for filename in self.files:
             self.compare_to_formatted(filename)
         if self.returncode != 0:
+            sys.stdout.write(self.stderr)
             sys.exit(self.returncode)
 
 

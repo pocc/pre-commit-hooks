@@ -86,14 +86,37 @@ def set_compilation_db(filenames):
     "command": "{1}{2} {3} -o {3}.o",
     "file": "{3}"
 }},""".format(
-            file_dir,
-            clang_location,
-            clang_suffix,
-            os.path.join(file_dir, file_base),
+            file_dir, clang_location, clang_suffix, os.path.join(file_dir, file_base)
         )
     cdb = cdb[:-1] + "]"  # Subtract extra comma and end json
     with open(file_dir + "/" + "compile_commands.json", "w") as f:
         f.write(cdb)
+
+
+def get_multifile_scenarios(err_files):
+    """Create tests to verify that commands are handling both err.c/err.cpp as input correctly."""
+    expected_err = """{}
+====================
+<  int main(){{int i;return;}}
+---
+>  int main(){}{{
+>    int i;{} return;
+>  }}
+{}
+====================
+<  int main(){{int i;return;}}
+---
+>  int main(){}{{
+>    int i;{} return;
+>  }}
+"""
+    clangfmt_err = expected_err.format(err_files[0], " ", "\n>   ", err_files[1], " ", "\n>   ")
+    uncrustify_err = expected_err.format(err_files[0], "", "", err_files[1], "", "")
+    scenarios = [
+        [ClangFormatCmd, ["--style=google"], err_files, clangfmt_err, 1],
+        [UncrustifyCmd, [], err_files, uncrustify_err, 1],
+    ]
+    return scenarios
 
 
 def generate_list_tests():
@@ -147,12 +170,7 @@ Error while processing {0}.
     unc_addtnl_args = [[], ["--replace", "--no-backup"]]
     uncrustify_arg_sets = [unc_base_args + arg for arg in unc_addtnl_args]
     unc_err = """{}\n====================\n<  int main(){{int i;return;}}\n---\n>  int main(){{\n>    int i; return;\n>  }}\n"""  # noqa: E501
-    uncrustify_output = [
-        ok_str,
-        ok_str,
-        unc_err.format(err_c),
-        unc_err.format(err_cpp),
-    ]
+    uncrustify_output = [ok_str, ok_str, unc_err.format(err_c), unc_err.format(err_cpp)]
 
     cppcheck_arg_sets = [[]]
     # cppcheck adds unnecessary error information.
@@ -179,40 +197,16 @@ int main(){{int i;return;}}
     scenarios = []
     for i in range(len(files)):
         for arg_set in clang_format_args_sets:
-            clang_format_scenario = [
-                ClangFormatCmd,
-                arg_set,
-                files[i],
-                clang_format_output[i],
-                retcodes[i],
-            ]
+            clang_format_scenario = [ClangFormatCmd, arg_set, [files[i]], clang_format_output[i], retcodes[i]]
             scenarios += [clang_format_scenario]
         for arg_set in clang_tidy_args_sets:
-            clang_tidy_scenario = [
-                ClangTidyCmd,
-                arg_set,
-                files[i],
-                clang_tidy_output[i],
-                retcodes[i],
-            ]
+            clang_tidy_scenario = [ClangTidyCmd, arg_set, [files[i]], clang_tidy_output[i], retcodes[i]]
             scenarios += [clang_tidy_scenario]
         for arg_set in uncrustify_arg_sets:
-            uncrustify_scenario = [
-                UncrustifyCmd,
-                arg_set,
-                files[i],
-                uncrustify_output[i],
-                retcodes[i],
-            ]
+            uncrustify_scenario = [UncrustifyCmd, arg_set, [files[i]], uncrustify_output[i], retcodes[i]]
             scenarios += [uncrustify_scenario]
         for arg_set in cppcheck_arg_sets:
-            cppcheck_scenario = [
-                CppcheckCmd,
-                arg_set,
-                files[i],
-                cppcheck_output[i],
-                retcodes[i],
-            ]
+            cppcheck_scenario = [CppcheckCmd, arg_set, [files[i]], cppcheck_output[i], retcodes[i]]
             scenarios += [cppcheck_scenario]
     if os.name != "nt":
         oclint_err = """
@@ -233,29 +227,19 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
 
 [OCLint (http://oclint.org) v{2}]
 """
-        oclint_arg_sets = [
-            ["-enable-global-analysis", "-enable-clang-static-analyzer"]
-        ]
+        oclint_arg_sets = [["-enable-global-analysis", "-enable-clang-static-analyzer"]]
         ver_output = sp.check_output(["oclint", "--version"]).decode("utf-8")
-        oclint_ver = re.search(r"OCLint version ([\d.]+)\.", ver_output).group(
-            1
-        )
+        oclint_ver = re.search(r"OCLint version ([\d.]+)\.", ver_output).group(1)
         eol_whitespace = " "
         oclint_err_str_c = oclint_err.format(err_c, eol_whitespace, oclint_ver)
-        oclint_err_str_cpp = oclint_err.format(
-            err_cpp, eol_whitespace, oclint_ver
-        )
+        oclint_err_str_cpp = oclint_err.format(err_cpp, eol_whitespace, oclint_ver)
         oclint_output = [ok_str, ok_str, oclint_err_str_c, oclint_err_str_cpp]
         for i in range(len(files)):
             for arg_set in oclint_arg_sets:
-                oclint_scenario = [
-                    OCLintCmd,
-                    arg_set,
-                    files[i],
-                    oclint_output[i],
-                    retcodes[i],
-                ]
+                oclint_scenario = [OCLintCmd, arg_set, [files[i]], oclint_output[i], retcodes[i]]
                 scenarios += [oclint_scenario]
+
+    scenarios += get_multifile_scenarios([err_c, err_cpp])
 
     return scenarios
 
@@ -268,24 +252,20 @@ class TestHooks:
         """Create test files that will be used by other tests."""
         os.makedirs("tests/files/temp", exist_ok=True)
         scenarios = generate_list_tests()
-        filenames = [
-            "tests/files/" + f for f in ["ok.c", "ok.cpp", "err.c", "err.cpp"]
-        ]
+        filenames = ["tests/files/" + f for f in ["ok.c", "ok.cpp", "err.c", "err.cpp"]]
         set_compilation_db(filenames)
         cls.scenarios = []
         for test_type in [cls.run_cmd_class, cls.run_shell_cmd]:
             for s in scenarios:
                 type_name = test_type.__name__
-                desc = " ".join(
-                    [type_name, s[0].command, s[2], " ".join(s[1])]
-                )
+                desc = " ".join([type_name, s[0].command, " ".join(s[2]), " ".join(s[1])])
                 test_scenario = [
                     desc,
                     {
                         "test_type": test_type,
                         "cmd": s[0],
                         "args": s[1],
-                        "fname": s[2],
+                        "files": s[2],
                         "expd_output": s[3],
                         "expd_retcode": s[4],
                     },
@@ -305,24 +285,30 @@ class TestHooks:
         )
         return retval
 
-    def test_run(self, test_type, cmd, args, fname, expd_output, expd_retcode):
+    def test_run(self, test_type, cmd, args, files, expd_output, expd_retcode):
         """Test each command's class from its python file
         and the command for each generated by setup.py."""
         fix_in_place = self.determine_edit_in_place(cmd.command, args)
-        if fix_in_place and "err.c" in fname:
-            temp_file = utils.create_temp_dir_for(fname)
-            expd_output = expd_output.replace(fname, temp_file)
-            fname = temp_file
-            set_compilation_db([fname])
-        test_type(cmd, args, fname, expd_output, expd_retcode)
-        if fix_in_place and "err.c" in fname:
-            temp_dir = os.path.dirname(fname)
-            shutil.rmtree(temp_dir)
+        has_err_file = any(["err.c" in f for f in files])
+        use_temp_files = fix_in_place and has_err_file
+        if use_temp_files:
+            temp_files = list()
+            for f in files:
+                temp_file = utils.create_temp_dir_for(f)
+                expd_output = expd_output.replace(f, temp_file)
+                temp_files.append(temp_file)
+            files = temp_files
+            set_compilation_db(files)
+        test_type(cmd, args, files, expd_output, expd_retcode)
+        if use_temp_files:
+            for f in files:
+                temp_dir = os.path.dirname(f)
+                shutil.rmtree(temp_dir)
 
     @staticmethod
-    def run_cmd_class(cmd_class, args, fname, target_output, target_retcode):
+    def run_cmd_class(cmd_class, args, files, target_output, target_retcode):
         """Test the command class in each python hook file"""
-        cmd = cmd_class([fname] + args)
+        cmd = cmd_class(files + args)
         if target_retcode == 0:
             cmd.run()
         else:
@@ -338,10 +324,10 @@ class TestHooks:
         assert target_retcode == retcode
 
     @staticmethod
-    def run_shell_cmd(cmd_class, args, fname, target_output, target_retcode):
+    def run_shell_cmd(cmd_class, args, files, target_output, target_retcode):
         """Use command generated by setup.py and installed by pip
         Ex. oclint => oclint-hook for the hook command"""
-        all_args = [cmd_class.command + "-hook", fname, *args]
+        all_args = [cmd_class.command + "-hook", *files, *args]
         sp_child = sp.run(all_args, stdout=sp.PIPE, stderr=sp.PIPE)
         actual = str(sp_child.stdout + sp_child.stderr, encoding="utf-8")
         retcode = sp_child.returncode
@@ -351,9 +337,7 @@ class TestHooks:
     @staticmethod
     def teardown_class():
         """Delete files generated by these tests."""
-        generated_files = [
-            "tests/files/" + f for f in ["ok.plist", "err.plist"]
-        ]
+        generated_files = ["tests/files/" + f for f in ["ok.plist", "err.plist"]]
         for filename in generated_files:
             if os.path.exists(filename):
                 os.remove(filename)

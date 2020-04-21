@@ -35,7 +35,7 @@ repos:
     rev: cea13f498418784e22f8fbd78db3f9240a2bad11
     hooks:
       - id: black
-        args: ["-l", "79"]
+        args: ["-l", "120"]
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 1.11.0
     hooks:
