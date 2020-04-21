@@ -93,28 +93,30 @@ def set_compilation_db(filenames):
         f.write(cdb)
 
 
-def get_multifile_scenarios(err_files, uncrustify_ver):
+def get_multifile_scenarios(err_files):
     """Create tests to verify that commands are handling both err.c/err.cpp as input correctly."""
     expected_err = """{}
 ====================
 <  int main(){{int i;return;}}
 ---
->  int main(){}{{
->    int i;{}return;
+>  int main() {{
+>    int i;
+>    return;
 >  }}
 {}
 ====================
 <  int main(){{int i;return;}}
 ---
->  int main(){}{{
->    int i;{}return;
+>  int main() {{
+>    int i;
+>    return;
 >  }}
-"""
-    clangfmt_err = expected_err.format(err_files[0], " ", "\n>    ", err_files[1], " ", "\n>    ")
-    uncrustify_err = expected_err.format(err_files[0], "", " ", err_files[1], "", " ")
+""".format(
+        err_files[0], err_files[1]
+    )
     scenarios = [
-        [ClangFormatCmd, ["--style=google"], err_files, clangfmt_err, 1],
-        [UncrustifyCmd, [], err_files, uncrustify_err, 1],
+        [ClangFormatCmd, ["--style=google"], err_files, expected_err, 1],
+        [UncrustifyCmd, ["-c", "tests/uncrustify_defaults.cfg"], err_files, expected_err, 1],
     ]
     return scenarios
 
@@ -169,8 +171,7 @@ Error while processing {0}.
     unc_base_args = ["-c", "tests/uncrustify_defaults.cfg"]
     unc_addtnl_args = [[], ["--replace", "--no-backup"]]
     uncrustify_arg_sets = [unc_base_args + arg for arg in unc_addtnl_args]
-    unc_err = """{}\n====================\n<  int main(){{int i;return;}}\n---\n>  int main(){{\n>    int i; return;\n>  }}\n"""  # noqa: E501
-    uncrustify_output = [ok_str, ok_str, unc_err.format(err_c), unc_err.format(err_cpp)]
+    uncrustify_output = [ok_str, ok_str, cf_c_err, cf_cpp_err]
 
     cppcheck_arg_sets = [[]]
     # cppcheck adds unnecessary error information.
@@ -239,7 +240,7 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
                 oclint_scenario = [OCLintCmd, arg_set, [files[i]], oclint_output[i], retcodes[i]]
                 scenarios += [oclint_scenario]
 
-    scenarios += get_multifile_scenarios([err_c, err_cpp], versions["uncrustify"])
+    scenarios += get_multifile_scenarios([err_c, err_cpp])
 
     return scenarios
 
