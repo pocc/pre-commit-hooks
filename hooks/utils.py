@@ -132,7 +132,7 @@ class FormatterCmd(Command):
     def __init__(self, command, look_behind, args):
         super().__init__(command, look_behind, args)
         self.file_flag = None
-        self.show_diff = True
+        self.quiet_flag = True
 
     @staticmethod
     def format_as_diff(lines):
@@ -171,7 +171,7 @@ class FormatterCmd(Command):
         python_diff = list(difflib.ndiff(expected, actual))
         diff = self.format_as_diff(python_diff)
         if len(diff) > 0:
-            if self.show_diff:
+            if not self.quiet_flag:
                 header = filename + "\n" + 20 * "=" + "\n"
                 self.stderr += header + "\n".join(diff) + "\n"
             self.returncode = 1
