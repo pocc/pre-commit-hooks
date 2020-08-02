@@ -130,9 +130,14 @@ class FormatterCmd(Command):
     """Commands that format code: clang-format, uncrustify"""
 
     def __init__(self, command, look_behind, args):
+        if args != None:
+            self.no_diff_flag = "--no-diff" in args
+            if self.no_diff_flag:
+                args.remove("--no-diff")
+        else:
+            self.no_diff_flag = False
         super().__init__(command, look_behind, args)
         self.file_flag = None
-        self.quiet_flag = True
 
     @staticmethod
     def format_as_diff(lines):
@@ -171,7 +176,7 @@ class FormatterCmd(Command):
         python_diff = list(difflib.ndiff(expected, actual))
         diff = self.format_as_diff(python_diff)
         if len(diff) > 0:
-            if not self.quiet_flag:
+            if not self.no_diff_flag:
                 header = filename + "\n" + 20 * "=" + "\n"
                 self.stderr += header + "\n".join(diff) + "\n"
             self.returncode = 1

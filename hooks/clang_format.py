@@ -17,9 +17,6 @@ class ClangFormatCmd(FormatterCmd):
         self.check_installed()
         self.parse_args(args)
         self.edit_in_place = "-i" in self.args
-        self.quiet_flag = "-q" in self.args
-        if self.quiet_flag:
-            self.args.remove("-q")
 
     def run(self):
         """Run clang-format. Error if diff is incorrect."""
