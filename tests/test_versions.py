@@ -41,13 +41,13 @@ Edit your pre-commit config or use a different version of {0}.
             commands.append(OCLintCmd)
         for cmd in commands:
             actual_ver = cls.versions[cmd.command]
-            err_str = cls.err_str.format(cmd.command, cls.err_ver, actual_ver)
+            err_str = cls.err_str.format(cmd.command, cls.err_ver, actual_ver).encode()
             # Removing last char ~= having actual version be $ver-beta or $ver.5
             fuzzy_version = actual_ver[:-1]
 
             table_tests = [
-                ["base", cmd, actual_ver, "", 0],
-                ["fuzzy", cmd, fuzzy_version, "", 0],
+                ["base", cmd, actual_ver, b"", 0],
+                ["fuzzy", cmd, fuzzy_version, b"", 0],
                 ["error", cmd, cls.err_ver, err_str, 1],
             ]
             for t in table_tests:
@@ -68,7 +68,7 @@ Edit your pre-commit config or use a different version of {0}.
     def test_version(cmd_class, version, expected_stderr, expected_retcode):
         args = [cmd_class.command + "-hook", "--version", version]
         sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
-        actual_stderr = str(sp_child.stderr, encoding="utf-8")
+        actual_stderr = sp_child.stderr
         actual_retcode = sp_child.returncode
         utils.assert_equal(actual_stderr, expected_stderr)
         assert actual_retcode == expected_retcode

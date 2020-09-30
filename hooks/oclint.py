@@ -25,7 +25,7 @@ class OCLintCmd(ClangAnalyzerCmd):
             current_files = os.listdir(os.getcwd())
             self.run_command(filename)
             if self.returncode != 0:
-                sys.stdout.write(self.stdout)
+                sys.stdout.buffer.write(self.stdout)
                 self.returncode = 1
                 sys.exit(self.returncode)
             self.parse_output()
@@ -35,12 +35,12 @@ class OCLintCmd(ClangAnalyzerCmd):
         """ oclint return code is usually wrong (github.com/oclint/oclint/issues/538)
         Figure out what it is based on stdout and return that instead
         """
-        violations = "FilesWithViolations=0" not in self.stdout
-        compiler_errors = "Compiler Errors" in self.stdout
+        violations = b"FilesWithViolations=0" not in self.stdout
+        compiler_errors = b"Compiler Errors" in self.stdout
         if violations or compiler_errors:
             output = self.stdout + self.stderr
-            self.raise_error("OCLint Violations found", output)
-        self.stdout = ""
+            self.raise_error(b"OCLint Violations found", output)
+        self.stdout = b""
 
     @staticmethod
     def cleanup_files(existing_files):
