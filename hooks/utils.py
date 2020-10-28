@@ -27,7 +27,7 @@ class Command:
         """Check if command is installed and fail exit if not."""
         path = shutil.which(self.command)
         if path is None:
-            website = "https://github.com/pocc/pre-commit-hooks#prerequisites"
+            website = "https://github.com/pocc/pre-commit-hooks#using-the-hooks"
             problem = self.command + " not found"
             details = """Make sure {} is installed and on your PATH.\nFor more info: {}""".format(
                 self.command, website
