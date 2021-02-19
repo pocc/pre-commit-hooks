@@ -6,30 +6,30 @@
 - id: clang-format
   name: clang-format
   entry: clang-format-hook
-  description: Formats C/CPP code
-  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+  description: Formats C, C++, Objective-C and Java code
+  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m|mm|java)$
   language: python
 - id: clang-tidy
   name: clang-tidy
   entry: clang-tidy-hook
-  description: Find warnings/errors in C/CPP code
+  description: Find warnings/errors in C, C++ and Objective-C code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
   language: python
 - id: oclint
   name: oclint
   entry: oclint-hook
-  description: Find warnings/errors in C/CPP code
+  description: Find warnings/errors in C, C++ and Objective-C code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
   language: python
 - id: uncrustify
   name: uncrustify
   entry: uncrustify-hook
-  description: Formats C/CPP code
-  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+  description: Formats C, C++, Objective-C, Java, D and Vala code
+  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m|mm|d|java|vala)$
   language: python
 - id: cppcheck
   name: cppcheck
   entry: cppcheck-hook
-  description: Find warnings/errors in C/CPP code
+  description: Find warnings/errors in C, C++ and Objective-C code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
   language: python
