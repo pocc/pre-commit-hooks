@@ -89,10 +89,10 @@ You can build all of these from source.
 
 | Hook Info                                                                | Type                 | Languages                             |
 | ------------------------------------------------------------------------ | -------------------- | ------------------------------------- |
-| [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | Formatter            | C, C++, ObjC                          |
+| [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | Formatter            | C, C++, ObjC, ObjC++, Java            |
 | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | Static code analyzer | C, C++, ObjC                          |
 | [oclint](http://oclint.org/)                                             | Static code analyzer | C, C++, ObjC                          |
-| [uncrustify](http://uncrustify.sourceforge.net/)                         | Formatter            | C, C++, C#, ObjC, D, Java, Pawn, VALA |
+| [uncrustify](http://uncrustify.sourceforge.net/)                         | Formatter            | C, C++, C#, ObjC, D, Java, Pawn, Vala |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             | Static code analyzer | C, C++                                |
 
 ### Hook Option Comparison
