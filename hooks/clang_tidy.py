@@ -24,6 +24,10 @@ class ClangTidyCmd(ClangAnalyzerCmd):
         for filename in self.files:
             self.run_command(filename)
             sys.stdout.buffer.write(self.stdout)
+            # Check to see if the command line arguments were valid
+            if b"error: [CommonOptionsParser]" in self.stderr:
+                sys.stderr.buffer.write(self.stderr)
+                sys.exit(1)
             # The number of warnings depends on errors in system files
             self.stderr = re.sub(b"\d+ warnings and ", b"", self.stderr)
             # Don't output stderr if it's complaining about problems in system files
