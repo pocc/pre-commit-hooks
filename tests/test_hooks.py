@@ -70,6 +70,13 @@ def assert_command_versions(versions):
     cppcheck_versions = ["1.72", "1.82", "1.89", "1.90"]
     compare_versions(cppcheck_versions, versions, "cppcheck")
 
+    # 0.5 on Ubuntu-16.04
+    # 0.9 on Ubuntu-18.04
+    # 0.12 on Ubuntu-20.04
+    # 0.13-0.16 on Macos 10.14/brew
+    iwyu_versions = ["0.5", "0.9", "0.12", "0.13", "0.14", "0.15", "0.16"]
+    compare_versions(iwyu_versions, versions, "include-what-you-use")
+
 
 def set_compilation_db(filenames):
     """Create a compilation database for clang static analyzers."""
