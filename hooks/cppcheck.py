@@ -28,8 +28,11 @@ class CppcheckCmd(Command):
             self.run_command(filename)
             # Useless error see https://stackoverflow.com/questions/6986033
             useless_error_part = "Cppcheck cannot find all the include files"
-            if useless_error_part in self.stderr:
-                self.stderr = ""
+            err_lines = self.stderr.splitlines(keepends=True)
+            for idx, line in enumerate(err_lines):
+                if useless_error_part in line:
+                    err_lines[idx] = ''
+            self.stderr = ''.join(err_lines)
             if self.returncode != 0:
                 sys.stderr.write(self.stdout + self.stderr)
                 sys.exit(self.returncode)
