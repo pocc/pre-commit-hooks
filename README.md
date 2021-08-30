@@ -137,22 +137,24 @@ Options after `--` like `-std=c++11` will be interpreted correctly for
 `clang-tidy` and `oclint`. Make sure they sequentially follow the `--` argument
 in the hook's args list.
 
+## Development
+
 ### Standalone Hooks
 
-If you want to have predictable return codes for your C linters outside of pre-commit,
-these hooks are available via [PyPI](https://pypi.org/project/CLinters/).
+You can also use these hooks on the command line for testing purposes or if you like consistent return codes. 
+These hooks are available via [PyPI](https://pypi.org/project/CLinters/).
 Install it with `pip install CLinters`.
-They are named as `$cmd-hook`, so `clang-format` becomes `clang-format-hook`.
+They are named as `$cmd-hook`, creating clang-format-hook, clang-tidy-hook, oclint-hook, cppcheck-hook, and uncrustify-hook.
 
-If you want to run the tests below, you will need to install them from PyPI
-or locally with `pip install .`.
-
-## Development
+They are generated with setup.py and setup.cfg and can be found in ~/.local/bin (at least on linux). 
 
 ### Testing
 
+If you want to run these tests, you will need to install the command line versions
+of the hooks locally with `pip install .`.
+
 To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are
-working as expected on your system, use `pytest --runslow --internal -vvv`.
+working as expected on your system, use `pytest --oclint --internal -vvv`.
 This will work on both bash and python branches.
 
 Testing is done by using pytest to generate 76 table tests (python branch)
@@ -161,16 +163,16 @@ based on combinations of args, files, and expected results.
 The default is to skip most (41/76) tests as to run them all takes ~60s. These
 pytest options are available to add test types:
 
-* `--runslow`: oclint tests, which take extra time
-* `--internal`: Internal class tests to ensure internal/shell APIs match
+* `--oclint`: oclint tests, which take extra time
+* `--internal`: Internal class tests to ensure standalone hooks work
 
-**Note**: You can parallelize these tests with `pytest-xdist`. Adding `-n 32`
-to the command creates 32 workers and divides runtime by ~6x in my testing.
+**Note**: You can parallelize these tests with `pytest-xdist` (run `pip install pytest-xdist`). For example, adding `-n 4`
+to the command creates 4 workers.
 
-To run all tests serially, run `pytest -x -vvv --internal --runslow` like so:
+To run all tests serially, run `pytest -x -vvv --internal --oclint` like so:
 
 ```bash
-pre-commit-hooks$ pytest -x -vvv --internal --runslow
+pre-commit-hooks$ pytest -x -vvv --internal --oclint
 ============================= test session starts ==============================
 platform darwin -- Python 3.7.6, pytest-5.4.1, py-1.7.0, pluggy-0.13.1 -- /usr/local/opt/python/bin/python3.7
 cachedir: .pytest_cache
@@ -181,7 +183,7 @@ tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-format on /Users/pr
 tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-tidy on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  7%]
 ...
 
-============================= 89 passed in 61.86s ==============================
+============================= 93 passed in 9.28s ==============================
 ```
 
 ### Why have a script when your hook could be `$command "$@"`?

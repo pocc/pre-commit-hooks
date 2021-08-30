@@ -42,11 +42,14 @@ def get_versions():
             sys.exit("Command " + cmd + " not found.")
         cmds = [cmd, "--version"]
         child = sp.run(cmds, stdout=sp.PIPE, stderr=sp.PIPE)
+        if len(child.stderr) > 0:
+            print(f"Received error when running {cmds}:\n{child.stderr}")
+            sys.exit(1)
         output = child.stdout.decode("utf-8")
         try:
             versions[cmd] = re.search(regex, output).group(1)
         except AttributeError:
-            print("Received `" + output + "`. Version regexes have broken.")
+            print(f"Received `{output}`. Version regexes have broken.")
             print("Please file a bug (github.com/pocc/pre-commit-hooks).")
             sys.exit(1)
     return versions

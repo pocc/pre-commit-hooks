@@ -36,6 +36,7 @@ class Command:
 
     def parse_args(self, args):
         """Parse the args into usable variables"""
+        print("args are", args)
         parser = argparse.ArgumentParser()
         parser.add_argument("filenames", nargs="*", help="Filenames to check")
         parser.add_argument("--version", nargs=1, help="Version check")
@@ -46,6 +47,7 @@ class Command:
             actual_version = self.get_version_str()
             self.assert_version(actual_version, expected_version)
         self.files = known_args.filenames
+        print("files are", self.files)
 
     def add_if_missing(self, new_args):
         """Add a default if it's missing from the command. This library
@@ -156,7 +158,7 @@ class FormatterCmd(Command):
             return [self.file_flag, filename]
         return [filename]
 
-    def get_formatted_lines(self, filename: bytes) -> [bytes]:
+    def get_formatted_lines(self, filename: bytes):
         """Get the expected output for a command applied to a file."""
         filename_opts = self.get_filename_opts(filename)
         args = [self.command, *self.args, *filename_opts]
@@ -171,7 +173,7 @@ class FormatterCmd(Command):
         return child.stdout.split(b"\x0a")
 
     @staticmethod
-    def get_filelines(filename) -> [bytes]:
+    def get_filelines(filename):
         """Get the lines in a file."""
         with open(filename, "rb") as f:
             filetext = f.read()
