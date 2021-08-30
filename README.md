@@ -101,8 +101,8 @@ You can build all of these from source.
 | ------------------------------------------------------------------------ | ------------ | --------------------------------------------- | --------------- |
 | [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | `-i`         |                   | |
 | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | `--fix-errors` [1] | `-checks=*` `-warnings-as-errors=*` [2] | |
-| [oclint](http://oclint.org/)                                             |  | `-enable-global-analysis` `-enable-clang-static-analyzer` | `-rc=<key>=<value>` |
-| [uncrustify](http://uncrustify.sourceforge.net/)                         | `--replace` `--no-backup` [3] |  | `--set key=value` |
+| [oclint](http://oclint.org/)                                             |  | `-enable-global-analysis` `-enable-clang-static-analyzer` [3] | `-rc=<key>=<value>` |
+| [uncrustify](http://uncrustify.sourceforge.net/)                         | `--replace` `--no-backup` [4] |  | `--set key=value` |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             |  | `-enable=all` | |
 
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
@@ -113,7 +113,11 @@ modernize wants to use [trailing return type](https://clang.llvm.org/extra/clang
 but Fuchsia [disallows it](https://clang.llvm.org/extra/clang-tidy/checks/fuchsia-trailing-return.html).
 *Thanks to @rambo.*
 
-[3]: By definition, if you are using `pre-commit`, you are using version control.
+[3]: The oclint pre-commit hook does the equivalent of `-max-priority-3 0` by default, which returns an error code when any check fails.
+If you use the `-max-priority-3` flag to only catch some errors, feel free to reopen #23.
+See [oclint error codes](https://docs.oclint.org/en/stable/manual/oclint.html#exit-status-options) for more info on partially catching failed checks.
+
+[4]: By definition, if you are using `pre-commit`, you are using version control.
 Therefore, it is recommended to avoid needless backup creation by using `--no-backup`.
 
 ### Enforcing linter version with --version
@@ -146,7 +150,12 @@ These hooks are available via [PyPI](https://pypi.org/project/CLinters/).
 Install it with `pip install CLinters`.
 They are named as `$cmd-hook`, creating clang-format-hook, clang-tidy-hook, oclint-hook, cppcheck-hook, and uncrustify-hook.
 
-They are generated with setup.py and setup.cfg and can be found in ~/.local/bin (at least on linux). 
+They are generated with setup.py and setup.cfg and can be found in ~/.local/bin (at least on linux).
+To test changes in hooks with pdb, using uncrustify-hook as an example (with uncrustify args following the command), use the following snippet:
+
+    python3 -m pdb "$(which uncrustify-hook)" -l cpp -c uncrustify_defaults.cfg err.cpp
+
+And add `breakpoint()` wherever you want pdb to trigger.
 
 ### Testing
 

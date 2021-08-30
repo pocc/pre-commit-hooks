@@ -8,6 +8,7 @@ import shutil
 import subprocess as sp
 import sys
 
+CPP_FILE_REGEX = r"\.(c|cc|cxx|cpp|h|hpp|hxx|m)$"
 
 class Command:
     """Super class that all commands inherit"""
@@ -16,7 +17,8 @@ class Command:
         self.args = args
         self.look_behind = look_behind
         self.command = command
-        self.files = []
+        # Will be [] if not run using pre-commit or if there are no committed files
+        self.files = self.get_added_files()
         self.edit_in_place = False
 
         self.stdout = b""
@@ -27,16 +29,24 @@ class Command:
         """Check if command is installed and fail exit if not."""
         path = shutil.which(self.command)
         if path is None:
-            website = "https://github.com/pocc/pre-commit-hooks#prerequisites"
+            website = "https://github.com/pocc/pre-commit-hooks#using-the-hooks"
             problem = self.command + " not found"
             details = """Make sure {} is installed and on your PATH.\nFor more info: {}""".format(
                 self.command, website
             )  # noqa: E501
             self.raise_error(problem, details)
 
+    def get_added_files(self):
+        """Find added files using git. Taken from https://github.com/pre-commit/pre-commit-hooks/blob/master/pre_commit_hooks/util.py"""
+        cmd = ['git', 'diff', '--staged', '--name-only', '--diff-filter=A']
+        sp_child = sp.run(cmd, stdout=sp.PIPE, stderr=sp.PIPE)
+        if sp_child.stderr or sp_child.returncode != 0:
+            self.raise_error("Problem determining which files are being committed using git.", sp_child.stderr.decode())
+        added_files = sp_child.stdout.decode().splitlines()
+        return added_files
+
     def parse_args(self, args):
         """Parse the args into usable variables"""
-        print("args are", args)
         parser = argparse.ArgumentParser()
         parser.add_argument("filenames", nargs="*", help="Filenames to check")
         parser.add_argument("--version", nargs=1, help="Version check")
@@ -46,8 +56,10 @@ class Command:
             expected_version = known_args.version[0]
             actual_version = self.get_version_str()
             self.assert_version(actual_version, expected_version)
-        self.files = known_args.filenames
-        print("files are", self.files)
+        # If not running on a commit, still attempt to get filenames with argparse
+        if not self.files:
+            self.files = known_args.filenames
+        self.files = [f for f in self.files if re.search(CPP_FILE_REGEX, f)]
 
     def add_if_missing(self, new_args):
         """Add a default if it's missing from the command. This library
@@ -119,6 +131,9 @@ class ClangAnalyzerCmd(Command):
         This function converts args (1 3 5 7 -- 6 8 0) => (0 1 3 5 7 -- 6 8),
         Where 0 is the file pre-commit sends to the utility
         See https://github.com/pre-commit/pre-commit/issues/1000
+
+        If this ever breaks, remove the added files from the set of args using added_files from
+        https://github.com/pre-commit/pre-commit-hooks/blob/master/pre_commit_hooks/util.py
 
         Skip this for clang-format, as it's unexpected
         Rotate if -- exists AND last arg is file AND pre-commit called $0"""
