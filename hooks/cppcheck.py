@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Wrapper script for cppcheck."""
-#############################################################################
 import sys
 
-from hooks.utils import Command
+from hooks.utils import StaticAnalyzerCmd
 
 
-class CppcheckCmd(Command):
+class CppcheckCmd(StaticAnalyzerCmd):
     """Class for the cppcheck command."""
 
     command = "cppcheck"
@@ -25,7 +24,7 @@ class CppcheckCmd(Command):
     def run(self):
         """Run cppcheck"""
         for filename in self.files:
-            self.run_command(filename)
+            self.run_command([filename] + self.args)
             # Useless error see https://stackoverflow.com/questions/6986033
             useless_error_part = b"Cppcheck cannot find all the include files"
             if useless_error_part in self.stderr:

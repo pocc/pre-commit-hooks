@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """fns for clang-format, clang-tidy, oclint"""
-###############################################################################
 import argparse
 import difflib
 import re
@@ -60,6 +59,12 @@ class Command:
         if not self.files:
             self.files = known_args.filenames
         self.files = [f for f in self.files if re.search(CPP_FILE_REGEX, f)]
+        # pre-commit puts files at the end, which messes with clang-tidy/oclint using --
+        # See https://github.com/pre-commit/pre-commit/issues/1000 for more info on --
+        # Files should not be in the args list, but in the files list
+        for f in self.files:
+            if f in self.args:
+                self.args.remove(f)
 
     def add_if_missing(self, new_args):
         """Add a default if it's missing from the command. This library
@@ -111,37 +116,19 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
         version = re.search(regex, version_str).group(1)
         return version
 
-    def run_command(self, filename):
-        """Run the command and check for errors"""
-        args = [self.command, filename] + self.args
+
+class StaticAnalyzerCmd(Command):
+    """Commmands that analyze code and are not formatters.s"""
+    def __init__(self, command, look_behind, args):
+        super().__init__(command, look_behind, args)
+
+    def run_command(self, args):
+        """Run the command and check for errors. Args includes options and filepaths"""
+        args = [self.command, *args]
         sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         self.stdout += sp_child.stdout
         self.stderr += sp_child.stderr
         self.returncode = sp_child.returncode
-
-
-class ClangAnalyzerCmd(Command):
-    """Commands that statically analyze code: clang-tidy, oclint"""
-
-    def __init__(self, command, look_behind, args):
-        super().__init__(command, look_behind, args)
-
-    def parse_ddash_args(self):
-        """pre-commit sends file as last arg, which causes problems with --
-        This function converts args (1 3 5 7 -- 6 8 0) => (0 1 3 5 7 -- 6 8),
-        Where 0 is the file pre-commit sends to the utility
-        See https://github.com/pre-commit/pre-commit/issues/1000
-
-        If this ever breaks, remove the added files from the set of args using added_files from
-        https://github.com/pre-commit/pre-commit-hooks/blob/master/pre_commit_hooks/util.py
-
-        Skip this for clang-format, as it's unexpected
-        Rotate if -- exists AND last arg is file AND pre-commit called $0"""
-        if "--" in self.args:
-            idx = self.args.index("--")
-            self.args = [self.args[-1]] + self.args[:idx] + self.args[idx:-1]
-        # Add a -- -DCAMKE_EXPORT_COMPILE_COMMANDS if -- is not specified
-        # To avoid compilation database errors.
 
 
 class FormatterCmd(Command):

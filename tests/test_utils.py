@@ -31,10 +31,10 @@ def assert_equal(expected, actual):
 
 def get_versions():
     """Returns a dict of commands and their versions."""
-    commands = ["clang-format", "clang-tidy", "uncrustify", "cppcheck"]
+    commands = ["clang-format", "clang-tidy", "uncrustify", "cppcheck", "cpplint"]
     if os.name != "nt":  # oclint doesn't work on windows
         commands += ["oclint"]
-    # Regex for all versions. Unit tests: https://regex101.com/r/ciqAuO/6/tests
+    # Regex for all versions. Unit tests: https://regex101.com/r/49Djov/1
     regex = r"[- ]((?:\d+\.)+\d+[_+\-a-z\d]*)(?![\s\S]*[- ]\d\.)"
     versions = {}
     for cmd in commands:

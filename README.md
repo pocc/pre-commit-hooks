@@ -3,12 +3,13 @@
 [![Build Status](https://travis-ci.com/pocc/pre-commit-hooks.svg?branch=master)](https://travis-ci.com/pocc/pre-commit-hooks)
 
 This is a [pre-commit](https://pre-commit.com) hooks repo that
-integrates five C/C++ linters:
+integrates six C/C++ linters:
 > [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html),
 [clang-tidy](https://clang.llvm.org/extra/clang-tidy/),
 [oclint](http://oclint.org/),
 [uncrustify](http://uncrustify.sourceforge.net/),
-[cppcheck](http://cppcheck.sourceforge.net/)
+[cppcheck](http://cppcheck.sourceforge.net/),
+[cpplint](https://github.com/cpplint/cpplint)
 
 Many of these linters will return 0 on error, which pre-commit will then
 mark as passing. Additionally, pre-commit has
@@ -17,8 +18,8 @@ where arguments after `--` are dropped. This repo's hooks for each command
 will fail correctly and honor all `--` arguments.
 
 This repo is available in both python and bash. To use a language, use `rev: $lang`
-in your `.pre-commit-config.yaml`. Master is set to python as the default as it is
-easier to maintain and troubleshoot.
+in your `.pre-commit-config.yaml`. Master is set to python as the default as that is
+the language pre-commit is written in.
 
 ## Example Usage
 
@@ -47,6 +48,7 @@ repos:
       - id: uncrustify
       - id: cppcheck
         args: [--enable=all]
+      - id: cpplint 
 ```
 
 _Note that for your config yaml, you can supply your own args or remove the args line entirely,
@@ -57,8 +59,6 @@ depending on your use case._
 Python3.6+ is required to use these hooks as all 5 invoking scripts are written in it.
 As this is also the minimum version of pre-commit, this should not be an issue.
 
-
-
 ### Installation
 
 _You will need to install these utilities in order to use them. Your package
@@ -68,6 +68,8 @@ manager may already have them. Below are the package names for each package mana
 - `yum install llvm uncrustify cppcheck` [2]
 - `brew install llvm oclint uncrustify cppcheck` [3]
 - `choco install llvm uncrustify cppcheck` [4]
+
+cpplint can be installed everywhere with `pip install cpplint`.
 
 [1]: `clang` is a required install for `clang-format` or `clang-tidy` to work.
 
@@ -94,6 +96,7 @@ You can build all of these from source.
 | [oclint](http://oclint.org/)                                             | Static code analyzer | C, C++, ObjC                          |
 | [uncrustify](http://uncrustify.sourceforge.net/)                         | Formatter            | C, C++, C#, ObjC, D, Java, Pawn, VALA |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             | Static code analyzer | C, C++                                |
+| [cpplint](https://github.com/cpplint/cpplint)                            | Style checker        | C, C++                                |
 
 ### Hook Option Comparison
 
@@ -104,6 +107,8 @@ You can build all of these from source.
 | [oclint](http://oclint.org/)                                             |  | `-enable-global-analysis` `-enable-clang-static-analyzer` [3] | `-rc=<key>=<value>` |
 | [uncrustify](http://uncrustify.sourceforge.net/)                         | `--replace` `--no-backup` [4] |  | `--set key=value` |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             |  | `-enable=all` | |
+| [cpplint](https://github.com/cpplint/cpplint)                            |  | `--verbose=0` |  |
+
 
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
 and fix compiler errors if it can, like missing semicolons.
@@ -143,6 +148,15 @@ in the hook's args list.
 
 ## Development
 
+### Adding a hook
+
+* [ ] Add the hook to hooks/
+* [ ] Add tests to tests/test_hooks.py
+* [ ] Add a section in .pre-commit-hooks.yaml
+* [ ] Add a line to setup.cfg
+* [ ] Update tests/test_utils.py get_versions() regex and command list
+* [ ] Update the README.md
+
 ### Standalone Hooks
 
 You can also use these hooks on the command line for testing purposes or if you like consistent return codes. 
@@ -159,6 +173,9 @@ And add `breakpoint()` wherever you want pdb to trigger.
 
 ### Testing
 
+*If tests fail, it may be due to a new version of a command.*
+*Known good command versions/OSes are at tests/pass_configurations.md*
+
 If you want to run these tests, you will need to install the command line versions
 of the hooks locally with `pip install .`.
 
@@ -173,7 +190,7 @@ The default is to skip most (41/76) tests as to run them all takes ~60s. These
 pytest options are available to add test types:
 
 * `--oclint`: oclint tests, which take extra time
-* `--internal`: Internal class tests to ensure standalone hooks work
+* `--internal`: Internal class tests for internal consistency
 
 **Note**: You can parallelize these tests with `pytest-xdist` (run `pip install pytest-xdist`). For example, adding `-n 4`
 to the command creates 4 workers.

@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """Wrapper script for oclint"""
-#############################################################################
 import os
 import sys
 
-from hooks.utils import ClangAnalyzerCmd
+from hooks.utils import StaticAnalyzerCmd
 
 
-class OCLintCmd(ClangAnalyzerCmd):
+class OCLintCmd(StaticAnalyzerCmd):
     """Class for the OCLint command."""
 
     command = "oclint"
@@ -16,14 +15,13 @@ class OCLintCmd(ClangAnalyzerCmd):
     def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
-        self.parse_ddash_args()
 
     def run(self):
         """Run OCLint and remove generated temporary files"""
         # Split text into an array of args that can be passed into oclint
         for filename in self.files:
             current_files = os.listdir(os.getcwd())
-            self.run_command(filename)
+            self.run_command([filename] + self.args)
             if self.returncode != 0:
                 sys.stdout.buffer.write(self.stdout)
                 self.returncode = 1

@@ -33,3 +33,9 @@
   description: Find warnings/errors in C/CPP code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
   language: python
+- id: cpplint
+  name: cpplint
+  entry: cpplint-hook
+  description: Find warnings/errors in C/CPP code
+  files: \.(c|cc|cpp|cu|cuh|cxx|h|hh|hpp|hxx)$
+  language: python

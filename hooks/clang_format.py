@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Wrapper script for clang-format"""
-###############################################################################
 import sys
 
 from hooks.utils import FormatterCmd

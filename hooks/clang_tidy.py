@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Wrapper script for clang-tidy."""
-#############################################################################
 import re
 import sys
 
-from hooks.utils import ClangAnalyzerCmd
+from hooks.utils import StaticAnalyzerCmd
 
 
-class ClangTidyCmd(ClangAnalyzerCmd):
+class ClangTidyCmd(StaticAnalyzerCmd):
     """Class for the clang-tidy command."""
 
     command = "clang-tidy"
@@ -17,12 +16,11 @@ class ClangTidyCmd(ClangAnalyzerCmd):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
         self.edit_in_place = "-fix" in self.args or "--fix-errors" in self.args
-        self.parse_ddash_args()
 
     def run(self):
         """Run clang-tidy"""
         for filename in self.files:
-            self.run_command(filename)
+            self.run_command([filename] + self.args)
             sys.stdout.buffer.write(self.stdout)
             # The number of warnings depends on errors in system files
             self.stderr = re.sub(b"\d+ warnings and ", b"", self.stderr)

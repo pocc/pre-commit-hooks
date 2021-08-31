@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Wrapper script for uncrustify"""
-###############################################################################
 import os
 import re
 import subprocess as sp

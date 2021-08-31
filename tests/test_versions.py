@@ -2,6 +2,7 @@
 """Test that --version works for each hook correctly"""
 import os
 import subprocess as sp
+import sys
 
 import tests.test_utils as utils
 from hooks.clang_format import ClangFormatCmd
