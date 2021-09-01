@@ -151,7 +151,8 @@ in the hook's args list.
 ### Adding a hook
 
 * [ ] Add the hook to hooks/
-* [ ] Add tests to tests/test_hooks.py
+* [ ] Add tests to tests/test_hooks.py (or alternative file)
+* [ ] Add tests to tests/test_versions.py
 * [ ] Add a section in .pre-commit-hooks.yaml
 * [ ] Add a line to setup.cfg
 * [ ] Update tests/test_utils.py get_versions() regex and command list

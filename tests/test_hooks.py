@@ -27,6 +27,7 @@ from hooks.cppcheck import CppcheckCmd
 from hooks.oclint import OCLintCmd
 from hooks.uncrustify import UncrustifyCmd
 from hooks.cpplint import CpplintCmd
+from hooks.include_what_you_use import IncludeWhatYouUseCmd
 
 
 def set_compilation_db(filenames):
@@ -147,6 +148,23 @@ Total errors found: 5
     cpplint_err_cpp = cpplint_err_str.format(err_cpp).encode()
     cpplint_output = [cppc_ok, cppc_ok, cpplint_err_c, cpplint_err_cpp]
 
+    iwyu_arg_sets = [[]]
+    iwyu_ok_hpp = os.path.join(pwd, "tests/files/iwyu-ok.hpp")
+    iwyu_err_hpp = os.path.join(pwd, "tests/files/iwyu-err.hpp")
+    iwyu_err_bstr = f"""
+{iwyu_err_hpp} should add these lines:
+
+{iwyu_err_hpp} should remove these lines:
+- #include <vector>  // lines 2-2
+
+The full include-list for {iwyu_err_hpp}:
+#include <string>  // for string
+---
+""".encode()
+    iwyu_files = [iwyu_ok_hpp, iwyu_err_hpp]
+    iwyu_retcodes = [0, 3]
+    iwyu_output = [cppc_ok, iwyu_err_bstr]
+
     files = [ok_c, ok_cpp, err_c, err_cpp]
     retcodes = [0, 0, 1, 1]
     scenarios = []
@@ -166,6 +184,11 @@ Total errors found: 5
         for arg_set in cpplint_arg_sets:
             cpplint_scenario = [CpplintCmd, arg_set, [files[i]], cpplint_output[i], retcodes[i]]
             scenarios += [cpplint_scenario]
+    for i in range(len(iwyu_files)):
+        for arg_set in iwyu_arg_sets:
+            iwyu_scenario = [IncludeWhatYouUseCmd, arg_set, [iwyu_files[i]], iwyu_output[i], iwyu_retcodes[i]]
+            scenarios += [iwyu_scenario]
+
     if os.name != "nt":
         oclint_err = """
 Compiler Errors:

@@ -20,14 +20,15 @@ pip_install () {
 }
 
 print_command_versions () {
-  num_cmds="$(command -v cppcheck clang-format oclint uncrustify cppcheck | wc -l)"
-  if [[ ${num_cmds} -ge "4" ]]; then
+  num_cmds="$(command -v cppcheck clang-format oclint uncrustify cppcheck cpplint include-what-you-use| wc -l)"
+  if [[ ${num_cmds} -ge "6" ]]; then
     clang-format --version
     clang-tidy --version
     uncrustify --version
     cppcheck --version
+    include-what-you-use --version
   fi
-  if [[ ${num_cmds} -eq "5" ]]; then
+  if [[ ${num_cmds} -eq "7" ]]; then
     oclint --version
   fi
 }
@@ -41,7 +42,8 @@ install_linux_oclint () {
 
 install_linux_cmds () {
   # If these are not already installed
-  apt -y install clang clang-format clang-tidy uncrustify cppcheck
+  apt -y install clang clang-format clang-tidy uncrustify cppcheck iwyu
+  pip install cpplint
   install_linux_oclint
 }
 
@@ -50,7 +52,8 @@ install_macos_cmds () {
   if [[ $(command -v brew) && "$(whoami)" == "$(stat /usr/local/var/homebrew | awk '{ print $5 }')" ]]; then
     export HOMEBREW_NO_INSTALL_CLEANUP=1
     export HOMEBREW_NO_AUTO_UPDATE=1
-    brew install llvm uncrustify cppcheck
+    brew install llvm uncrustify cppcheck iwyu
+    pip install cpplint
     brew cask install oclint
   else
     echo "Brew not available. Tests may fail."

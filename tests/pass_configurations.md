@@ -19,3 +19,9 @@
 * 1.82 on Ubuntu-18.04
 * 1.89 on Macos 10.13.6/brew
 * 1.90 on Macos 10.14/brew
+
+## Include-What-You-Use
+* 0.5 on Ubuntu-16.04
+* 0.9 on Ubuntu-18.04
+* 0.12 on Ubuntu-20.04
+* 0.13-0.16 on Macos 10.14/brew

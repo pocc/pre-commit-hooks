@@ -2,7 +2,6 @@
 """Test that --version works for each hook correctly"""
 import os
 import subprocess as sp
-import sys
 
 import tests.test_utils as utils
 from hooks.clang_format import ClangFormatCmd
@@ -10,6 +9,8 @@ from hooks.clang_tidy import ClangTidyCmd
 from hooks.cppcheck import CppcheckCmd
 from hooks.oclint import OCLintCmd
 from hooks.uncrustify import UncrustifyCmd
+from hooks.cpplint import CpplintCmd
+from hooks.include_what_you_use import IncludeWhatYouUseCmd
 
 
 class TestVersions:
@@ -37,6 +38,8 @@ Edit your pre-commit config or use a different version of {0}.
             ClangTidyCmd,
             UncrustifyCmd,
             CppcheckCmd,
+            CpplintCmd,
+            IncludeWhatYouUseCmd
         ]  # noqa: E501
         if os.name != "nt":  # oclint is not supported on windows
             commands.append(OCLintCmd)
