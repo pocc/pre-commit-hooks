@@ -15,6 +15,7 @@ class ClangFormatCmd(FormatterCmd):
         super().__init__(self.command, self.lookbehind, args)
         self.check_installed()
         self.parse_args(args)
+        self.set_diff_flag()
         self.edit_in_place = "-i" in self.args
 
     def run(self):

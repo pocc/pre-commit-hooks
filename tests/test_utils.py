@@ -22,8 +22,8 @@ def create_temp_dir_for(filename):
 def assert_equal(expected, actual):
     """Stand in for Python's assert which is annoying to work with."""
     if expected != actual:
-        print(b"Expected:`" + expected + b"`")
-        print(b"Actual:`" + actual + b"`")
+        print(f"Expected:`{expected}`")
+        print(f"Actual:`{actual}`")
         diff_lines = difflib.diff_bytes(difflib.unified_diff, expected, actual)
         print(b"\n".join(diff_lines))
         pytest.fail("Test failed!")

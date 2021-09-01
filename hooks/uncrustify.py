@@ -18,6 +18,7 @@ class UncrustifyCmd(FormatterCmd):
         super().__init__(self.command, self.lookbehind, args)
         self.check_installed()
         self.parse_args(args)
+        self.set_diff_flag()
         self.file_flag = "-f"
         self.edit_in_place = "--replace" in self.args
         if "-c" not in self.args:

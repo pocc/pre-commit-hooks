@@ -66,6 +66,14 @@ def get_multifile_scenarios(err_files):
     ]
     return scenarios
 
+def get_multifile_scenarios_no_diff(err_files):
+    """Create tests to verify that commands are handling both err.c/err.cpp as input correctly and that --no-diff disables diff output."""
+    expected_err = b""
+    scenarios = [
+        [ClangFormatCmd, ["--style=google", "--no-diff"], err_files, expected_err, 1],
+        [UncrustifyCmd, ["-c", "tests/uncrustify_defaults.cfg", "--no-diff"], err_files, expected_err, 1],
+    ]
+    return scenarios
 
 def generate_list_tests():
     """Generate the scenarios for class (45)
@@ -222,6 +230,7 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
                 oclint_scenario = [OCLintCmd, arg_set, [files[i]], oclint_output[i], oclint_retcodes[i]]
                 scenarios += [oclint_scenario]
 
+    scenarios += get_multifile_scenarios_no_diff([err_c, err_cpp])
     scenarios += get_multifile_scenarios([err_c, err_cpp])
 
     return scenarios
@@ -229,7 +238,6 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
 
 class TestHooks:
     """Test all C Linters: clang-format, clang-tidy, and oclint."""
-
     @classmethod
     def setup_class(cls):
         """Create test files that will be used by other tests."""
@@ -238,10 +246,11 @@ class TestHooks:
         filenames = ["tests/files/" + f for f in ["ok.c", "ok.cpp", "err.c", "err.cpp"]]
         set_compilation_db(filenames)
         cls.scenarios = []
-        for test_type in [cls.run_cmd_class, cls.run_shell_cmd]:
-            for s in scenarios:
+
+        for s in scenarios:
+            for test_type in [cls.run_cmd_class, cls.run_shell_cmd]:
                 type_name = test_type.__name__
-                desc = " ".join([type_name, s[0].command, " ".join(s[2]), " ".join(s[1])])
+                desc = f"{type_name} {s[0].command} {s[1]} {s[2]}"
                 test_scenario = [
                     desc,
                     {
@@ -273,6 +282,7 @@ class TestHooks:
             temp_files = list()
             for f in files:
                 temp_file = utils.create_temp_dir_for(f)
+                # Replace filename with temp filename in command output
                 expd_output = expd_output.replace(f.encode(), temp_file.encode())
                 temp_files.append(temp_file)
             files = temp_files

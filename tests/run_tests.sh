@@ -83,8 +83,7 @@ run_tests () {
 
   print_command_versions
   pip_install
-  # Try to parallelize with xdist, but fall back if there's an error.
-  ${COMMAND} -n "32" || ${COMMAND}
+  ${COMMAND}
   cleanup
 }
 

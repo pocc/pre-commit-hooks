@@ -143,6 +143,11 @@ class FormatterCmd(Command):
         super().__init__(command, look_behind, args)
         self.file_flag = None
 
+    def set_diff_flag(self):
+        self.no_diff_flag = "--no-diff" in self.args
+        if self.no_diff_flag:
+            self.args.remove("--no-diff")
+
     def compare_to_formatted(self, filename_str: str) -> None:
         """Compare the expected formatted output to file contents."""
         # This string encode is from argparse, so we should be able to trust it.
@@ -155,8 +160,9 @@ class FormatterCmd(Command):
             expected = self.get_filelines(filename)
         diff = list(difflib.diff_bytes(difflib.unified_diff, actual, expected, fromfile=b'original', tofile=b'formatted'))
         if len(diff) > 0:
-            header = filename + b"\n" + 20 * b"=" + b"\n"
-            self.stderr += header + b"\n".join(diff) + b"\n"
+            if not self.no_diff_flag:
+                header = filename + b"\n" + 20 * b"=" + b"\n"
+                self.stderr += header + b"\n".join(diff) + b"\n"
             self.returncode = 1
 
     def get_filename_opts(self, filename: bytes):

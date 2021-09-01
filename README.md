@@ -104,7 +104,7 @@ You can build all of these from source.
 | ------------------------------------------------------------------------ | ------------ | --------------------------------------------- | --------------- |
 | [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) | `-i`         |                   | |
 | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)                   | `--fix-errors` [1] | `-checks=*` `-warnings-as-errors=*` [2] | |
-| [oclint](http://oclint.org/)                                             |  | `-enable-global-analysis` `-enable-clang-static-analyzer` [3] | `-rc=<key>=<value>` |
+| [oclint](http://oclint.org/)                                             |  | `-enable-global-analysis` `-enable-clang-static-analyzer` `-max-priority-3 0` [3] | `-rc=<key>=<value>` |
 | [uncrustify](http://uncrustify.sourceforge.net/)                         | `--replace` `--no-backup` [4] |  | `--set key=value` |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             |  | `-enable=all` | |
 | [cpplint](https://github.com/cpplint/cpplint)                            |  | `--verbose=0` |  |
@@ -124,6 +124,16 @@ See [oclint error codes](https://docs.oclint.org/en/stable/manual/oclint.html#ex
 
 [4]: By definition, if you are using `pre-commit`, you are using version control.
 Therefore, it is recommended to avoid needless backup creation by using `--no-backup`.
+
+## Special flags in this repo
+
+There are 2 flags, `--no-diff` and `--version` that can be added to args: for a pre-commit hook.
+They will be removed and not be passed on to the command.
+
+### Using --no-diff
+
+You can add `--no-diff` to the args: for clang-format and uncrustify 
+if you would like there to be no diff output for these commands.
 
 ### Enforcing linter version with --version
 
