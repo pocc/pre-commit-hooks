@@ -33,3 +33,9 @@
   description: Find warnings/errors in C/CPP code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
   language: python
+- id: include-what-you-use
+  name: include-what-you-use
+  entry: iwyu-hook
+  description: Runs Include-What-You-Use in C/CPP code
+  files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx)$
+  language: python
