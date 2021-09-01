@@ -130,6 +130,11 @@ class StaticAnalyzerCmd(Command):
         self.stderr += sp_child.stderr
         self.returncode = sp_child.returncode
 
+    def exit_on_error(self):
+        if self.returncode != 0:
+            sys.stderr.buffer.write(self.stdout + self.stderr)
+            sys.exit(self.returncode)
+
 
 class FormatterCmd(Command):
     """Commands that format code: clang-format, uncrustify"""

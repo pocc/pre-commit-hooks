@@ -15,30 +15,22 @@ class OCLintCmd(StaticAnalyzerCmd):
     def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
+        # Check for as many errors as possible (see https://github.com/oclint/oclint/issues/538)
+        self.add_if_missing(["-max-priority-3", "0"])
 
     def run(self):
-        """Run OCLint and remove generated temporary files"""
+        """Run OCLint and remove generated temporary files. OCLint will put the standard reprot into stderr."""
         # Split text into an array of args that can be passed into oclint
         for filename in self.files:
             current_files = os.listdir(os.getcwd())
             self.run_command([filename] + self.args)
-            if self.returncode != 0:
-                sys.stdout.buffer.write(self.stdout)
-                self.returncode = 1
-                sys.exit(self.returncode)
-            self.parse_output()
+            # Errors are sent to stdout instead of stderr
+            if b"Errors" in self.stdout:
+                self.stderr = self.stdout
+            # If errors have been captured, stdout is unexpected
+            self.stdout = b''
+            self.exit_on_error()
             self.cleanup_files(current_files)
-
-    def parse_output(self):
-        """ oclint return code is usually wrong (github.com/oclint/oclint/issues/538)
-        Figure out what it is based on stdout and return that instead
-        """
-        violations = b"FilesWithViolations=0" not in self.stdout
-        compiler_errors = b"Compiler Errors" in self.stdout
-        if violations or compiler_errors:
-            output = self.stdout + self.stderr
-            self.raise_error(b"OCLint Violations found", output)
-        self.stdout = b""
 
     @staticmethod
     def cleanup_files(existing_files):

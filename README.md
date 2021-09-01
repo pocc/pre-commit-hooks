@@ -37,7 +37,7 @@ The above uses this `.pre-commit-config.yaml`:
 fail_fast: false
 repos:
   - repo: https://github.com/pocc/pre-commit-hooks
-    rev: python
+    rev: master
     hooks:
       - id: clang-format
         args: [--style=Google]

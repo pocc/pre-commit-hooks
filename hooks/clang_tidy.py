@@ -18,26 +18,12 @@ class ClangTidyCmd(StaticAnalyzerCmd):
         self.edit_in_place = "-fix" in self.args or "--fix-errors" in self.args
 
     def run(self):
-        """Run clang-tidy"""
+        """Run clang-tidy. If --fix-errors is passed in, then return code will be 0, even if there are errors."""
         for filename in self.files:
             self.run_command([filename] + self.args)
-            sys.stdout.buffer.write(self.stdout)
-            # The number of warnings depends on errors in system files
-            self.stderr = re.sub(rb"\d+ warnings and ", b"", self.stderr)
-            # Don't output stderr if it's complaining about problems in system files
-            no_sysfile_warning = b"non-user code" not in self.stderr
-            # On good clang-tidy checks, it will spew warnings to stderr
-            if len(self.stdout) > 0 and no_sysfile_warning:
-                sys.stderr.buffer.write(self.stderr)
-            else:
-                self.stderr = b""
-            has_errors = (
-                b"error generated." in self.stderr or b"errors generated." in self.stderr
-            )
-            if has_errors:  # Change return code if errors are generated
+            if len(self.stderr) > 0:
                 self.returncode = 1
-            if self.returncode != 0:
-                sys.exit(self.returncode)
+            self.exit_on_error()
 
 
 def main(argv=None):

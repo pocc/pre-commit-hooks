@@ -216,9 +216,10 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
         oclint_err_str_c = oclint_err.format(err_c, eol_whitespace, oclint_ver).encode()
         oclint_err_str_cpp = oclint_err.format(err_cpp, eol_whitespace, oclint_ver).encode()
         oclint_output = [ok_str, ok_str, oclint_err_str_c, oclint_err_str_cpp]
+        oclint_retcodes = [0, 0, 6, 6]
         for i in range(len(files)):
             for arg_set in oclint_arg_sets:
-                oclint_scenario = [OCLintCmd, arg_set, [files[i]], oclint_output[i], retcodes[i]]
+                oclint_scenario = [OCLintCmd, arg_set, [files[i]], oclint_output[i], oclint_retcodes[i]]
                 scenarios += [oclint_scenario]
 
     scenarios += get_multifile_scenarios([err_c, err_cpp])
