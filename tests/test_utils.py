@@ -35,7 +35,7 @@ def get_versions():
     if os.name != "nt":  # oclint doesn't work on windows
         commands += ["oclint"]
     # Regex for all versions. Unit tests: https://regex101.com/r/49Djov/1
-    regex = r"[- ]((?:\d+\.)+\d+[_+\-a-z\d]*)(?![\s\S]*[- ]\d\.)"
+    regex = r"[- ]((?:\d+\.)+\d+[_+\-a-z\d]*)(?![\s\S]*version)"
     versions = {}
     for cmd in commands:
         if not shutil.which(cmd):

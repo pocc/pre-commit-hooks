@@ -33,7 +33,7 @@ class UncrustifyCmd(FormatterCmd):
             cmds = ["uncrustify", "--show-config"]
             defaults = sp.check_output(cmds)
             # Change default 8 => 2 spaces per LLVM default
-            regex = b"(indent_columns\s+=) \d"
+            regex = rb"(indent_columns\s+=) \d"
             defaults = re.sub(regex, b"\1 2", defaults)
             with open("defaults.cfg", "wb") as f:
                 f.write(defaults)

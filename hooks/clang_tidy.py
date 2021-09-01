@@ -23,7 +23,7 @@ class ClangTidyCmd(StaticAnalyzerCmd):
             self.run_command([filename] + self.args)
             sys.stdout.buffer.write(self.stdout)
             # The number of warnings depends on errors in system files
-            self.stderr = re.sub(b"\d+ warnings and ", b"", self.stderr)
+            self.stderr = re.sub(rb"\d+ warnings and ", b"", self.stderr)
             # Don't output stderr if it's complaining about problems in system files
             no_sysfile_warning = b"non-user code" not in self.stderr
             # On good clang-tidy checks, it will spew warnings to stderr
@@ -32,8 +32,7 @@ class ClangTidyCmd(StaticAnalyzerCmd):
             else:
                 self.stderr = b""
             has_errors = (
-                b"error generated." in self.stderr
-                or b"errors generated." in self.stderr
+                b"error generated." in self.stderr or b"errors generated." in self.stderr
             )
             if has_errors:  # Change return code if errors are generated
                 self.returncode = 1

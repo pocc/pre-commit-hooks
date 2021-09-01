@@ -216,8 +216,9 @@ tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-tidy on /Users/pre-
 
 shellcheck keeps things simple by relaying arguments as `shellcheck "$@"`.
 This is not possible with several C/C++ linters because they exit 0 when
-there are errors. pre-commit registers failures by non-zero exit codes,
-which results in false "passes".
+there are errors. The pre-commit framework registers failures by non-zero exit codes,
+which results in false "passes". Additionally, these scripts provide more verbose error
+messages and version locking.
 
 ## Additional Resources
 

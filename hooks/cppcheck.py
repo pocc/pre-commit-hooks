@@ -20,15 +20,13 @@ class CppcheckCmd(StaticAnalyzerCmd):
         self.add_if_missing(["--error-exitcode=1"])
         # Enable all of the checks
         self.add_if_missing(["--enable=all"])
+        # Per https://github.com/pocc/pre-commit-hooks/pull/30, suppress missingIncludeSystem messages
+        self.add_if_missing(["--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem"])
 
     def run(self):
         """Run cppcheck"""
         for filename in self.files:
             self.run_command([filename] + self.args)
-            # Useless error see https://stackoverflow.com/questions/6986033
-            useless_error_part = b"Cppcheck cannot find all the include files"
-            if useless_error_part in self.stderr:
-                self.stderr = b""
             if self.returncode != 0:
                 sys.stderr.buffer.write(self.stdout + self.stderr)
                 sys.exit(self.returncode)
