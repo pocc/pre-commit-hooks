@@ -20,15 +20,14 @@ pip_install () {
 }
 
 print_command_versions () {
-  num_cmds="$(command -v cppcheck clang-format oclint uncrustify cppcheck cpplint include-what-you-use| wc -l)"
-  if [[ ${num_cmds} -ge "6" ]]; then
+  num_cmds="$(command -v cppcheck clang-format oclint uncrustify cppcheck cpplint | wc -l)"
+  if [[ ${num_cmds} -ge "5" ]]; then
     clang-format --version
     clang-tidy --version
     uncrustify --version
     cppcheck --version
-    include-what-you-use --version
   fi
-  if [[ ${num_cmds} -eq "7" ]]; then
+  if [[ ${num_cmds} -eq "6" ]]; then
     oclint --version
   fi
 }
@@ -42,7 +41,8 @@ install_linux_oclint () {
 
 install_linux_cmds () {
   # If these are not already installed
-  apt -y install clang clang-format clang-tidy uncrustify cppcheck iwyu
+  # Do this with travis instead so as to not use root
+  # apt -y install clang clang-format clang-tidy uncrustify cppcheck iwyu
   pip install cpplint
   install_linux_oclint
 }
@@ -73,8 +73,7 @@ run_tests () {
   COMMAND="pytest -vvv -x --internal"
 
   if [[ "$OSTYPE" == "linux-gnu" ]]; then
-    # travis takes care of installation of other commands
-    install_linux_oclint
+    install_linux_cmds
     COMMAND="$COMMAND --oclint"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     install_macos_cmds

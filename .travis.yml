@@ -17,5 +17,4 @@ addons:
     - clang-tidy
     - uncrustify
     - cppcheck
-    - iwyu
 script: "./tests/run_tests.sh"
