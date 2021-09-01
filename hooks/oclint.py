@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """Wrapper script for oclint"""
-#############################################################################
 import os
 import sys
 
-from hooks.utils import ClangAnalyzerCmd
+from hooks.utils import StaticAnalyzerCmd
 
 
-class OCLintCmd(ClangAnalyzerCmd):
+class OCLintCmd(StaticAnalyzerCmd):
     """Class for the OCLint command."""
 
     command = "oclint"
@@ -16,16 +15,15 @@ class OCLintCmd(ClangAnalyzerCmd):
     def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
-        self.parse_ddash_args()
 
     def run(self):
         """Run OCLint and remove generated temporary files"""
         # Split text into an array of args that can be passed into oclint
         for filename in self.files:
             current_files = os.listdir(os.getcwd())
-            self.run_command(filename)
+            self.run_command([filename] + self.args)
             if self.returncode != 0:
-                sys.stdout.write(self.stdout)
+                sys.stdout.buffer.write(self.stdout)
                 self.returncode = 1
                 sys.exit(self.returncode)
             self.parse_output()
@@ -35,12 +33,12 @@ class OCLintCmd(ClangAnalyzerCmd):
         """ oclint return code is usually wrong (github.com/oclint/oclint/issues/538)
         Figure out what it is based on stdout and return that instead
         """
-        violations = "FilesWithViolations=0" not in self.stdout
-        compiler_errors = "Compiler Errors" in self.stdout
+        violations = b"FilesWithViolations=0" not in self.stdout
+        compiler_errors = b"Compiler Errors" in self.stdout
         if violations or compiler_errors:
             output = self.stdout + self.stderr
-            self.raise_error("OCLint Violations found", output)
-        self.stdout = ""
+            self.raise_error(b"OCLint Violations found", output)
+        self.stdout = b""
 
     @staticmethod
     def cleanup_files(existing_files):

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Wrapper script for uncrustify"""
-###############################################################################
 import os
 import re
 import subprocess as sp
@@ -32,11 +31,11 @@ class UncrustifyCmd(FormatterCmd):
         if "defaults.cfg" not in os.listdir(os.getcwd()):
             # --show-config prints the current config to stdout
             cmds = ["uncrustify", "--show-config"]
-            defaults = sp.check_output(cmds).decode("utf-8")
+            defaults = sp.check_output(cmds)
             # Change default 8 => 2 spaces per LLVM default
-            regex = r"(indent_columns\s+=) \d"
-            defaults = re.sub(regex, r"\1 2", defaults)
-            with open("defaults.cfg", "w") as f:
+            regex = rb"(indent_columns\s+=) \d"
+            defaults = re.sub(regex, b"\1 2", defaults)
+            with open("defaults.cfg", "wb") as f:
                 f.write(defaults)
 
     def run(self):
@@ -44,7 +43,7 @@ class UncrustifyCmd(FormatterCmd):
         for filename in self.files:
             self.compare_to_formatted(filename)
         if self.returncode != 0:
-            sys.stdout.write(self.stderr)
+            sys.stdout.buffer.write(self.stderr)
             sys.exit(self.returncode)
 
 

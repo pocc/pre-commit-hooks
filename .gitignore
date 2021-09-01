@@ -10,3 +10,5 @@ temp/
 *.egg-info/
 defaults.cfg
 compile_commands.json
+# backup files created by uncrustify
+*.unc-backup*

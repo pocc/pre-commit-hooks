@@ -1,14 +1,13 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Wrapper for include-what-you-use"""
-# ==============================================================================
 import shutil
 import sys
 
-from hooks.utils import Command
+from hooks.utils import Command, StaticAnalyzerCmd
 
 
-class IncludeWhatYouUseCmd(Command):
+class IncludeWhatYouUseCmd(StaticAnalyzerCmd):
     """Class for the Include-What-You-Use command."""
 
     command = "include-what-you-use"
@@ -20,28 +19,18 @@ class IncludeWhatYouUseCmd(Command):
         self.parse_args(args)
 
     def run(self):
-        """Run Include-What-You-Use. Error if diff is incorrect."""
+        """Run Include-What-You-Use. Error if diff is incorrect. "Correct" """
 
-        error_output = []
         for filename in self.files:
-            self.run_command(filename)
-            error_output.append(self.parse_output())
-
-        if error_output:
-            self.raise_error("Include-What-You-Use violations found\n", "".join(error_output))
-
-    def parse_output(self):
-        """Include-What-You-Use return code is never 0
-        Figure out what it is based on stdout and return that instead
-        """
-        is_correct = "has correct #includes/fwd-decls" in self.stderr
-
-        if not is_correct and self.stderr:
-            output = self.stdout + self.stderr
-            self.stdout = ""
-            self.stderr = ""
-            return output
-        return []
+            self.run_command([filename] + self.args)
+            is_correct = b"has correct #includes/fwd-decls" in self.stderr
+            if is_correct:
+                self.returncode = 0
+                self.stdout = b''
+                self.stderr = b''
+            else:
+                sys.stderr.buffer.write(self.stdout + self.stderr)
+                sys.exit(self.returncode)
 
 
 def main(argv=None):

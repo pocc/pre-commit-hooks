@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Wrapper script for clang-format"""
-###############################################################################
 import sys
 
 from hooks.utils import FormatterCmd
@@ -23,7 +22,7 @@ class ClangFormatCmd(FormatterCmd):
         for filename in self.files:
             self.compare_to_formatted(filename)
         if self.returncode != 0:
-            sys.stdout.write(self.stderr)
+            sys.stdout.buffer.write(self.stderr)
             sys.exit(self.returncode)
 
 
