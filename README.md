@@ -57,7 +57,15 @@ depending on your use case._
     </p>
 </details>
 
-You can also clone this repo, `cd tests/testrepo` and run `git init; pre-commit install; git add .; git commit` to see all of the linters at work.
+You can also clone this repo and then run this to see all of the linters at work,
+
+```bash
+cd tests/test_repo
+git init
+pre-commit install
+git add .
+git commit
+```
 
 ## Using this repo
 
@@ -136,6 +144,7 @@ You can build all of these from source.
 | [uncrustify](http://uncrustify.sourceforge.net/)                         | Formatter            | C, C++, C#, ObjC, D, Java, Pawn, Vala |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             | Static code analyzer | C, C++                                |
 | [cpplint](https://github.com/cpplint/cpplint)                            | Style checker        | C, C++                                |
+| [include-what-you-use](https://github.com/include-what-you-use/include-what-you-use) | Static code analyzer | C, C++                    |
 
 ### Hook Option Comparison
 
@@ -147,6 +156,7 @@ You can build all of these from source.
 | [uncrustify](http://uncrustify.sourceforge.net/)                         | `--replace` `--no-backup` [4] |  | `--set key=value` |
 | [cppcheck](http://cppcheck.sourceforge.net/)                             |  | `-enable=all` | |
 | [cpplint](https://github.com/cpplint/cpplint)                            |  | `--verbose=0` |  |
+| [include-what-you-use](https://github.com/include-what-you-use/include-what-you-use) | | `--verbose=3` | |
 
 
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
@@ -165,7 +175,7 @@ Therefore, it is recommended to avoid needless backup creation by using `--no-ba
 
 ## Development
 
-See [README_dev.md]
+See [README_dev.md](README_dev.md)
 
 ## Additional Resources
 
