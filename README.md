@@ -57,9 +57,10 @@ depending on your use case._
     </p>
 </details>
 
-You can also clone this repo and then run this to see all of the linters at work,
+You can also clone this repo and then run the test_repo to see all of the linters at work,
 
 ```bash
+git clone https://github.com/pocc/pre-commit-hooks
 cd tests/test_repo
 git init
 pre-commit install

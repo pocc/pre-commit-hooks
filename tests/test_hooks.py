@@ -52,21 +52,6 @@ def set_compilation_db(filenames):
         f.write(cdb)
 
 
-def get_multifile_scenarios(err_files):
-    """Create tests to verify that commands are handling both err.c/err.cpp as input correctly."""
-    expected_err = """{}
-====================\n--- original\n\n+++ formatted\n\n@@ -1 +1,4 @@\n\n-int main(){{int i;return;}}\n+int main() {{\n+  int i;\n+  return;\n+}}\n{}
-====================\n--- original\n\n+++ formatted\n\n@@ -1 +1,4 @@\n\n-int main(){{int i;return;}}\n+int main() {{\n+  int i;\n+  return;\n+}}
-""".format(
-        err_files[0], err_files[1]
-    ).encode()
-    scenarios = [
-        [ClangFormatCmd, ["--style=google"], err_files, expected_err, 1],
-        [UncrustifyCmd, ["-c", "tests/uncrustify_defaults.cfg"], err_files, expected_err, 1],
-    ]
-    return scenarios
-
-
 def get_multifile_scenarios_no_diff(err_files):
     """Create tests to verify that commands are handling both err.c/err.cpp as input correctly and that --no-diff disables diff output."""
     expected_err = b""
@@ -95,19 +80,30 @@ def generate_list_tests():
     ok_str = b""
 
     clang_format_args_sets = [["--style=google"], ["--style=google", "-i"]]
-    clang_format_err = """{}
-{}
---- original\n\n+++ formatted\n\n@@ -1 +1,4 @@\n\n-int main(){{int i;return;}}\n+int main() {{\n+  int i;\n+  return;\n+}}
+    clang_format_err = """{0}
+====================
+--- original
+
++++ formatted
+
+@@ -1,2 +1,5 @@
+
+ #include {1}
+-int main(){{int i;return;}}
++int main() {{
++  int i;
++  return;
++}}
 """  # noqa: E501
-    cf_c_err = clang_format_err.format(err_c, 20 * "=").encode()
-    cf_cpp_err = clang_format_err.format(err_cpp, 20 * "=").encode()
+    cf_c_err = clang_format_err.format(err_c, "<stdio.h>").encode()
+    cf_cpp_err = clang_format_err.format(err_cpp, "<string>").encode()
     clang_format_output = [ok_str, ok_str, cf_c_err, cf_cpp_err]
 
     ct_base_args = ["-quiet", "-checks=clang-diagnostic-return-type"]
     # Run normal, plus two in-place arguments
     additional_args = [[], ["-fix"], ["--fix-errors"]]
     clang_tidy_args_sets = [ct_base_args + arg for arg in additional_args]
-    clang_tidy_err_str = """{0}:1:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
+    clang_tidy_err_str = """{0}:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
 int main(){{int i;return;}}
                  ^
 1 error generated.
@@ -132,7 +128,7 @@ Error while processing {0}.
         cppcheck_err = "[{}:1]: (style) Unused variable: i\n"
     # They've made changes to messaging
     elif versions["cppcheck"] >= "1.89":
-        cppcheck_err = """{}:1:16: style: Unused variable: i [unusedVariable]
+        cppcheck_err = """{}:2:16: style: Unused variable: i [unusedVariable]
 int main(){{int i;return;}}
                ^
 """
@@ -149,31 +145,46 @@ int main(){{int i;return;}}
 Done processing {0}
 Total errors found: 5
 {0}:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
-{0}:1:  More than one command on the same line  [whitespace/newline] [0]
-{0}:1:  Missing space after ;  [whitespace/semicolon] [3]
-{0}:1:  Missing space before {{  [whitespace/braces] [5]
-{0}:1:  Could not find a newline character at the end of the file.  [whitespace/ending_newline] [5]
+{0}:2:  More than one command on the same line  [whitespace/newline] [0]
+{0}:2:  Missing space after ;  [whitespace/semicolon] [3]
+{0}:2:  Missing space before {{  [whitespace/braces] [5]
+{0}:2:  Could not find a newline character at the end of the file.  [whitespace/ending_newline] [5]
 """
     cpplint_err_c = cpplint_err_str.format(err_c).encode()
     cpplint_err_cpp = cpplint_err_str.format(err_cpp).encode()
     cpplint_output = [cppc_ok, cppc_ok, cpplint_err_c, cpplint_err_cpp]
 
     iwyu_arg_sets = [[]]
-    iwyu_ok_hpp = os.path.join(pwd, "tests/test_repo/ok-iwyu.hpp")
-    iwyu_err_hpp = os.path.join(pwd, "tests/test_repo/err-iwyu.hpp")
-    iwyu_err_bstr = f"""
-{iwyu_err_hpp} should add these lines:
+    iwyu_err_c = """{0}:2:18: error: non-void function 'main' should return a value [-Wreturn-type]
+int main(){{int i;return;}}
+                 ^
 
-{iwyu_err_hpp} should remove these lines:
-- #include <vector>  // lines 2-2
+{0} should add these lines:
 
-The full include-list for {iwyu_err_hpp}:
-#include <string>  // for string
+{0} should remove these lines:
+- #include <stdio.h>  // lines 1-1
+
+The full include-list for {0}:
 ---
-""".encode()
-    iwyu_files = [iwyu_ok_hpp, iwyu_err_hpp]
-    iwyu_retcodes = [0, 3]
-    iwyu_output = [cppc_ok, iwyu_err_bstr]
+""".format(
+        err_c
+    ).encode()
+    iwyu_err_cpp = """{0}:2:18: error: non-void function 'main' should return a value [-Wreturn-type]
+int main(){{int i;return;}}
+                 ^
+
+{0} should add these lines:
+
+{0} should remove these lines:
+- #include <string>  // lines 1-1
+
+The full include-list for {0}:
+---
+""".format(
+        err_cpp
+    ).encode()
+    iwyu_retcodes = [0, 0, 3, 3]
+    iwyu_output = [cppc_ok, cppc_ok, iwyu_err_c, iwyu_err_cpp]
 
     files = [ok_c, ok_cpp, err_c, err_cpp]
     retcodes = [0, 0, 1, 1]
@@ -194,9 +205,8 @@ The full include-list for {iwyu_err_hpp}:
         for arg_set in cpplint_arg_sets:
             cpplint_scenario = [CpplintCmd, arg_set, [files[i]], cpplint_output[i], retcodes[i]]
             scenarios += [cpplint_scenario]
-    for i in range(len(iwyu_files)):
         for arg_set in iwyu_arg_sets:
-            iwyu_scenario = [IncludeWhatYouUseCmd, arg_set, [iwyu_files[i]], iwyu_output[i], iwyu_retcodes[i]]
+            iwyu_scenario = [IncludeWhatYouUseCmd, arg_set, [files[i]], iwyu_output[i], iwyu_retcodes[i]]
             scenarios += [iwyu_scenario]
 
     if os.name != "nt":
@@ -204,11 +214,11 @@ The full include-list for {iwyu_err_hpp}:
 Compiler Errors:
 (please be aware that these errors will prevent OCLint from analyzing this source code)
 
-{0}:1:18: non-void function 'main' should return a value
+{0}:2:18: non-void function 'main' should return a value
 
 Clang Static Analyzer Results:
 
-{0}:1:18: non-void function 'main' should return a value
+{0}:2:18: non-void function 'main' should return a value
 
 
 OCLint Report
@@ -233,7 +243,6 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
                 scenarios += [oclint_scenario]
 
     scenarios += get_multifile_scenarios_no_diff([err_c, err_cpp])
-    scenarios += get_multifile_scenarios([err_c, err_cpp])
 
     return scenarios
 

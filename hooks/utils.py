@@ -7,7 +7,7 @@ import shutil
 import subprocess as sp
 import sys
 
-LINTER_FILE_REGEX = r"\.(c|cc|cxx|cpp|cu|cuh|h|hh|hpp|hxx|m|mm|d|java|vala))$"
+LINTER_FILE_REGEX = r"\.(c|cc|cxx|cpp|cu|cuh|h|hh|hpp|hxx|m|mm|d|java|vala)$"
 
 
 class Command:
