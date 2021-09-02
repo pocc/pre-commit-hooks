@@ -13,7 +13,7 @@ import pytest
 def create_temp_dir_for(filename):
     """Create a temporary dir for a file, returning the file path."""
     uuid_dir = str(uuid.uuid4())
-    temp_dir = os.path.join("tests/files/temp", uuid_dir)
+    temp_dir = os.path.join("test/test_repo/temp", uuid_dir)
     os.makedirs(temp_dir)
     new_temp_name = shutil.copy2(filename, temp_dir)
     return os.path.join(os.getcwd(), new_temp_name)
@@ -25,7 +25,7 @@ def assert_equal(expected, actual):
         print(f"Expected:`{expected}`")
         print(f"Actual:`{actual}`")
         diff_lines = difflib.diff_bytes(difflib.unified_diff, expected, actual)
-        print(b"\n".join(diff_lines))
+        print(diff_lines)
         pytest.fail("Test failed!")
 
 

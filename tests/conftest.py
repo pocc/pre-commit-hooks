@@ -33,9 +33,9 @@ def pytest_collection_modifyitems(config, items):
 def pytest_exception_interact(node, call, report):
     """See https://docs.pytest.org/en/latest/reference.html#_pytest.hookspec.pytest_exception_interact"""  # noqa: E501
     if report.failed:
-        # Clean up temp dirs in tests/files if a test failed.
-        if os.path.exists("tests/files/temp"):
-            shutil.rmtree("tests/files/temp")
+        # Clean up temp dirs in tests/test_repo if a test failed.
+        if os.path.exists("tests/test_repo/temp"):
+            shutil.rmtree("tests/test_repo/temp")
         # Delete generated files
         for filename in ["ok.plist", "err.plist", "defaults.cfg"]:
             abs_filename = os.path.abspath(filename)

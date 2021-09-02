@@ -14,6 +14,7 @@ class CpplintCmd(StaticAnalyzerCmd):
     def __init__(self, args):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
+        self.add_if_missing(["--verbose=0"])
 
     def run(self):
         """Run cpplint"""

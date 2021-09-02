@@ -9,6 +9,7 @@ import sys
 
 CPP_FILE_REGEX = r"\.(c|cc|cxx|cpp|h|hpp|hxx|m)$"
 
+
 class Command:
     """Super class that all commands inherit"""
 
@@ -37,7 +38,7 @@ class Command:
 
     def get_added_files(self):
         """Find added files using git. Taken from https://github.com/pre-commit/pre-commit-hooks/blob/master/pre_commit_hooks/util.py"""
-        cmd = ['git', 'diff', '--staged', '--name-only', '--diff-filter=A']
+        cmd = ["git", "diff", "--staged", "--name-only", "--diff-filter=A"]
         sp_child = sp.run(cmd, stdout=sp.PIPE, stderr=sp.PIPE)
         if sp_child.stderr or sp_child.returncode != 0:
             self.raise_error("Problem determining which files are being committed using git.", sp_child.stderr.decode())
@@ -56,8 +57,7 @@ class Command:
             actual_version = self.get_version_str()
             self.assert_version(actual_version, expected_version)
         # If not running on a commit, still attempt to get filenames with argparse
-        if not self.files:
-            self.files = known_args.filenames
+        self.files += known_args.filenames
         self.files = [f for f in self.files if re.search(CPP_FILE_REGEX, f)]
         # pre-commit puts files at the end, which messes with clang-tidy/oclint using --
         # See https://github.com/pre-commit/pre-commit/issues/1000 for more info on --
@@ -119,6 +119,7 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
 
 class StaticAnalyzerCmd(Command):
     """Commmands that analyze code and are not formatters.s"""
+
     def __init__(self, command, look_behind, args):
         super().__init__(command, look_behind, args)
 
@@ -158,7 +159,9 @@ class FormatterCmd(Command):
             # If edit in place is used, the formatter will fix in place with
             # no stdout. So compare the before/after file for hook pass/fail
             expected = self.get_filelines(filename)
-        diff = list(difflib.diff_bytes(difflib.unified_diff, actual, expected, fromfile=b'original', tofile=b'formatted'))
+        diff = list(
+            difflib.diff_bytes(difflib.unified_diff, actual, expected, fromfile=b"original", tofile=b"formatted")
+        )
         if len(diff) > 0:
             if not self.no_diff_flag:
                 header = filename + b"\n" + 20 * b"=" + b"\n"

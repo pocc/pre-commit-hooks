@@ -1,0 +1,177 @@
+clang-format.............................................................Failed
+- hook id: clang-format
+- exit code: 1
+
+err.c
+====================
+--- original
+
++++ formatted
+
+@@ -1 +1,4 @@
+
+-int main(){int i;return;}
++int main() {
++  int i;
++  return;
++}
+err.cpp
+====================
+--- original
+
++++ formatted
+
+@@ -1 +1,4 @@
+
+-int main(){int i;return;}
++int main() {
++  int i;
++  return;
++}
+
+clang-tidy...............................................................Failed
+- hook id: clang-tidy
+- exit code: 1
+
+1 error generated.
+Error while processing /home/rj/code/pre-commit-hooks/tests/test_repo/err.c.
+Found compiler error(s).
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:1:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
+int main(){int i;return;}
+                 ^
+
+oclint...................................................................Failed
+- hook id: oclint
+- exit code: 1
+
+Compiler Errors:
+(please be aware that these errors will prevent OCLint from analyzing this source code)
+
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:1:18: non-void function 'main' should return a value
+
+Clang Static Analyzer Results:
+
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:1:18: non-void function 'main' should return a value
+
+
+OCLint Report
+
+Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0
+
+
+[OCLint (http://oclint.org) v0.13.1]
+
+uncrustify...............................................................Failed
+- hook id: uncrustify
+- exit code: 1
+
+err-iwyu.hpp
+====================
+--- original
+
++++ formatted
+
+@@ -1,4 +1,5 @@
+
+ #include <string>
+ #include <vector>
+-void foo(std::string s) {}
++void foo(std::string s) {
++}
+
+err.c
+====================
+--- original
+
++++ formatted
+
+@@ -1 +1,3 @@
+
+-int main(){int i;return;}
++int main(){
++	int i; return;
++}
+err.cpp
+====================
+--- original
+
++++ formatted
+
+@@ -1 +1,3 @@
+
+-int main(){int i;return;}
++int main(){
++	int i; return;
++}
+ok-iwyu.hpp
+====================
+--- original
+
++++ formatted
+
+@@ -1,3 +1,4 @@
+
+ #include <vector>
+-void foo(std::vector<int> s) {}
++void foo(std::vector<int> s) {
++}
+
+ok.c
+====================
+--- original
+
++++ formatted
+
+@@ -2,7 +2,7 @@
+
+ #include <stdio.h>
+
+ int main() {
+-  printf("Hello World!\n");
+-  return 0;
++	printf("Hello World!\n");
++	return 0;
+ }
+
+ok.cpp
+====================
+--- original
+
++++ formatted
+
+@@ -2,7 +2,7 @@
+
+ #include <iostream>
+
+ int main() {
+-  std::cout << "Hello World!\n";
+-  return 0;
++	std::cout << "Hello World!\n";
++	return 0;
+ }
+
+cppcheck.................................................................Failed
+- hook id: cppcheck
+- exit code: 1
+
+err-iwyu.hpp:3:22: performance: Function parameter 's' should be passed by const reference. [passedByValue]
+void foo(std::string s) {}
+                     ^
+err-iwyu.hpp:3:0: style: The function 'foo' is never used. [unusedFunction]
+
+^
+
+cpplint..................................................................Failed
+- hook id: cpplint
+- exit code: 1
+
+Done processing err-iwyu.hpp
+Total errors found: 2
+err-iwyu.hpp:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
+err-iwyu.hpp:0:  No #ifndef header guard found, suggested CPP variable is: TESTS_TEST_REPO_ERR_IWYU_HPP_  [build/header_guard] [5]
+
+include-what-you-use.....................................................Failed
+- hook id: include-what-you-use
+- exit code: 1
+
+Executable `iwyu-hook` not found

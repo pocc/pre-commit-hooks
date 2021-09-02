@@ -3,33 +3,28 @@
 [![Build Status](https://travis-ci.com/pocc/pre-commit-hooks.svg?branch=master)](https://travis-ci.com/pocc/pre-commit-hooks)
 
 This is a [pre-commit](https://pre-commit.com) hooks repo that
-integrates six C/C++ linters:
+integrates two C/C++ code formatters:
 > [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html),
-[clang-tidy](https://clang.llvm.org/extra/clang-tidy/),
-[oclint](http://oclint.org/),
 [uncrustify](http://uncrustify.sourceforge.net/),
+
+and five C/C++ static code analyzers:
+> [clang-tidy](https://clang.llvm.org/extra/clang-tidy/),
+[oclint](http://oclint.org/),
 [cppcheck](http://cppcheck.sourceforge.net/),
-[cpplint](https://github.com/cpplint/cpplint)
+[cpplint](https://github.com/cpplint/cpplint),
+[include-what-you-use](https://github.com/include-what-you-use/include-what-you-use)
 
-Many of these linters will return 0 on error, which pre-commit will then
-mark as passing. Additionally, pre-commit has
-[a bug](https://github.com/pre-commit/pre-commit/issues/1000)
-where arguments after `--` are dropped. This repo's hooks for each command
-will fail correctly and honor all `--` arguments.
+This repo's hooks do more than passthrough arguments to provide these features:
 
-This repo is available in both python and bash. To use a language, use `rev: $lang`
-in your `.pre-commit-config.yaml`. Master is set to python as the default as that is
-the language pre-commit is written in.
+* Relay correct pass/fail to pre-commit, even when some commands exit 0 for
+* Honor `--` arguments, which pre-commit [has problems with](https://github.com/pre-commit/pre-commit/issues/1000)
+* Optionally [enforce a command version](https://github.com/pocc/pre-commit-hooks#enforcing-linter-version-with---version) so your team gets code formatted/analyzed the same way.
+* Formatters clang-format and uncrustify will error with diffs of what has changed
+* More verbose error messages
 
 ## Example Usage
 
 With `int main() { int i; return 10; }` in a file `err.cpp`, all five linters should fail on commit:
-
-<p align="center">
-  <img src="media/clinters_err.png" width="80%">
-</p>
-
-Using clang-format `8.0.0`; clang-tidy `8.0.0`; oclint `0.13`
 
 The above uses this `.pre-commit-config.yaml`:
 
@@ -48,13 +43,55 @@ repos:
       - id: uncrustify
       - id: cppcheck
         args: [--enable=all]
-      - id: cpplint 
+      - id: cpplint
+      - id: iwyu
 ```
 
 _Note that for your config yaml, you can supply your own args or remove the args line entirely,
 depending on your use case._
 
-## Using the Hooks
+<details>
+  <summary>Pre-commit linters full error output</summary>
+    <p align="center">
+      <img src="media/clinters_err.png" width="80%">
+    </p>
+</details>
+
+## Using this repo
+
+### Special flags in this repo
+
+There are 2 flags, `--version` and `--no-diff` that can be added to args: for a pre-commit hook.
+They will be removed and not be passed on to the command.
+
+Some linters change behavior between versions. To enforce a linter version
+8.0.0, for example, add `--version=8.0.0` to `args:` for that linter. Note that
+this is a pre-commit hook arg and will be filtered before args are passed to the linter.
+
+You can add `--no-diff` to the args: for clang-format and uncrustify
+if you would like there to be no diff output for these commands.
+
+### Default Options
+
+These options are automatically added to enable all errors or are required.
+
+* oclint: `["-enable-global-analysis", "-enable-clang-static-analyzer", "-max-priority-3", "0"]`
+* uncrustify: `["-c", "defaults.cfg"]` (options added, and a defaults.cfg generated, if -c is missing)
+* cppcheck: `["-q" , "--error-exitcode=1", "--enable=all", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"]` (See https://github.com/pocc/pre-commit-hooks/pull/30)
+* cpplint: `["--verbose=0"]`
+
+If any of these options are supplied in `args:`, they will override the above defaults.
+
+### Compilation Database
+
+`clang-tidy` and `oclint` both expect a
+[compilation database](https://clang.llvm.org/docs/JSONCompilationDatabase.html).
+Both of the hooks for them will ignore the error for not having one.
+
+You can generate with one `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ...` if you
+have a cmake-based project.
+
+## Information about the Commands
 
 Python3.6+ is required to use these hooks as all 5 invoking scripts are written in it.
 As this is also the minimum version of pre-commit, this should not be an issue.
@@ -119,117 +156,14 @@ but Fuchsia [disallows it](https://clang.llvm.org/extra/clang-tidy/checks/fuchsi
 *Thanks to @rambo.*
 
 [3]: The oclint pre-commit hook does the equivalent of `-max-priority-3 0` by default, which returns an error code when any check fails.
-If you use the `-max-priority-3` flag to only catch some errors, feel free to reopen #23.
 See [oclint error codes](https://docs.oclint.org/en/stable/manual/oclint.html#exit-status-options) for more info on partially catching failed checks.
 
 [4]: By definition, if you are using `pre-commit`, you are using version control.
 Therefore, it is recommended to avoid needless backup creation by using `--no-backup`.
 
-## Special flags in this repo
-
-There are 2 flags, `--no-diff` and `--version` that can be added to args: for a pre-commit hook.
-They will be removed and not be passed on to the command.
-
-### Using --no-diff
-
-You can add `--no-diff` to the args: for clang-format and uncrustify 
-if you would like there to be no diff output for these commands.
-
-### Enforcing linter version with --version
-
-Some linters change behavior between versions. To enforce a linter version
-8.0.0, for example, add `--version=8.0.0` to `args:` for that linter. Note that
-this is a pre-commit hook arg and will be filtered before args are passed to the linter.
-
-### Compilation Database
-
-`clang-tidy` and `oclint` both expect a
-[compilation database](https://clang.llvm.org/docs/JSONCompilationDatabase.html).
-Both of the hooks for them will ignore the error for not having one.
-
-You can generate with one `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ...` if you
-have a cmake-based project.
-
-### The '--' doubledash option
-
-Options after `--` like `-std=c++11` will be interpreted correctly for
-`clang-tidy` and `oclint`. Make sure they sequentially follow the `--` argument
-in the hook's args list.
-
 ## Development
 
-### Adding a hook
-
-* [ ] Add the hook to hooks/
-* [ ] Add tests to tests/test_hooks.py (or alternative file)
-* [ ] Add tests to tests/test_versions.py
-* [ ] Add a section in .pre-commit-hooks.yaml
-* [ ] Add a line to setup.cfg
-* [ ] Update tests/test_utils.py get_versions() regex and command list
-* [ ] Update the README.md
-
-### Standalone Hooks
-
-You can also use these hooks on the command line for testing purposes or if you like consistent return codes. 
-These hooks are available via [PyPI](https://pypi.org/project/CLinters/).
-Install it with `pip install CLinters`.
-They are named as `$cmd-hook`, creating clang-format-hook, clang-tidy-hook, oclint-hook, cppcheck-hook, and uncrustify-hook.
-
-They are generated with setup.py and setup.cfg and can be found in ~/.local/bin (at least on linux).
-To test changes in hooks with pdb, using uncrustify-hook as an example (with uncrustify args following the command), use the following snippet:
-
-    python3 -m pdb "$(which uncrustify-hook)" -l cpp -c uncrustify_defaults.cfg err.cpp
-
-And add `breakpoint()` wherever you want pdb to trigger.
-
-### Testing
-
-*If tests fail, it may be due to a new version of a command.*
-*Known good command versions/OSes are at tests/pass_configurations.md*
-
-If you want to run these tests, you will need to install the command line versions
-of the hooks locally with `pip install .`.
-
-To run the tests and verify `clang-format`, `clang-tidy`, and `oclint` are
-working as expected on your system, use `pytest --oclint --internal -vvv`.
-This will work on both bash and python branches.
-
-Testing is done by using pytest to generate 76 table tests (python branch)
-based on combinations of args, files, and expected results.
-
-The default is to skip most (41/76) tests as to run them all takes ~60s. These
-pytest options are available to add test types:
-
-* `--oclint`: oclint tests, which take extra time
-* `--internal`: Internal class tests for internal consistency
-
-**Note**: You can parallelize these tests with `pytest-xdist` (run `pip install pytest-xdist`). For example, adding `-n 4`
-to the command creates 4 workers.
-
-To run all tests serially, run `pytest -x -vvv --internal --oclint` like so:
-
-```bash
-pre-commit-hooks$ pytest -x -vvv --internal --oclint
-============================= test session starts ==============================
-platform darwin -- Python 3.7.6, pytest-5.4.1, py-1.7.0, pluggy-0.13.1 -- /usr/local/opt/python/bin/python3.7
-cachedir: .pytest_cache
-rootdir: /Users/pre-commit-hooks/code/pre-commit-hooks, inifile: pytest.ini
-collected 76 items
-
-tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-format on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  3%]
-tests/test_hooks.py::TestHooks::test_run[run_cmd_class clang-tidy on /Users/pre-commit-hooks/code/pre-commit-hooks/tests/files/ok.c] PASSED [  7%]
-...
-
-============================= 93 passed in 9.28s ==============================
-```
-
-### Why have a script when your hook could be `$command "$@"`?
-
-shellcheck keeps things simple by relaying arguments as `shellcheck "$@"`.
-This is not possible with several C/C++ linters because they exit 0 when
-there are errors. The pre-commit framework registers failures by non-zero exit codes,
-which results in false "passes". Additionally, these scripts provide more verbose error
-messages and version locking.
+See [README_dev.md]
 
 ## Additional Resources
 

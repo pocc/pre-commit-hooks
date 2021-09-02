@@ -49,8 +49,8 @@ function cleanup {
 }
 ####################
 
-ok_files="$(find tests/files/ok*)"
-err_files="$(find tests/files/err*)"
+ok_files="$(find tests/test_repo/ok*)"
+err_files="$(find tests/test_repo/err*)"
 
 ### clang-format ###
 testfn run_clang_format "$ok_files" 0
