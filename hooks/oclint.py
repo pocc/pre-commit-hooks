@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Wrapper script for oclint"""
 import os
-import sys
 
 from hooks.utils import StaticAnalyzerCmd
 
@@ -17,6 +16,10 @@ class OCLintCmd(StaticAnalyzerCmd):
         self.parse_args(args)
         # Check for as many errors as possible (see https://github.com/oclint/oclint/issues/538)
         self.add_if_missing(["-max-priority-3", "0"])
+        # Enable different classes of analysis
+        self.add_if_missing(["-enable-global-analysis", "-enable-clang-static-analyzer"])
+        # Sending analytics can cause oclint to hang
+        self.add_if_missing(["-no-analytics"])
 
     def run(self):
         """Run OCLint and remove generated temporary files. OCLint will put the standard reprot into stderr."""
@@ -28,7 +31,7 @@ class OCLintCmd(StaticAnalyzerCmd):
             if b"Errors" in self.stdout:
                 self.stderr = self.stdout
             # If errors have been captured, stdout is unexpected
-            self.stdout = b''
+            self.stdout = b""
             self.exit_on_error()
             self.cleanup_files(current_files)
 

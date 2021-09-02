@@ -65,7 +65,7 @@ install_macos_cmds () {
 cleanup () {
   # Run a cleanup function in test script as
   # its not possible in parallelized pytest
-  rm -rf tests/files/*.json tests/files/temp || true
+  rm -rf tests/test_repo/*.json tests/test_repo/temp || true
 }
 
 run_tests () {

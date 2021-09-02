@@ -46,7 +46,6 @@ repos:
     hooks:
       - id: tests
         name: tests
-        entry: tests/run_tests.sh
-        description: Tests expected output of all 3 scripts
-        language: script
-        files: \.py$
+        entry: bash -c "pytest -v -xxx"
+        description: Tests expected output of all scripts
+        language: system
