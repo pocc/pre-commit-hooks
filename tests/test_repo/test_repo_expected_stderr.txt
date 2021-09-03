@@ -8,8 +8,9 @@ err.c
 
 +++ formatted
 
-@@ -1 +1,4 @@
+@@ -1,2 +1,5 @@
 
+ #include <stdio.h>
 -int main(){int i;return;}
 +int main() {
 +  int i;
@@ -21,8 +22,9 @@ err.cpp
 
 +++ formatted
 
-@@ -1 +1,4 @@
+@@ -1,2 +1,5 @@
 
+ #include <string>
 -int main(){int i;return;}
 +int main() {
 +  int i;
@@ -33,7 +35,7 @@ clang-tidy...............................................................Failed
 - hook id: clang-tidy
 - exit code: 1
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:1:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
 int main(){int i;return;}
                  ^
 1 error generated.
@@ -47,11 +49,11 @@ oclint...................................................................Failed
 Compiler Errors:
 (please be aware that these errors will prevent OCLint from analyzing this source code)
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:1:18: non-void function 'main' should return a value
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:2:18: non-void function 'main' should return a value
 
 Clang Static Analyzer Results:
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:1:18: non-void function 'main' should return a value
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:2:18: non-void function 'main' should return a value
 
 
 OCLint Report
@@ -65,28 +67,15 @@ uncrustify...............................................................Failed
 - hook id: uncrustify
 - exit code: 1
 
-err-iwyu.hpp
-====================
---- original
-
-+++ formatted
-
-@@ -1,4 +1,5 @@
-
- #include <string>
- #include <vector>
--void foo(std::string s) {}
-+void foo(std::string s) {
-+}
-
 err.c
 ====================
 --- original
 
 +++ formatted
 
-@@ -1 +1,3 @@
+@@ -1,2 +1,4 @@
 
+ #include <stdio.h>
 -int main(){int i;return;}
 +int main(){
 +	int i; return;
@@ -97,8 +86,9 @@ err.cpp
 
 +++ formatted
 
-@@ -1 +1,3 @@
+@@ -1,2 +1,4 @@
 
+ #include <string>
 -int main(){int i;return;}
 +int main(){
 +	int i; return;
@@ -108,28 +98,34 @@ cppcheck.................................................................Failed
 - hook id: cppcheck
 - exit code: 1
 
-err-iwyu.hpp:3:22: performance: Function parameter 's' should be passed by const reference. [passedByValue]
-void foo(std::string s) {}
-                     ^
+err.c:2:16: style: Unused variable: i [unusedVariable]
+int main(){int i;return;}
+               ^
 
 cpplint..................................................................Failed
 - hook id: cpplint
 - exit code: 1
 
-Done processing err-iwyu.hpp
-Total errors found: 2
-err-iwyu.hpp:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
-err-iwyu.hpp:0:  No #ifndef header guard found, suggested CPP variable is: TESTS_TEST_REPO_ERR_IWYU_HPP_  [build/header_guard] [5]
+Done processing err.c
+Total errors found: 5
+err.c:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
+err.c:2:  More than one command on the same line  [whitespace/newline] [0]
+err.c:2:  Missing space after ;  [whitespace/semicolon] [3]
+err.c:2:  Missing space before {  [whitespace/braces] [5]
+err.c:2:  Could not find a newline character at the end of the file.  [whitespace/ending_newline] [5]
 
 include-what-you-use.....................................................Failed
 - hook id: include-what-you-use
 - exit code: 3
 
-err-iwyu.hpp should add these lines:
+err.c:2:18: error: non-void function 'main' should return a value [-Wreturn-type]
+int main(){int i;return;}
+                 ^
 
-err-iwyu.hpp should remove these lines:
-- #include <vector>  // lines 2-2
+err.c should add these lines:
 
-The full include-list for err-iwyu.hpp:
-#include <string>  // for string
+err.c should remove these lines:
+- #include <stdio.h>  // lines 1-1
+
+The full include-list for err.c:
 ---

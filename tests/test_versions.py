@@ -7,10 +7,10 @@ import tests.test_utils as utils
 from hooks.clang_format import ClangFormatCmd
 from hooks.clang_tidy import ClangTidyCmd
 from hooks.cppcheck import CppcheckCmd
-from hooks.oclint import OCLintCmd
-from hooks.uncrustify import UncrustifyCmd
 from hooks.cpplint import CpplintCmd
 from hooks.include_what_you_use import IncludeWhatYouUseCmd
+from hooks.oclint import OCLintCmd
+from hooks.uncrustify import UncrustifyCmd
 
 
 class TestVersions:
@@ -39,7 +39,7 @@ Edit your pre-commit config or use a different version of {0}.
             UncrustifyCmd,
             CppcheckCmd,
             CpplintCmd,
-            IncludeWhatYouUseCmd
+            IncludeWhatYouUseCmd,
         ]  # noqa: E501
         if os.name != "nt":  # oclint is not supported on windows
             commands.append(OCLintCmd)
@@ -57,13 +57,8 @@ Edit your pre-commit config or use a different version of {0}.
             for t in table_tests:
                 scenarios += [
                     [
-                        "{} {} version test".format(cmd.command, t[0]),
-                        {
-                            "cmd_class": t[1],
-                            "version": t[2],
-                            "expected_stderr": t[3],
-                            "expected_retcode": t[4],
-                        },
+                        "({}) {} --version {}".format(t[0], cmd.command, t[2]),
+                        {"cmd_class": t[1], "version": t[2], "expected_stderr": t[3], "expected_retcode": t[4]},
                     ]
                 ]
         return scenarios

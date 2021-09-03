@@ -87,7 +87,7 @@ if you would like there to be no diff output for these commands.
 These options are automatically added to enable all errors or are required.
 
 * oclint: `["-enable-global-analysis", "-enable-clang-static-analyzer", "-max-priority-3", "0"]`
-* uncrustify: `["-c", "defaults.cfg"]` (options added, and a defaults.cfg generated, if -c is missing)
+* uncrustify: `["-c", "defaults.cfg", "-q"]` (options added, and a defaults.cfg generated, if -c is missing)
 * cppcheck: `["-q" , "--error-exitcode=1", "--enable=all", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"]` (See https://github.com/pocc/pre-commit-hooks/pull/30)
 * cpplint: `["--verbose=0"]`
 

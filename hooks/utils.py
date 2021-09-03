@@ -56,10 +56,7 @@ class Command:
             expected_version = known_args.version[0]
             actual_version = self.get_version_str()
             self.assert_version(actual_version, expected_version)
-        # If not running on a commit, still attempt to get filenames with argparse
-        for i in known_args.filenames:
-            if i not in self.files:
-                self.files.append(i)
+        self.files = known_args.filenames
         self.files = [f for f in self.files if re.search(LINTER_FILE_REGEX, f)]
         # pre-commit puts files at the end, which messes with clang-tidy/oclint using --
         # See https://github.com/pre-commit/pre-commit/issues/1000 for more info on --
@@ -67,6 +64,11 @@ class Command:
         for f in self.files:
             if f in self.args:
                 self.args.remove(f)
+        # All commands other than clang-tidy or oclint require files, --version ok
+        is_cmd_clang_analyzer = self.command == "clang-tidy" or self.command == "oclint"
+        has_args = self.files or self.args or "version" in known_args
+        if not has_args and not is_cmd_clang_analyzer:
+            self.raise_error("Missing arguments", "No file arguments found and no files are pending commit.")
 
     def add_if_missing(self, new_args):
         """Add a default if it's missing from the command. This library
@@ -181,11 +183,9 @@ class FormatterCmd(Command):
         filename_opts = self.get_filename_opts(filename)
         args = [self.command, *self.args, *filename_opts]
         child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
-        if self.command == "uncrustify" and b"Parsing:" in child.stderr:
-            child.stderr = b""
         if len(child.stderr) > 0:
             problem = "Unexpected Stderr received from " + self.command
-            self.raise_error(problem, str(child.stderr, encoding="utf-8"))
+            self.raise_error(problem, child.stdout.decode() + child.stderr.decode())
         if child.stdout == b"":
             return []
         return child.stdout.split(b"\x0a")

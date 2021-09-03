@@ -18,6 +18,7 @@ class UncrustifyCmd(FormatterCmd):
         super().__init__(self.command, self.lookbehind, args)
         self.check_installed()
         self.parse_args(args)
+        self.add_if_missing(["-q"])  # Remove stderr, which causes issues
         self.set_diff_flag()
         self.file_flag = "-f"
         self.edit_in_place = "--replace" in self.args
@@ -34,8 +35,8 @@ class UncrustifyCmd(FormatterCmd):
             cmds = ["uncrustify", "--show-config"]
             defaults = sp.check_output(cmds)
             # Change default 8 => 2 spaces per LLVM default
-            regex = rb"(indent_columns\s+=) \d"
-            defaults = re.sub(regex, b"\1 2", defaults)
+            regex = rb"indent_columns.*"
+            defaults = re.sub(regex, b"indent_columns = 2", defaults)
             with open("defaults.cfg", "wb") as f:
                 f.write(defaults)
 
