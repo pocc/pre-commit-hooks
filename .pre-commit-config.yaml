@@ -11,8 +11,9 @@ repos:
     rev: 1f6de3d70391131fac4b911ae913c568e571e34e
     hooks:
       - id: trailing-whitespace
+        exclude: \.output
       - id: end-of-file-fixer
-        exclude: \.cp?p?$
+        exclude: \.(cp?p?$|output)
       - id: check-docstring-first
       - id: check-added-large-files
       - id: check-yaml

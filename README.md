@@ -25,7 +25,7 @@ This repo's hooks do more than passthrough arguments to provide these features:
 ## Example Usage
 
 With `int main() { int i; return 10; }` in a file `err.cpp`, all five linters should fail on commit
-and produce [this output](tests/test_repo/test_repo_expected_stderr.txt) using this `.pre-commit-config.yaml`:
+and produce [this output](tests/test_repo/test_integration_expected_stderr.txt) using this `.pre-commit-config.yaml`:
 
 
 ```yaml
@@ -37,12 +37,9 @@ repos:
       - id: clang-format
         args: [--style=Google]
       - id: clang-tidy
-        args: [-checks=clang-diagnostic-return-type]
       - id: oclint
-        args: [-enable-clang-static-analyzer, -enable-global-analysis]
       - id: uncrustify
       - id: cppcheck
-        args: [--enable=all]
       - id: cpplint
       - id: iwyu
 ```

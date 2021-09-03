@@ -30,28 +30,6 @@ from hooks.oclint import OCLintCmd
 from hooks.uncrustify import UncrustifyCmd
 
 
-def set_compilation_db(filenames):
-    """Create a compilation database for clang static analyzers."""
-    cdb = "["
-    clang_location = shutil.which("clang")
-    file_dir = os.path.dirname(os.path.abspath(filenames[0]))
-    for f in filenames:
-        file_base = os.path.basename(f)
-        clang_suffix = ""
-        if f.endswith("cpp"):
-            clang_suffix = "++"
-        cdb += """\n{{
-    "directory": "{0}",
-    "command": "{1}{2} {3} -o {3}.o",
-    "file": "{3}"
-}},""".format(
-            file_dir, clang_location, clang_suffix, os.path.join(file_dir, file_base)
-        )
-    cdb = cdb[:-1] + "]"  # Subtract extra comma and end json
-    with open(file_dir + "/" + "compile_commands.json", "w") as f:
-        f.write(cdb)
-
-
 def get_multifile_scenarios_no_diff(err_files):
     """Create tests to verify that commands are handling both err.c/err.cpp as input correctly and that --no-diff disables diff output."""
     expected_err = b""
@@ -256,7 +234,7 @@ class TestHooks:
         os.makedirs("tests/test_repo/temp", exist_ok=True)
         scenarios = generate_list_tests()
         filenames = ["tests/test_repo/" + f for f in ["ok.c", "ok.cpp", "err.c", "err.cpp"]]
-        set_compilation_db(filenames)
+        utils.set_compilation_db(filenames)
         cls.scenarios = []
         for test_type in [cls.run_cmd_class, cls.run_shell_cmd]:
             for s in scenarios:
@@ -296,7 +274,7 @@ class TestHooks:
                 expd_output = expd_output.replace(f.encode(), temp_file.encode())
                 temp_files.append(temp_file)
             files = temp_files
-            set_compilation_db(files)
+            utils.set_compilation_db(files)
         all_args = files + args
         test_type(cmd, all_args, expd_output, expd_retcode)
         if use_temp_files:

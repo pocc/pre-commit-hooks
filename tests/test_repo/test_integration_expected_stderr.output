@@ -2,20 +2,6 @@ clang-format.............................................................Failed
 - hook id: clang-format
 - exit code: 1
 
-err.c
-====================
---- original
-
-+++ formatted
-
-@@ -1,2 +1,5 @@
-
- #include <stdio.h>
--int main(){int i;return;}
-+int main() {
-+  int i;
-+  return;
-+}
 err.cpp
 ====================
 --- original
@@ -25,6 +11,20 @@ err.cpp
 @@ -1,2 +1,5 @@
 
  #include <string>
+-int main(){int i;return;}
++int main() {
++  int i;
++  return;
++}
+err.c
+====================
+--- original
+
++++ formatted
+
+@@ -1,2 +1,5 @@
+
+ #include <stdio.h>
 -int main(){int i;return;}
 +int main() {
 +  int i;
@@ -35,11 +35,11 @@ clang-tidy...............................................................Failed
 - hook id: clang-tidy
 - exit code: 1
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
 int main(){int i;return;}
                  ^
 1 error generated.
-Error while processing /home/rj/code/pre-commit-hooks/tests/test_repo/err.c.
+Error while processing /home/rj/code/pre-commit-hooks/tests/test_repo/err.cpp.
 Found compiler error(s).
 
 oclint...................................................................Failed
@@ -49,16 +49,16 @@ oclint...................................................................Failed
 Compiler Errors:
 (please be aware that these errors will prevent OCLint from analyzing this source code)
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:2:18: non-void function 'main' should return a value
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.cpp:2:18: non-void function 'main' should return a value
 
 Clang Static Analyzer Results:
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.c:2:18: non-void function 'main' should return a value
+/home/rj/code/pre-commit-hooks/tests/test_repo/err.cpp:2:18: non-void function 'main' should return a value
 
 
 OCLint Report
 
-Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0
+Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 
 
 
 [OCLint (http://oclint.org) v0.13.1]
@@ -67,19 +67,6 @@ uncrustify...............................................................Failed
 - hook id: uncrustify
 - exit code: 1
 
-err.c
-====================
---- original
-
-+++ formatted
-
-@@ -1,2 +1,4 @@
-
- #include <stdio.h>
--int main(){int i;return;}
-+int main(){
-+	int i; return;
-+}
 err.cpp
 ====================
 --- original
@@ -91,14 +78,27 @@ err.cpp
  #include <string>
 -int main(){int i;return;}
 +int main(){
-+	int i; return;
++  int i; return;
++}
+err.c
+====================
+--- original
+
++++ formatted
+
+@@ -1,2 +1,4 @@
+
+ #include <stdio.h>
+-int main(){int i;return;}
++int main(){
++  int i; return;
 +}
 
 cppcheck.................................................................Failed
 - hook id: cppcheck
 - exit code: 1
 
-err.c:2:16: style: Unused variable: i [unusedVariable]
+err.cpp:2:16: style: Unused variable: i [unusedVariable]
 int main(){int i;return;}
                ^
 
@@ -106,26 +106,27 @@ cpplint..................................................................Failed
 - hook id: cpplint
 - exit code: 1
 
-Done processing err.c
+Done processing err.cpp
 Total errors found: 5
-err.c:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
-err.c:2:  More than one command on the same line  [whitespace/newline] [0]
-err.c:2:  Missing space after ;  [whitespace/semicolon] [3]
-err.c:2:  Missing space before {  [whitespace/braces] [5]
-err.c:2:  Could not find a newline character at the end of the file.  [whitespace/ending_newline] [5]
+err.cpp:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
+err.cpp:2:  More than one command on the same line  [whitespace/newline] [0]
+err.cpp:2:  Missing space after ;  [whitespace/semicolon] [3]
+err.cpp:2:  Missing space before {  [whitespace/braces] [5]
+err.cpp:2:  Could not find a newline character at the end of the file.  [whitespace/ending_newline] [5]
 
 include-what-you-use.....................................................Failed
 - hook id: include-what-you-use
 - exit code: 3
 
-err.c:2:18: error: non-void function 'main' should return a value [-Wreturn-type]
+err.cpp:2:18: error: non-void function 'main' should return a value [-Wreturn-type]
 int main(){int i;return;}
                  ^
 
-err.c should add these lines:
+err.cpp should add these lines:
 
-err.c should remove these lines:
-- #include <stdio.h>  // lines 1-1
+err.cpp should remove these lines:
+- #include <string>  // lines 1-1
 
-The full include-list for err.c:
+The full include-list for err.cpp:
 ---
+
