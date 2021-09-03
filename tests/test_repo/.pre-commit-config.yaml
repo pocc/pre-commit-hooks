@@ -1,7 +1,7 @@
 fail_fast: false
 repos:
   - repo: https://github.com/pocc/pre-commit-hooks
-    rev: 63f20adecd9d03eee26a4884b9f33be90a5bb1e1
+    rev: v1.3.3
     hooks:
       - id: clang-format
         args: [--style=Google]
