@@ -16,17 +16,31 @@ and five C/C++ static code analyzers:
 
 This repo's hooks do more than passthrough arguments to provide these features:
 
-* Relay correct pass/fail to pre-commit, even when some commands exit 0 for
+* Relay correct pass/fail to pre-commit, even when some commands exit 0 when they should not. Some versions of oclint, clang-tidy, and cppcheck have this behavior.
 * Honor `--` arguments, which pre-commit [has problems with](https://github.com/pre-commit/pre-commit/issues/1000)
-* Optionally [enforce a command version](https://github.com/pocc/pre-commit-hooks#enforcing-linter-version-with---version) so your team gets code formatted/analyzed the same way.
+* Optionally [enforce a command version](https://github.com/pocc/pre-commit-hooks#enforcing-linter-version-with---version) so your team gets code formatted/analyzed the same way
 * Formatters clang-format and uncrustify will error with diffs of what has changed
-* More verbose error messages
 
 ## Example Usage
 
-With `int main() { int i; return 10; }` in a file `err.cpp`, all five linters should fail on commit
-and produce [this output](tests/test_repo/test_integration_expected_stderr.txt) using this `.pre-commit-config.yaml`:
+With this err.c
 
+```cpp
+#include <string>
+int main(){int i;return;}
+```
+
+All seven linters should fail on commit
+and produce [this output](tests/test_repo/test_integration_expected_stderr.txt)
+
+<details>
+  <summary>Pre-commit linters image output</summary>
+    <p align="center">
+      <img src="media/clinters_err.png" width="80%">
+    </p>
+</details>
+
+using this `.pre-commit-config.yaml`:
 
 ```yaml
 fail_fast: false
@@ -46,13 +60,6 @@ repos:
 
 _Note that for your config yaml, you can supply your own args or remove the args line entirely,
 depending on your use case._
-
-<details>
-  <summary>Pre-commit linters image output</summary>
-    <p align="center">
-      <img src="media/clinters_err.png" width="80%">
-    </p>
-</details>
 
 You can also clone this repo and then run the test_repo to see all of the linters at work,
 

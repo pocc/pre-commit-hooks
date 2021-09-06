@@ -12,15 +12,6 @@ def pytest_addoption(parser):
     """Add --internal option for testing classes (this is mostly redundant)"""
     action = "store_true"
     ihelp = "run internal tests"
-    parser.addoption("--internal", action=action, default=False, help=ihelp)
-
-
-def pytest_collection_modifyitems(config, items):
-    """Add pytest.mark.internal option to mark tests that check internals."""
-    skip_internal = pytest.mark.skip(reason="need --internal option to run")
-    for item in items:
-        if "cmd_class" in item.name and not config.getoption("--internal"):
-            item.add_marker(skip_internal)
 
 
 def pytest_exception_interact(node, call, report):

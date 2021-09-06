@@ -35,7 +35,7 @@ clang-tidy...............................................................Failed
 - hook id: clang-tidy
 - exit code: 1
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
+{repo_dir}/tests/test_repo/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
 int main(){int i;return;}
                  ^
 1 error generated.
@@ -49,11 +49,11 @@ oclint...................................................................Failed
 Compiler Errors:
 (please be aware that these errors will prevent OCLint from analyzing this source code)
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.cpp:2:18: non-void function 'main' should return a value
+{repo_dir}/tests/test_repo/err.cpp:2:18: non-void function 'main' should return a value
 
 Clang Static Analyzer Results:
 
-/home/rj/code/pre-commit-hooks/tests/test_repo/err.cpp:2:18: non-void function 'main' should return a value
+{repo_dir}/tests/test_repo/err.cpp:2:18: non-void function 'main' should return a value
 
 
 OCLint Report

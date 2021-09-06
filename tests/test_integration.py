@@ -21,6 +21,7 @@ class TestIntegration:
         filepaths = [os.path.join(os.getcwd(), f) for f in files]
         set_compilation_db(filepaths)
 
+    @staticmethod
     def generate_table_tests():
         pre_commit_config = """\
 fail_fast: false
@@ -40,6 +41,7 @@ repos:
         expected_filename = os.path.join(os.getcwd(), "tests/test_repo/test_integration_expected_stderr.output")
         with open(expected_filename, "rb") as f:
             stderr_expected = f.read()
+        stderr_expected = stderr_expected.replace(b"{repo_dir}", os.getcwd().encode())
         scenarios = [
             [
                 "Integration test in tests/test_repo with a basic .pre-commit-config.yaml",
@@ -61,3 +63,10 @@ repos:
         assert_equal(expd_output, stderr_actual)
         # Cleanup
         shutil.rmtree(os.path.join(test_dir, ".git"))
+
+
+if __name__ == "__main__":
+    test = TestIntegration()
+    scenarios = test.generate_table_tests()
+    for scenario in scenarios:
+        test.test_integration(scenario[1]["pre_commit_config"], scenario[1]["expd_output"])
