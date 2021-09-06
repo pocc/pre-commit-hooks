@@ -76,14 +76,14 @@ git commit
 
 ### Special flags in this repo
 
-There are 2 flags, `--version` and `--no-diff` that can be added to args: for a pre-commit hook.
+There are 2 flags, `--version` and `--no-diff` that can be added to `args:` for a pre-commit hook.
 They will be removed and not be passed on to the command.
 
 Some linters change behavior between versions. To enforce a linter version
 8.0.0, for example, add `--version=8.0.0` to `args:` for that linter. Note that
 this is a pre-commit hook arg and will be filtered before args are passed to the linter.
 
-You can add `--no-diff` to the args: for clang-format and uncrustify
+You can add `--no-diff` to the `args:` for clang-format and uncrustify
 if you would like there to be no diff output for these commands.
 
 ### Default Options
@@ -116,10 +116,10 @@ As this is also the minimum version of pre-commit, this should not be an issue.
 _You will need to install these utilities in order to use them. Your package
 manager may already have them. Below are the package names for each package manager, if available:_
 
-- `apt install clang clang-format clang-tidy uncrustify cppcheck` [1] [2]
-- `yum install llvm uncrustify cppcheck` [2]
-- `brew install llvm oclint uncrustify cppcheck` [3]
-- `choco install llvm uncrustify cppcheck` [4]
+- `apt install clang clang-format clang-tidy uncrustify cppcheck iwyu` [1] [2]
+- `yum install llvm uncrustify cppcheck iwyu` [2]
+- `brew install llvm oclint uncrustify cppcheck include-what-you-use` [3]
+- `choco install llvm uncrustify cppcheck inlcude-what-you-use` [4]
 
 cpplint can be installed everywhere with `pip install cpplint`.
 
