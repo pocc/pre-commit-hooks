@@ -1,0 +1,14 @@
+name: pre-commit-hooks testing
+on: [push]
+jobs:
+  build:
+    runs-on: [macos-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install 7 hooks, python, pip
+        run: brew install llvm uncrustify cppcheck iwyu python3 python3-pip
+      - name: Install pip dependencies
+        run: pip install cpplint pytest black
+      - name: Run tests
+        run: pytest -x -vvv
