@@ -17,4 +17,9 @@ addons:
     - clang-tidy
     - uncrustify
     - cppcheck
+    - iwyu
+    # Required for iwyu
+    - llvm-9-dev
+    - libclang-9-dev
+    - clang-9
 script: "./tests/run_tests.sh"

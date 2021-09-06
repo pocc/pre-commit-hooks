@@ -42,6 +42,6 @@
 - id: include-what-you-use
   name: include-what-you-use
   entry: include-what-you-use-hook
-  description: Runs Include-What-You-Use in C/CPP code
+  description: Runs Include-What-You-Use (iwyu) in C/CPP code
   files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx)$
   language: python

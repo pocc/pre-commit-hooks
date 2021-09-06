@@ -50,3 +50,4 @@ repos:
         entry: bash -c "pip install . && pytest -v -xxx"
         description: Tests expected output of all scripts
         language: system
+        types: [python, shell]
