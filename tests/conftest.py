@@ -8,12 +8,6 @@ import shutil
 import pytest
 
 
-def pytest_addoption(parser):
-    """Add --internal option for testing classes (this is mostly redundant)"""
-    action = "store_true"
-    ihelp = "run internal tests"
-
-
 def pytest_exception_interact(node, call, report):
     """See https://docs.pytest.org/en/latest/reference.html#_pytest.hookspec.pytest_exception_interact"""  # noqa: E501
     if report.failed:

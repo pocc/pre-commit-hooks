@@ -1,5 +1,8 @@
 name: pre-commit-hooks testing
-on: [push]
+on:
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: [windows-latest]

@@ -1,0 +1,352 @@
+[
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/err.c", "{test_dir}/err.cpp"],
+    "args": ["--style=google", "--no-diff"],
+    "expd_output": "clang-format.............................................................Failed\n- hook id: clang-format\n- exit code: 1\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/err.c", "{test_dir}/err.cpp"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg", "--no-diff"],
+    "expd_output": "uncrustify...............................................................Failed\n- hook id: uncrustify\n- exit code: 1\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["--style=google"],
+    "expd_output": "clang-format.............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["--style=google", "-i"],
+    "expd_output": "clang-format.............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg"],
+    "expd_output": "uncrustify...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg", "--replace", "--no-backup"],
+    "expd_output": "uncrustify...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["--style=google"],
+    "expd_output": "clang-format.............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["--style=google", "-i"],
+    "expd_output": "clang-format.............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg"],
+    "expd_output": "uncrustify...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg", "--replace", "--no-backup"],
+    "expd_output": "uncrustify...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/err.c"],
+    "args": ["--style=google"],
+    "expd_output": "clang-format.............................................................Failed\n- hook id: clang-format\n- exit code: 1\n\nerr.c\n====================\n--- original\n\n+++ formatted\n\n@@ -1,2 +1,5 @@\n\n #include <stdio.h>\n-int main(){int i;return;}\n+int main() {\n+  int i;\n+  return;\n+}\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/err.c"],
+    "args": ["--style=google", "-i"],
+    "expd_output": "clang-format.............................................................Failed\n- hook id: clang-format\n- exit code: 1\n- files were modified by this hook\n\nerr.c\n====================\n--- original\n\n+++ formatted\n\n@@ -1,2 +1,5 @@\n\n #include <stdio.h>\n-int main(){int i;return;}\n+int main() {\n+  int i;\n+  return;\n+}\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/err.c"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg"],
+    "expd_output": "uncrustify...............................................................Failed\n- hook id: uncrustify\n- exit code: 1\n\nerr.c\n====================\n--- original\n\n+++ formatted\n\n@@ -1,2 +1,5 @@\n\n #include <stdio.h>\n-int main(){int i;return;}\n+int main() {\n+  int i;\n+  return;\n+}\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/err.c"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg", "--replace", "--no-backup"],
+    "expd_output": "uncrustify...............................................................Failed\n- hook id: uncrustify\n- exit code: 1\n- files were modified by this hook\n\nerr.c\n====================\n--- original\n\n+++ formatted\n\n@@ -1,2 +1,5 @@\n\n #include <stdio.h>\n-int main(){int i;return;}\n+int main() {\n+  int i;\n+  return;\n+}\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["--style=google"],
+    "expd_output": "clang-format.............................................................Failed\n- hook id: clang-format\n- exit code: 1\n\nerr.cpp\n====================\n--- original\n\n+++ formatted\n\n@@ -1,2 +1,5 @@\n\n #include <string>\n-int main(){int i;return;}\n+int main() {\n+  int i;\n+  return;\n+}\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-format",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["--style=google", "-i"],
+    "expd_output": "clang-format.............................................................Failed\n- hook id: clang-format\n- exit code: 1\n- files were modified by this hook\n\nerr.cpp\n====================\n--- original\n\n+++ formatted\n\n@@ -1,2 +1,5 @@\n\n #include <string>\n-int main(){int i;return;}\n+int main() {\n+  int i;\n+  return;\n+}\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg"],
+    "expd_output": "uncrustify...............................................................Failed\n- hook id: uncrustify\n- exit code: 1\n\nerr.cpp\n====================\n--- original\n\n+++ formatted\n\n@@ -1,2 +1,5 @@\n\n #include <string>\n-int main(){int i;return;}\n+int main() {\n+  int i;\n+  return;\n+}\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "uncrustify",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["-c", "{repo_dir}/tests/uncrustify_defaults.cfg", "--replace", "--no-backup"],
+    "expd_output": "uncrustify...............................................................Failed\n- hook id: uncrustify\n- exit code: 1\n- files were modified by this hook\n\nerr.cpp\n====================\n--- original\n\n+++ formatted\n\n@@ -1,2 +1,5 @@\n\n #include <string>\n-int main(){int i;return;}\n+int main() {\n+  int i;\n+  return;\n+}\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type"],
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "-fix"],
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--fix-errors"],
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--", "-std=c18"],
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type"],
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "-fix"],
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--fix-errors"],
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--", "-std=c++20"],
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/err.c"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type"],
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.c.\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/err.c"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "-fix"],
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.c.\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/err.c"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--fix-errors"],
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.c.\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/err.c"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--", "-std=c18"],
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.c.\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type"],
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.cpp.\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "-fix"],
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.cpp.\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--fix-errors"],
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.cpp.\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "clang-tidy",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--", "-std=c++20"],
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n2 warnings and 1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.cpp.\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "cppcheck",
+    "files": ["{test_dir}/ok.c"],
+    "args": [],
+    "expd_output": "cppcheck.................................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "cppcheck",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": [],
+    "expd_output": "cppcheck.................................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "cppcheck",
+    "files": ["{test_dir}/err.c"],
+    "args": [],
+    "expd_output": "cppcheck.................................................................Failed\n- hook id: cppcheck\n- exit code: 1\n\nerr.c:2:16: style: Unused variable: i [unusedVariable]\nint main(){int i;return;}\n               ^\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "cppcheck",
+    "files": ["{test_dir}/err.cpp"],
+    "args": [],
+    "expd_output": "cppcheck.................................................................Failed\n- hook id: cppcheck\n- exit code: 1\n\nerr.cpp:2:16: style: Unused variable: i [unusedVariable]\nint main(){int i;return;}\n               ^\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "cpplint",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["--verbose=0", "--quiet"],
+    "expd_output": "cpplint..................................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "cpplint",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["--verbose=0", "--quiet"],
+    "expd_output": "cpplint..................................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "cpplint",
+    "files": ["{test_dir}/err.c"],
+    "args": ["--verbose=0", "--quiet"],
+    "expd_output": "cpplint..................................................................Failed\n- hook id: cpplint\n- exit code: 1\n\nDone processing err.c\nTotal errors found: 5\nerr.c:0:  No copyright message found.  You should have a line: \"Copyright [year] <Copyright Owner>\"  [legal/copyright] [5]\nerr.c:2:  More than one command on the same line  [whitespace/newline] [0]\nerr.c:2:  Missing space after ;  [whitespace/semicolon] [3]\nerr.c:2:  Missing space before {  [whitespace/braces] [5]\nerr.c:2:  Could not find a newline character at the end of the file.  [whitespace/ending_newline] [5]\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "cpplint",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["--verbose=0", "--quiet"],
+    "expd_output": "cpplint..................................................................Failed\n- hook id: cpplint\n- exit code: 1\n\nDone processing err.cpp\nTotal errors found: 5\nerr.cpp:0:  No copyright message found.  You should have a line: \"Copyright [year] <Copyright Owner>\"  [legal/copyright] [5]\nerr.cpp:2:  More than one command on the same line  [whitespace/newline] [0]\nerr.cpp:2:  Missing space after ;  [whitespace/semicolon] [3]\nerr.cpp:2:  Missing space before {  [whitespace/braces] [5]\nerr.cpp:2:  Could not find a newline character at the end of the file.  [whitespace/ending_newline] [5]\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "include-what-you-use",
+    "files": ["{test_dir}/ok.c"],
+    "args": [],
+    "expd_output": "include-what-you-use.....................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "include-what-you-use",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": [],
+    "expd_output": "include-what-you-use.....................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "include-what-you-use",
+    "files": ["{test_dir}/err.c"],
+    "args": [],
+    "expd_output": "include-what-you-use.....................................................Failed\n- hook id: include-what-you-use\n- exit code: 3\n\nerr.c:2:18: error: non-void function 'main' should return a value [-Wreturn-type]\nint main(){int i;return;}\n                 ^\n\nerr.c should add these lines:\n\nerr.c should remove these lines:\n- #include <stdio.h>  // lines 1-1\n\nThe full include-list for err.c:\n---\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "include-what-you-use",
+    "files": ["{test_dir}/err.cpp"],
+    "args": [],
+    "expd_output": "include-what-you-use.....................................................Failed\n- hook id: include-what-you-use\n- exit code: 3\n\nerr.cpp:2:18: error: non-void function 'main' should return a value [-Wreturn-type]\nint main(){int i;return;}\n                 ^\n\nerr.cpp should add these lines:\n\nerr.cpp should remove these lines:\n- #include <string>  // lines 1-1\n\nThe full include-list for err.cpp:\n---\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "oclint",
+    "files": ["{test_dir}/ok.c"],
+    "args": ["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics", "--", "-std=c18"],
+    "expd_output": "oclint...................................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "oclint",
+    "files": ["{test_dir}/ok.cpp"],
+    "args": ["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics", "--", "-std=c++20"],
+    "expd_output": "oclint...................................................................Passed\n",
+    "expd_retcode": 0
+  },
+  {
+    "command": "oclint",
+    "files": ["{test_dir}/err.c"],
+    "args": ["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics", "--", "-std=c18"],
+    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v0.13.1]\n\n",
+    "expd_retcode": 1
+  },
+  {
+    "command": "oclint",
+    "files": ["{test_dir}/err.cpp"],
+    "args": ["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics", "--", "-std=c++20"],
+    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v0.13.1]\n\n",
+    "expd_retcode": 1
+  }
+]

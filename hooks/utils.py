@@ -2,12 +2,11 @@
 """fns for clang-format, clang-tidy, oclint"""
 import argparse
 import difflib
+import os
 import re
 import shutil
 import subprocess as sp
 import sys
-
-LINTER_FILE_REGEX = r"\.(c|cc|cxx|cpp|cu|cuh|h|hh|hpp|hxx|m|mm|d|java|vala)$"
 
 
 class Command:
@@ -17,6 +16,7 @@ class Command:
         self.args = args
         self.look_behind = look_behind
         self.command = command
+        self.set_file_regex()
         # Will be [] if not run using pre-commit or if there are no committed files
         self.files = self.get_added_files()
         self.edit_in_place = False
@@ -25,11 +25,24 @@ class Command:
         self.stderr = b""
         self.returncode = 0
 
+    def set_file_regex(self):
+        """Get the file regex for a command's target files from the .pre-commit-hooks.yaml."""
+        file_regex = {
+            "clang-format": r".*\.(?:c|cc|cxx|cpp|h|hpp|hxx|m|mm|java)$",
+            "oclint": r".*\.(?:c|cc|cxx|cpp|h|hpp|hxx|m)$",
+            "clang-tidy": r".*\.(?:c|cc|cxx|cpp|h|hpp|hxx|m)$",
+            "cppcheck": r".*\.(?:c|cc|cxx|cpp|h|hpp|hxx|m)$",
+            "uncrustify": r".*\.(?:c|cc|cxx|cpp|h|hpp|hxx|m|mm|d|java|vala)$",
+            "cpplint": r".*\.(?:c|cc|cpp|cu|cuh|cxx|h|hh|hpp|hxx)$",
+            "include-what-you-use": r".*\.(?:c|cc|cxx|cpp|cu|h|hpp|hxx)$"
+        }
+        self.file_regex = file_regex[self.command]
+
     def check_installed(self):
         """Check if command is installed and fail exit if not."""
         path = shutil.which(self.command)
         if path is None:
-            website = "https://github.com/pocc/pre-commit-hooks#using-the-hooks"
+            website = "https://github.com/pocc/pre-commit-hooks#example-usage"
             problem = self.command + " not found"
             details = """Make sure {} is installed and on your PATH.\nFor more info: {}""".format(
                 self.command, website
@@ -43,30 +56,30 @@ class Command:
         if sp_child.stderr or sp_child.returncode != 0:
             self.raise_error("Problem determining which files are being committed using git.", sp_child.stderr.decode())
         added_files = sp_child.stdout.decode().splitlines()
+        # If no unstaged files, match the file regex against sys argv
+        if not added_files:
+            added_files = sys.argv
+        added_files = [f for f in added_files if re.search(self.file_regex, f)]
         return added_files
 
     def parse_args(self, args):
         """Parse the args into usable variables"""
-        parser = argparse.ArgumentParser()
-        parser.add_argument("filenames", nargs="*", help="Filenames to check")
-        parser.add_argument("--version", nargs=1, help="Version check")
-        # Exclude this filename from args
-        known_args, self.args = parser.parse_known_args(args)
-        if "version" in known_args and known_args.version is not None:
-            expected_version = known_args.version[0]
-            actual_version = self.get_version_str()
-            self.assert_version(actual_version, expected_version)
-        self.files = known_args.filenames
-        self.files = [f for f in self.files if re.search(LINTER_FILE_REGEX, f)]
-        # pre-commit puts files at the end, which messes with clang-tidy/oclint using --
-        # See https://github.com/pre-commit/pre-commit/issues/1000 for more info on --
-        # Files should not be in the args list, but in the files list
-        for f in self.files:
-            if f in self.args:
-                self.args.remove(f)
+        self.args = list(sys.argv[1:])  # don't include calling function
+        for arg in sys.argv:
+            if arg in self.files:
+                self.args.remove(arg)
+            if arg.startswith("--version"):
+                # If --version is passed in as 2 arguments, where the second is version
+                if arg == "--version" and sys.argv.index(arg) != len(sys.argv) - 1:
+                    expected_version = sys.argv[sys.argv.index(arg) + 1]
+                # Expected split of --version=8.0.0 or --version 8.0.0 with as many spaces as needed
+                else:
+                    expected_version = arg.replace(" ", "").replace("=", "").replace("--version", "")
+                actual_version = self.get_version_str()
+                self.assert_version(actual_version, expected_version)
         # All commands other than clang-tidy or oclint require files, --version ok
         is_cmd_clang_analyzer = self.command == "clang-tidy" or self.command == "oclint"
-        has_args = self.files or self.args or "version" in known_args
+        has_args = self.files or self.args or "version" in self.args
         if not has_args and not is_cmd_clang_analyzer:
             self.raise_error("Missing arguments", "No file arguments found and no files are pending commit.")
 
@@ -184,15 +197,16 @@ class FormatterCmd(Command):
         args = [self.command, *self.args, *filename_opts]
         child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         if len(child.stderr) > 0:
-            problem = f"Unexpected Stderr received when analyzing {filename}"
+            problem = f"Unexpected Stderr received when analyzing {filename}."
             self.raise_error(problem, child.stdout.decode() + child.stderr.decode())
         if child.stdout == b"":
             return []
         return child.stdout.split(b"\x0a")
 
-    @staticmethod
-    def get_filelines(filename):
+    def get_filelines(self, filename):
         """Get the lines in a file."""
+        if not os.path.exists(filename):
+            self.raise_error("File {filename} not found", "Check your path to the file.")
         with open(filename, "rb") as f:
             filetext = f.read()
         return filetext.split(b"\x0a")

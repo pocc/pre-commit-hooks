@@ -9,14 +9,12 @@ import uuid
 
 import pytest
 
-
-def create_temp_dir_for(filename):
-    """Create a temporary dir for a file, returning the file path."""
-    uuid_dir = str(uuid.uuid4())
-    temp_dir = os.path.join("tests/test_repo/temp", uuid_dir)
-    os.makedirs(temp_dir)
-    new_temp_name = shutil.copy2(filename, temp_dir)
-    return os.path.join(os.getcwd(), new_temp_name)
+test_file_strs = {
+    "ok.c": '// Copyright 2021 Ross Jacobs\n#include <stdio.h>\n\nint main() {\n  printf("Hello World!\\n");\n  return 0;\n}\n',
+    "ok.cpp": '// Copyright 2021 Ross Jacobs\n#include <iostream>\n\nint main() {\n  std::cout << "Hello World!\\n";\n  return 0;\n}\n',
+    "err.c": "#include <stdio.h>\nint main(){int i;return;}",
+    "err.cpp": "#include <string>\nint main(){int i;return;}",
+}
 
 
 def assert_equal(expected, actual):
@@ -83,3 +81,23 @@ def set_compilation_db(filenames):
     cdb = cdb[:-1] + "]"  # Subtract extra comma and end json
     with open(file_dir + "/" + "compile_commands.json", "w") as f:
         f.write(cdb)
+
+
+def set_git_identity():
+    """Set a git identity if one does not exist."""
+    sp_child = sp.run(["git", "config", "--list"], stdout=sp.PIPE)
+    if "user.name" not in sp_child.stdout.decode() or "user.email" not in sp_child.stdout.decode():
+        sp.run(["git", "config", "--global", "user.name", "Test Runner"])
+        sp.run(["git", "config", "--global", "user.email", "test@example.com"])
+        sp.run(["git", "config", "--global", "init.defaultbranch", "master"])
+
+
+def run_in(commands, tmpdir):
+    sp_child = sp.run(commands, cwd=tmpdir, stdout=sp.PIPE, stderr=sp.PIPE)
+    if sp_child.returncode != 0:
+        err_msg = (
+            f"commands {commands} failed with\n"
+            + f"stdout: {sp_child.stdout.decode()}"
+            + f"stderr: {sp_child.stderr.decode()}\n"
+        )
+        pytest.fail(err_msg)

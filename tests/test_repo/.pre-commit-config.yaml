@@ -1,8 +1,0 @@
-
-fail_fast: false
-repos:
-  - repo: https://github.com/pocc/pre-commit-hooks
-    rev: 07fad6c
-    hooks:
-      - id: uncrustify
-        args: ['-c=/home/rj/code/pre-commit-hooks/tests/uncrustify_defaults.cfg']
