@@ -23,7 +23,7 @@ def assert_equal(expected, actual):
     """Stand in for Python's assert which is annoying to work with."""
     if expected != actual:
         print(f"\n\nExpected:`{expected}`")
-        print(f"\n\nActual:  `{actual}`")
+        print(f"\n\nActual__:`{actual}`")
         if isinstance(expected, bytes) and isinstance(actual, bytes):
             expected_str = expected.decode()
             actual_str = actual.decode()

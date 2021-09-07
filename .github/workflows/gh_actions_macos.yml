@@ -9,11 +9,13 @@ jobs:
       - name: Find out where clang-tidy is
         run: |
           echo "$(brew --prefix llvm)"
-          ls "$(brew --prefix llvm)"
+          ls "$(brew --prefix llvm)/bin"
           "$(brew --prefix llvm)/bin/clang-format" --version
           "$(brew --prefix llvm)/bin/clang-tidy" --version
-      - name: Install 7 hooks, python3, llvm 12.0.1 already installed which includes clang-tidy
-        run: brew install clang-format clang-tidy uncrustify cppcheck oclint iwyu python3
+          clang-format=$(brew --prefix llvm)/bin/clang-format)"
+          clang-tidy=$(brew --prefix llvm)/bin/clang-tidy)"
+      - name: Install 4 hooks, python3, llvm 12.0.1 already installed which includes clang-tidy, clang-format
+        run: brew install uncrustify cppcheck oclint iwyu python3
       - name: Install pip dependencies
         run: pip3 install cpplint pytest black
       - name: Install hooks locally

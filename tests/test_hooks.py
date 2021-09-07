@@ -255,20 +255,23 @@ OCLint Report
 Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
 
 
-[OCLint (http://oclint.org) v{2}]
+[OCLint (http{2}://oclint.org) v{3}]
 """
         # -no-analytics required because in some versions of oclint, this causes oclint to hang (0.13.1)
         # version 20+ starts using --<option> instead of -<option>
+        # Link is to https://oclint.org instead of http://oclint.org in versions >= 20
+        https_s = ""
         if cls.versions["oclint"] > "20":
             oclint_arg_sets = [["--enable-global-analysis", "--enable-clang-static-analyzer"]]
+            https_s = "s"
         else:
             oclint_arg_sets = [["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics"]]
         oclint_arg_sets[0] += ["--", "-std=c18"]
         ver_output = sp.check_output(["oclint", "--version"]).decode("utf-8")
         oclint_ver = re.search(r"OCLint version ([\d.]+)\.", ver_output).group(1)
         eol_whitespace = " "
-        oclint_err_str_c = oclint_err.format(cls.err_c, eol_whitespace, oclint_ver).encode()
-        oclint_err_str_cpp = oclint_err.format(cls.err_cpp, eol_whitespace, oclint_ver).encode()
+        oclint_err_str_c = oclint_err.format(cls.err_c, eol_whitespace, https_s, oclint_ver).encode()
+        oclint_err_str_cpp = oclint_err.format(cls.err_cpp, eol_whitespace, https_s, oclint_ver).encode()
         oclint_output = [b"", b"", oclint_err_str_c, oclint_err_str_cpp]
         oclint_retcodes = [0, 0, 6, 6]
         for i in range(len(cls.files)):
