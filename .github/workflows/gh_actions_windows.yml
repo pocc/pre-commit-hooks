@@ -21,5 +21,15 @@ jobs:
         run: pip3 install cpplint pytest black pre-commit
       - name: Install hooks locally
         run: pip3 install .
+      - name: Get command versions
+        run: |
+          clang-format --version
+          clang-tidy --version
+          cppcheck --version
+          cpplint --version
+      - name: Get python library versions
+        run: |
+          pytest --version
+          pre-commit --version
       - name: Run tests
         run: pytest -x -vvv

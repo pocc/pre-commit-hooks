@@ -1,4 +1,6 @@
 """Test oclint and clang-tidy -p argument"""
+import os
+
 from hooks.clang_tidy import ClangTidyCmd
 from hooks.oclint import OCLintCmd
 
@@ -9,10 +11,9 @@ class TestHDashp:
     @classmethod
     def setup_class(cls):
         """Setup the scenario list"""
-        cls.scenarios = [
-            ["ClangTidyCmd", {"klass": ClangTidyCmd}],
-            ["OCLintCmd", {"klass": OCLintCmd}],
-        ]
+        cls.scenarios = [["ClangTidyCmd", {"klass": ClangTidyCmd}]]
+        if os.name != "nt":  # oclint doesn't exist on windows
+            cls.scenarios.append(["OCLintCmd", {"klass": OCLintCmd}])
 
     @staticmethod
     def test_clang_tidy_dashp_present(klass) -> None:

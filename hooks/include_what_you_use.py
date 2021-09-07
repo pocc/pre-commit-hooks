@@ -1,10 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Wrapper for include-what-you-use"""
-import shutil
 import sys
 
-from hooks.utils import Command, StaticAnalyzerCmd
+from hooks.utils import StaticAnalyzerCmd
 
 
 class IncludeWhatYouUseCmd(StaticAnalyzerCmd):
@@ -26,8 +25,8 @@ class IncludeWhatYouUseCmd(StaticAnalyzerCmd):
             is_correct = b"has correct #includes/fwd-decls" in self.stderr
             if is_correct:
                 self.returncode = 0
-                self.stdout = b''
-                self.stderr = b''
+                self.stdout = b""
+                self.stderr = b""
             else:
                 sys.stderr.buffer.write(self.stdout + self.stderr)
                 sys.exit(self.returncode)

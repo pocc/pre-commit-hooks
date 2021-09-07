@@ -10,9 +10,23 @@ jobs:
         run: echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
       - name: Install 4 hooks, python3, llvm 12.0.1 already installed which includes clang-tidy, clang-format
         run: brew install uncrustify cppcheck oclint iwyu python3
+      - name: Install C/C++ libraries with xcode
+        run: xcode-select --install
       - name: Install pip dependencies
-        run: pip3 install cpplint pytest black pre-commit
+        run: pip3 install cpplint pytest pre-commit
       - name: Install hooks locally
         run: pip3 install .
+      - name: Get command versions
+        run: |
+          clang-format --version
+          clang-tidy --version
+          cppcheck --version
+          cpplint --version
+          include-what-you-use --version
+          oclint --version
+      - name: Get python library versions
+        run: |
+          pytest --version
+          pre-commit --version
       - name: Run tests
         run: pytest -x -vvv

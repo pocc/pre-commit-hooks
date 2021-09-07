@@ -184,7 +184,7 @@ class FormatterCmd(Command):
         args = [self.command, *self.args, *filename_opts]
         child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         if len(child.stderr) > 0:
-            problem = "Unexpected Stderr received from " + self.command
+            problem = f"Unexpected Stderr received when analyzing {filename}"
             self.raise_error(problem, child.stdout.decode() + child.stderr.decode())
         if child.stdout == b"":
             return []

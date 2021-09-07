@@ -18,8 +18,8 @@ class UncrustifyCmd(FormatterCmd):
         super().__init__(self.command, self.lookbehind, args)
         self.check_installed()
         self.parse_args(args)
-        self.add_if_missing(["-q"])  # Remove stderr, which causes issues
         self.set_diff_flag()
+        self.add_if_missing(["-q"])  # Remove stderr, which causes issues
         self.file_flag = "-f"
         self.edit_in_place = "--replace" in self.args
         if "-c" not in self.args:
