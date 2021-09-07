@@ -38,10 +38,10 @@ def assert_equal(expected, actual):
 
 def get_versions():
     """Returns a dict of commands and their versions."""
-    commands = ["clang-format", "clang-tidy", "uncrustify", "cppcheck", "cpplint", "include-what-you-use"]
-    if os.name != "nt":  # oclint doesn't work on windows
-        commands += ["oclint"]
-    # Regex for all versions. Unit tests: https://regex101.com/r/w5P74Q/1
+    commands = ["clang-format", "clang-tidy", "uncrustify", "cppcheck", "cpplint"]
+    if os.name != "nt":  # oclint doesn't work on windows, iwyu needs to be compiled on windows
+        commands += ["oclint", "include-what-you-use"]
+    # Regex for all versions. Unit tests: https://regex101.com/r/rzJE0I/1
     regex = r"[- ]((?:\d+\.)+\d+[_+\-a-z\d]*)(?![\s\S]*OCLint version)"
     versions = {}
     for cmd in commands:
