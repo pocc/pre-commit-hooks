@@ -33,16 +33,10 @@ Edit your pre-commit config or use a different version of {0}.
     def generate_table_tests(cls):
         """Run table tests for versions for all commands."""
         scenarios = []
-        commands = [
-            ClangFormatCmd,
-            ClangTidyCmd,
-            UncrustifyCmd,
-            CppcheckCmd,
-            CpplintCmd,
-            IncludeWhatYouUseCmd,
-        ]  # noqa: E501
-        if os.name != "nt":  # oclint is not supported on windows
+        commands = [ClangFormatCmd, ClangTidyCmd, UncrustifyCmd, CppcheckCmd, CpplintCmd]  # noqa: E501
+        if os.name != "nt":  # oclint is not supported on windows, iwyu has to be compiled from source
             commands.append(OCLintCmd)
+            commands.append(IncludeWhatYouUseCmd)
         for cmd in commands:
             actual_ver = cls.versions[cmd.command]
             err_str = cls.err_str.format(cmd.command, cls.err_ver, actual_ver).encode()
