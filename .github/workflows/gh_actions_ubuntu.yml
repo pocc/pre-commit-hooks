@@ -1,8 +1,5 @@
 name: pre-commit-hooks testing
-on:
-  push:
-    branches:
-      - main
+on: [push]
 jobs:
   build:
     runs-on: [ubuntu-latest]
