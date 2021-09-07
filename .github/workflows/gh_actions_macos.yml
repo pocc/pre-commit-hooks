@@ -6,9 +6,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Install 7 hooks, python, pip
-        run: brew install llvm uncrustify cppcheck iwyu python3 python3-pip
+      - name: Install 7 hooks, python3, llvm 12.0.1 already installed which includes clang-tidy
+        run: brew install clang-format uncrustify cppcheck oclint iwyu python3
       - name: Install pip dependencies
-        run: pip install cpplint pytest black
+        run: pip3 install cpplint pytest black
+      - name: Install hooks locally
+        run: pip3 install .
       - name: Run tests
         run: pytest -x -vvv

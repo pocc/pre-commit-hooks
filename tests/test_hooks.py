@@ -62,8 +62,10 @@ class GeneratorT:
         cls.scenarios += cls.generate_clang_tidy_tests()
         cls.scenarios += cls.generate_cppcheck_tests()
         cls.scenarios += cls.generate_cpplint_tests()
-        cls.scenarios += cls.generate_iwyu_tests()
         if os.name != "nt":
+            # iwyu works on windows, but doesn't have a choco package
+            cls.scenarios += cls.generate_iwyu_tests()
+            # oclint does not work on windows
             cls.scenarios += cls.generate_oclint_tests()
 
     @classmethod

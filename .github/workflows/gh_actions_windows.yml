@@ -6,9 +6,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Install 6 hooks (not oclint on windows), python, pip
-        run: choco install llvm uncrustify cppcheck iwyu python3 python3-pip -y --no-progress
+      - name: Install 5 hooks (not oclint, iwyu on windows), python3
+        run: choco install llvm uncrustify cppcheck python3 -y --no-progress
+      - name: Update paths (see https://stackoverflow.com/questions/60169752)
+        run: echo "C:\Program Files\LLVM\bin;C:\ProgramData\chocolatey\lib\uncrustify\tools;C:\Program Files\Cppcheck;C:\Python39" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Check installations
+        run: |
+          clang-format --version
+          clang-tidy --version
+          uncrustify --version
+          cppcheck --version
+          python3 --version
       - name: Install pip dependencies
-        run: pip install cpplint pytest black
+        run: pip3 install cpplint pytest black
+      - name: Install hooks locally
+        run: pip3 install .
       - name: Run tests
         run: pytest -x -vvv

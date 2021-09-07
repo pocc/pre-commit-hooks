@@ -1,6 +1,9 @@
 # pre-commit hooks
 
-[![Build Status](https://travis-ci.com/pocc/pre-commit-hooks.svg?branch=master)](https://travis-ci.com/pocc/pre-commit-hooks)
+![example workflow](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_linux.yml/badge.svg)
+![example workflow](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_macos.yml/badge.svg)
+![example workflow](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_windows.yml/badge.svg)
+
 
 This is a [pre-commit](https://pre-commit.com) hooks repo that
 integrates two C/C++ code formatters:
