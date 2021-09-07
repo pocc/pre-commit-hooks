@@ -16,7 +16,7 @@ jobs:
             sudo cp -vr oclint-21.05/lib/* /usr/local/lib/
             oclint --version
       - name: Install pip dependencies
-        run: pip install cpplint pytest black
+        run: pip install cpplint pytest black pre-commit
       - name: Install hooks locally
         run: pip install .
       - name: Run tests

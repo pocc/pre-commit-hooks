@@ -18,7 +18,7 @@ jobs:
           cppcheck --version
           python3 --version
       - name: Install pip dependencies
-        run: pip3 install cpplint pytest black
+        run: pip3 install cpplint pytest black pre-commit
       - name: Install hooks locally
         run: pip3 install .
       - name: Run tests

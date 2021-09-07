@@ -55,7 +55,15 @@ repos:
         pre_commit_config_path = os.path.join(test_dir, ".pre-commit-config.yaml")
         with open(pre_commit_config_path, "w") as f:
             f.write(pre_commit_config)
-        command_str = f"cd {test_dir}; rm -rf .git; git init; pre-commit install; git add .; git commit"
+        command_str = f"""\
+cd {test_dir};
+rm -rf .git
+git config user.email "test@example.com"
+git config user.name "Test Runner"
+git init
+pre-commit install
+git add .
+git commit"""
         sp_child = sp.run(["/bin/bash", "-c", command_str], stdout=sp.PIPE, stderr=sp.PIPE)
         stderr_actual = sp_child.stderr
         # Get rid of initializing messages that could interfere with test

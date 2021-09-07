@@ -6,18 +6,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Find out where clang-tidy is
-        run: |
-          echo "$(brew --prefix llvm)"
-          ls "$(brew --prefix llvm)/bin"
-          "$(brew --prefix llvm)/bin/clang-format" --version
-          "$(brew --prefix llvm)/bin/clang-tidy" --version
-          clang-format=$(brew --prefix llvm)/bin/clang-format)"
-          clang-tidy=$(brew --prefix llvm)/bin/clang-tidy)"
+      - name: Add llvm utils clang-format and clang-tidy to path
+        run: echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
       - name: Install 4 hooks, python3, llvm 12.0.1 already installed which includes clang-tidy, clang-format
         run: brew install uncrustify cppcheck oclint iwyu python3
       - name: Install pip dependencies
-        run: pip3 install cpplint pytest black
+        run: pip3 install cpplint pytest black pre-commit
       - name: Install hooks locally
         run: pip3 install .
       - name: Run tests
