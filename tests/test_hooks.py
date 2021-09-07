@@ -420,7 +420,7 @@ class TestHooks:
         pre_commit_config = f"""\
 repos:
 - repo: https://github.com/pocc/pre-commit-hooks
-  rev: 76d2a48
+  rev: 8a67133
   hooks:
     - id: {cmd_name}
       args: {args}

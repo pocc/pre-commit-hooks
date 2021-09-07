@@ -21,7 +21,7 @@ This repo's hooks do more than passthrough arguments to provide these features:
 
 * Relay correct pass/fail to pre-commit, even when some commands exit 0 when they should not. Some versions of oclint, clang-tidy, and cppcheck have this behavior.
 * Honor `--` arguments, which pre-commit [has problems with](https://github.com/pre-commit/pre-commit/issues/1000)
-* Optionally [enforce a command version](https://github.com/pocc/pre-commit-hooks#enforcing-linter-version-with---version) so your team gets code formatted/analyzed the same way
+* Optionally [enforce a command version](https://github.com/pocc/pre-commit-hooks#specialh-flags-in-this-repo) so your team gets code formatted/analyzed the same way
 * Formatters clang-format and uncrustify will error with diffs of what has changed
 
 ## Example Usage
