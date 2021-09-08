@@ -309,16 +309,18 @@ class TestHooks:
         scenarios = generator.scenarios
         test_repo_temp = os.path.join("tests", "test_repo", "temp")
         os.makedirs(test_repo_temp, exist_ok=True)
+        tmpdir = os.path.join(tempfile.gettempdir(), "pre-commit-hooks-testing")
+        os.makedirs(tmpdir, exist_ok=True)
         base_files = ["ok.c", "ok.cpp", "err.c", "err.cpp"]
         filenames = [os.path.join("tests", "test_repo", f) for f in base_files]
         utils.set_compilation_db(filenames)
-        temp_filenames = [
-            os.path.join(os.path.join(tempfile.gettempdir(), "pre-commit-hooks-testing"), f) for f in base_files
-        ]
+        temp_filenames = [os.path.join(tmpdir, f) for f in base_files]
         utils.set_compilation_db(temp_filenames)
         cls.scenarios = []
         for s in scenarios:
             desc = " ".join([cls.run_shell_cmd.__name__, s[0].command, " ".join(s[2]), " ".join(s[1])])
+            if os.name == "nt":
+                s[2] = [arg.replace("/", "\\\\") for arg in s[2]]
             test_scenario = [
                 desc,
                 {
@@ -335,15 +337,14 @@ class TestHooks:
         with open(table_tests_integration) as f:
             json_str = f.read()
         table_tests = json.loads(json_str)
-        tmpdir = os.path.join(tempfile.gettempdir(), "pre-commit-hooks-testing")
-        if not os.path.exists(tmpdir):
-            os.makedirs(tmpdir, exist_ok=True)
         # initialize repo
         utils.run_in(["git", "init"], tmpdir)
         utils.run_in(["pre-commit", "install"], tmpdir)
         for s in table_tests:
             s["args"] = [arg.replace("{repo_dir}", os.getcwd()) for arg in s["args"]]
             s["files"] = [arg.replace("{test_dir}", tmpdir) for arg in s["files"]]
+            if os.name == "nt":
+                s["files"] = [arg.replace("/", "\\\\") for arg in s["files"]]
             desc = " ".join(
                 [cls.run_integration_test.__name__, s["command"] + "-hook", " ".join(s["files"]), " ".join(s["args"])]
             )
