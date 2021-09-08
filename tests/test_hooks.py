@@ -35,6 +35,8 @@ from hooks.uncrustify import UncrustifyCmd
 class GeneratorT:
     """Generate the test scenarios"""
 
+    versions = utils.get_versions()
+
     @classmethod
     def setup_class(cls):
         """Create test files that will be used by other tests"""
@@ -48,8 +50,6 @@ class GeneratorT:
         +2x tests:
             * Call the shell hooks installed with pip to mimic end user use
             * Call via importing the command classes to verify expectations"""
-        cls.versions = utils.get_versions()
-
         test_repo_dir = os.path.join(os.getcwd(), "tests", "test_repo")
         cls.err_c = os.path.join(test_repo_dir, "err.c")
         cls.err_cpp = os.path.join(test_repo_dir, "err.cpp")
@@ -305,6 +305,7 @@ class TestHooks:
         """
         utils.set_git_identity()  # set a git identity if one doesn't exist
         generator = GeneratorT()
+        versions = generator.versions
         generator.generate_list_tests()
         scenarios = generator.scenarios
         test_repo_temp = os.path.join("tests", "test_repo", "temp")
@@ -348,6 +349,9 @@ class TestHooks:
             desc = " ".join(
                 [cls.run_integration_test.__name__, s["command"] + "-hook", " ".join(s["files"]), " ".join(s["args"])]
             )
+            # After 20, oclint versions use double dash args
+            if s["command"] == "oclint" and versions["oclint"] >= "20":
+                s["args"] = [arg.replace("-", "--") for arg in s["args"]]
             test_scenario = [
                 desc,
                 {
