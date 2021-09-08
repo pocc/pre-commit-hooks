@@ -19,6 +19,7 @@ test_file_strs = {
 
 def assert_equal(expected, actual):
     """Stand in for Python's assert which is annoying to work with."""
+    actual = actual.replace(b"\r", b"")  # ignore windows file ending differences
     if expected != actual:
         print(f"\n\nExpected:`{expected}`")
         print(f"\n\nActual__:`{actual}`")
@@ -79,6 +80,9 @@ def set_compilation_db(filenames):
             file_dir, clang_location, clang_suffix, os.path.join(file_dir, file_base)
         )
     cdb = cdb[:-1] + "]"  # Subtract extra comma and end json
+    # Required for clang-tidy
+    if os.name == "nt":
+        cdb = cdb.replace("\\", "\\\\").replace("Program Files", 'Program" "Files')
     with open(file_dir + "/" + "compile_commands.json", "w") as f:
         f.write(cdb)
 
