@@ -122,6 +122,7 @@ class GeneratorT:
 
     @classmethod
     def generate_clang_tidy_tests(cls):
+        """Don't care about warnings. They'll be removed in later tests."""
         ct_base_args = ["-quiet", "-checks=clang-diagnostic-return-type"]
         # Run normal, plus two in-place arguments
         additional_args = [[], ["-fix"], ["--fix-errors"], ["--", "-std=c18"]]
@@ -143,12 +144,6 @@ Error while processing {0}.
                 if cls.files[i].endswith(".cpp") and "-std=c18" in arg_set:
                     new_arg_set[new_arg_set.index("-std=c18")] = "-std=c++20"
                     # Clang tidy c++20 generates additional warnings
-                if cls.files[i].endswith("err.cpp") and "-std=c++20" in new_arg_set:
-                    if cls.versions["clang-tidy"] > "10.0.0":
-                        updated_str = b"4 warnings and 1 error generated"
-                    else:
-                        updated_str = b"2 warnings and 1 error generated"
-                    clang_tidy_output[i] = clang_tidy_output[i].replace(b"1 error generated", updated_str)
                 clang_tidy_scenario = [ClangTidyCmd, new_arg_set, [cls.files[i]], clang_tidy_output[i], cls.retcodes[i]]
                 scenarios += [clang_tidy_scenario]
         return scenarios
@@ -387,25 +382,6 @@ class TestHooks:
                     f.write(utils.test_file_strs[base_name])
 
     @staticmethod
-    def run_cmd_class(cmd_class, files, args, target_output, target_retcode):
-        """Test the command class in each python hook file. This is largely pointless - prefer integration tests."""
-        all_args = files + args
-        cmd = cmd_class(all_args)
-        if target_retcode == 0:
-            cmd.run()
-        else:
-            with pytest.raises(SystemExit):
-                cmd.run()
-                # If this continues with no system exit, print info
-                print(b"stdout:`" + cmd.stdout + b"`")
-                print(b"stderr:`" + cmd.stderr + b"`")
-                print("returncode:", cmd.returncode)
-        actual = cmd.stdout + cmd.stderr
-        retcode = cmd.returncode
-        utils.assert_equal(target_output, actual)
-        assert target_retcode == retcode
-
-    @staticmethod
     def run_integration_test(cmd_name, files, args, target_output, target_retcode):
         """Run integration tests by
 
@@ -441,6 +417,9 @@ repos:
         output_actual = sp_child.stderr + sp_child.stdout
         # Get rid of pre-commit first run info lines
         output_actual = re.sub(rb"\[INFO\].*\n", b"", output_actual)
+        # Output is unpredictable and platform/version dependent
+        if any([f.endswith("err.cpp") for f in files]) and "-std=c++20" in args:
+            output_actual = re.sub(rb"[\d,]+ warnings and ", b"", output_actual)
         if output_actual == b"":
             pytest.fail("pre-commit should provide output, but none found.")
 
@@ -478,6 +457,9 @@ repos:
         cmd_to_run = [cmd_name + "-hook", *all_args]
         sp_child = sp.run(cmd_to_run, stdout=sp.PIPE, stderr=sp.PIPE)
         actual = sp_child.stdout + sp_child.stderr
+        # Output is unpredictable and platform/version dependent
+        if any([f.endswith("err.cpp") for f in files]) and "-std=c++20" in args:
+            actual = re.sub(rb"[\d,]+ warnings and ", b"", actual)
         retcode = sp_child.returncode
         utils.assert_equal(target_output, actual)
         assert target_retcode == retcode

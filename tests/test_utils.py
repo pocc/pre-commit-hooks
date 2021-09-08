@@ -82,8 +82,8 @@ def set_compilation_db(filenames):
     cdb = cdb[:-1] + "]"  # Subtract extra comma and end json
     # Required for clang-tidy
     if os.name == "nt":
-        cdb = cdb.replace("\\", "\\\\").replace("Program Files", 'Program" "Files')
-    with open(file_dir + "/" + "compile_commands.json", "w") as f:
+        cdb = cdb.replace("\\", "\\\\").replace("Program Files", 'Program\\" \\"Files')
+    with open(os.path.join(file_dir, "compile_commands.json"), "w") as f:
         f.write(cdb)
 
 
@@ -100,8 +100,6 @@ def run_in(commands, tmpdir):
     sp_child = sp.run(commands, cwd=tmpdir, stdout=sp.PIPE, stderr=sp.PIPE)
     if sp_child.returncode != 0:
         err_msg = (
-            f"commands {commands} failed with\n"
-            + f"stdout: {sp_child.stdout.decode()}"
-            + f"stderr: {sp_child.stderr.decode()}\n"
+            f"commands {commands} failed with\nstdout: {sp_child.stdout.decode()}stderr: {sp_child.stderr.decode()}\n"
         )
         pytest.fail(err_msg)

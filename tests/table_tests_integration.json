@@ -185,56 +185,56 @@
     "command": "clang-tidy",
     "files": ["{test_dir}/err.c"],
     "args": ["-quiet", "-checks=clang-diagnostic-return-type"],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.c.\n\n",
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing {test_dir}/err.c.\n\n",
     "expd_retcode": 1
   },
   {
     "command": "clang-tidy",
     "files": ["{test_dir}/err.c"],
     "args": ["-quiet", "-checks=clang-diagnostic-return-type", "-fix"],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.c.\n\n",
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing {test_dir}/err.c.\n\n",
     "expd_retcode": 1
   },
   {
     "command": "clang-tidy",
     "files": ["{test_dir}/err.c"],
     "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--fix-errors"],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.c.\n\n",
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing {test_dir}/err.c.\n\n",
     "expd_retcode": 1
   },
   {
     "command": "clang-tidy",
     "files": ["{test_dir}/err.c"],
     "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--", "-std=c18"],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.c.\n\n",
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing {test_dir}/err.c.\n\n",
     "expd_retcode": 1
   },
   {
     "command": "clang-tidy",
     "files": ["{test_dir}/err.cpp"],
     "args": ["-quiet", "-checks=clang-diagnostic-return-type"],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.cpp.\n\n",
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing {test_dir}/err.cpp.\n\n",
     "expd_retcode": 1
   },
   {
     "command": "clang-tidy",
     "files": ["{test_dir}/err.cpp"],
     "args": ["-quiet", "-checks=clang-diagnostic-return-type", "-fix"],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.cpp.\n\n",
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing {test_dir}/err.cpp.\n\n",
     "expd_retcode": 1
   },
   {
     "command": "clang-tidy",
     "files": ["{test_dir}/err.cpp"],
     "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--fix-errors"],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.cpp.\n\n",
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing {test_dir}/err.cpp.\n\n",
     "expd_retcode": 1
   },
   {
     "command": "clang-tidy",
     "files": ["{test_dir}/err.cpp"],
     "args": ["-quiet", "-checks=clang-diagnostic-return-type", "--", "-std=c++20"],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n2 warnings and 1 error generated.\nError while processing /tmp/pre-commit-hooks-testing/err.cpp.\n\n",
+    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\nint main(){int i;return;}\n                 ^\n1 error generated.\nError while processing {test_dir}/err.cpp.\n\n",
     "expd_retcode": 1
   },
   {
@@ -339,14 +339,14 @@
     "command": "oclint",
     "files": ["{test_dir}/err.c"],
     "args": ["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics", "--", "-std=c18"],
-    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n/tmp/pre-commit-hooks-testing/err.c:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v0.13.1]\n\n",
+    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n{test_dir}/err.c:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n{test_dir}/err.c:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v0.13.1]\n\n",
     "expd_retcode": 1
   },
   {
     "command": "oclint",
     "files": ["{test_dir}/err.cpp"],
     "args": ["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics", "--", "-std=c++20"],
-    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n/tmp/pre-commit-hooks-testing/err.cpp:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v0.13.1]\n\n",
+    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n{test_dir}/err.cpp:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n{test_dir}/err.cpp:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v0.13.1]\n\n",
     "expd_retcode": 1
   }
 ]
