@@ -7,7 +7,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name:  Install 7 hooks, python, pip
-        run: sudo apt install clang clang-format clang-tidy uncrustify cppcheck iwyu llvm-9-dev libclang-9-dev clang-9 python3 python3-pip
+        run: sudo apt install clang clang-format clang-tidy uncrustify cppcheck iwyu llvm-9-dev libclang-9-dev clang-9 python3.8 python3-pip
       - name: Install latest oclint (21.05)
         run: |
           wget https://github.com/oclint/oclint/releases/download/v21.05/oclint-21.05-llvm-12.0.0-x86_64-linux-ubuntu-20.04.tar.gz
@@ -32,4 +32,4 @@ jobs:
           pytest --version
           pre-commit --version
       - name: Run tests
-        run: pytest -x -vvv
+        run: python3.8 -m pytest -x -vvv
