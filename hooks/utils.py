@@ -34,7 +34,7 @@ class Command:
             "cppcheck": r".*\.(?:c|cc|cxx|cpp|h|hpp|hxx|m)$",
             "uncrustify": r".*\.(?:c|cc|cxx|cpp|h|hpp|hxx|m|mm|d|java|vala)$",
             "cpplint": r".*\.(?:c|cc|cpp|cu|cuh|cxx|h|hh|hpp|hxx)$",
-            "include-what-you-use": r".*\.(?:c|cc|cxx|cpp|cu|h|hpp|hxx)$"
+            "include-what-you-use": r".*\.(?:c|cc|cxx|cpp|cu|h|hpp|hxx)$",
         }
         self.file_regex = file_regex[self.command]
 
@@ -196,8 +196,8 @@ class FormatterCmd(Command):
         filename_opts = self.get_filename_opts(filename)
         args = [self.command, *self.args, *filename_opts]
         child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
-        if len(child.stderr) > 0:
-            problem = f"Unexpected Stderr received when analyzing {filename}."
+        if len(child.stderr) > 0 or child.returncode != 0:
+            problem = f"Unexpected Stderr/return code received when analyzing {filename}.\nArgs: {args}"
             self.raise_error(problem, child.stdout.decode() + child.stderr.decode())
         if child.stdout == b"":
             return []
@@ -206,7 +206,7 @@ class FormatterCmd(Command):
     def get_filelines(self, filename):
         """Get the lines in a file."""
         if not os.path.exists(filename):
-            self.raise_error("File {filename} not found", "Check your path to the file.")
+            self.raise_error(f"File {filename} not found", "Check your path to the file.")
         with open(filename, "rb") as f:
             filetext = f.read()
         return filetext.split(b"\x0a")

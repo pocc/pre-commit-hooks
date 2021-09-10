@@ -8,8 +8,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Add llvm utils clang-format and clang-tidy to path
         run: echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
+      - name: Reinstall llvm to help macos find stdio.h
+        run: brew reinstall llvm
       - name: Install 4 hooks, python3, llvm 12.0.1 already installed which includes clang-tidy, clang-format
-        run: brew install uncrustify cppcheck oclint iwyu python3
+        run: brew install llvm uncrustify cppcheck oclint iwyu python3
       - name: Install C/C++ libraries with xcode, latest
         run: |
           sudo rm -rf /Library/Developer/CommandLineTools
