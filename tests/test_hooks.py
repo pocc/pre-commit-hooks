@@ -262,7 +262,7 @@ Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0{1}
         # version 20+ starts using --<option> instead of -<option>
         # Link is to https://oclint.org instead of http://oclint.org in versions >= 20
         https_s = ""
-        if cls.versions["oclint"] > "20":
+        if cls.versions["oclint"] >= "20":
             oclint_arg_sets = [["--enable-global-analysis", "--enable-clang-static-analyzer"]]
             https_s = "s"
         else:
@@ -344,14 +344,22 @@ class TestHooks:
         for s in table_tests:
             s["args"] = [arg.replace("{repo_dir}", os.getcwd()) for arg in s["args"]]
             s["files"] = [arg.replace("{test_dir}", tmpdir) for arg in s["files"]]
+            s["expd_output"] = s["expd_output"].replace("{test_dir}", tmpdir)
+
             if os.name == "nt":
                 s["files"] = [arg.replace("/", "\\\\") for arg in s["files"]]
+            # After 20, oclint versions use double dash args
+            elif s["command"] == "oclint":
+                s["expd_output"] = s["expd_output"].replace("{oclint_ver}", versions["oclint"])
+                if versions["oclint"] >= "20":
+                    s["args"] = [arg.replace("-enable", "--enable") for arg in s["args"]]
+                    if "-no-analytics" in s["args"]:  # no longer exists as an option
+                        s["args"].remove("-no-analytics")
+                    # https after version 20 instead of http
+                    s["expd_output"] = s["expd_output"].replace("http://oclint.org", "https://oclint.org")
             desc = " ".join(
                 [cls.run_integration_test.__name__, s["command"] + "-hook", " ".join(s["files"]), " ".join(s["args"])]
             )
-            # After 20, oclint versions use double dash args
-            if s["command"] == "oclint" and versions["oclint"] >= "20":
-                s["args"] = [arg.replace("-", "--") for arg in s["args"]]
             test_scenario = [
                 desc,
                 {
@@ -395,7 +403,6 @@ class TestHooks:
         3. Run `git init; pre-commit install; git add .; git commit` against the files
         """
         tmpdir = os.path.join(tempfile.gettempdir(), "pre-commit-hooks-testing")
-        target_output = target_output.replace(b"{test_dir}", tmpdir.encode())
         for test_file in files:
             test_file_base = os.path.split(test_file)[-1]
             with open(test_file, "w") as fd:

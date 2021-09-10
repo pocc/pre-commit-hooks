@@ -339,14 +339,14 @@
     "command": "oclint",
     "files": ["{test_dir}/err.c"],
     "args": ["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics", "--", "-std=c18"],
-    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n{test_dir}/err.c:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n{test_dir}/err.c:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v0.13.1]\n\n",
+    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n{test_dir}/err.c:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n{test_dir}/err.c:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v{oclint_ver}]\n\n",
     "expd_retcode": 1
   },
   {
     "command": "oclint",
     "files": ["{test_dir}/err.cpp"],
     "args": ["-enable-global-analysis", "-enable-clang-static-analyzer", "-no-analytics", "--", "-std=c++20"],
-    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n{test_dir}/err.cpp:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n{test_dir}/err.cpp:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v0.13.1]\n\n",
+    "expd_output": "oclint...................................................................Failed\n- hook id: oclint\n- exit code: 6\n\nCompiler Errors:\n(please be aware that these errors will prevent OCLint from analyzing this source code)\n\n{test_dir}/err.cpp:2:18: non-void function 'main' should return a value\n\nClang Static Analyzer Results:\n\n{test_dir}/err.cpp:2:18: non-void function 'main' should return a value\n\n\nOCLint Report\n\nSummary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0 \n\n\n[OCLint (http://oclint.org) v{oclint_ver}]\n\n",
     "expd_retcode": 1
   }
 ]
