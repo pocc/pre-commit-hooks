@@ -103,3 +103,38 @@ def run_in(commands, tmpdir):
             f"commands {commands} failed with\nstdout: {sp_child.stdout.decode()}stderr: {sp_child.stderr.decode()}\n"
         )
         pytest.fail(err_msg)
+
+
+def integration_test(cmd_name, files, args, test_dir):
+    for test_file in files:
+        test_file_base = os.path.split(test_file)[-1]
+        if test_file_base in test_file_strs:
+            with open(test_file, "w") as fd:
+                fd.write(test_file_strs[test_file_base])
+    # Add only the files we are testing
+    run_in(["git", "reset"], test_dir)
+    run_in(["git", "add"] + files, test_dir)
+    args = list(args)  # redeclare so there's no memory weirdness
+    pre_commit_config_path = os.path.join(test_dir, ".pre-commit-config.yaml")
+    pre_commit_config = f"""\
+repos:
+- repo: https://github.com/pocc/pre-commit-hooks
+  rev: v1.3.4
+  hooks:
+    - id: {cmd_name}
+      args: {args}
+"""
+    with open(pre_commit_config_path, "w") as f:
+        f.write(pre_commit_config)
+
+    # Pre-commit run will only work on staged files, which is what we want to test
+    # Using git commit can cause hangs if pre-commit passes
+    sp_child = sp.run(["pre-commit", "run"], cwd=test_dir, stdout=sp.PIPE, stderr=sp.PIPE)
+    output_actual = sp_child.stderr + sp_child.stdout
+    # Get rid of pre-commit first run info lines
+    output_actual = re.sub(rb"\[(?:INFO|WARNING)\].*\n", b"", output_actual)
+    # Output is unpredictable and platform/version dependent
+    if any([f.endswith("err.cpp") for f in files]) and "-std=c++20" in args:
+        output_actual = re.sub(rb"[\d,]+ warnings and ", b"", output_actual)
+
+    return output_actual, sp_child.returncode

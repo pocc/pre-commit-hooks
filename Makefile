@@ -5,7 +5,7 @@ clean:
 	rm -rf dist *.egg-info
 
 test:
-	pip install . && pytest -x -vvv
+	rm ~/.local/bin/*-hook && pip install . && pytest -x -vvv
 
 # Test with fresh installs of downloaded utilities
 test_fresh_installs:
