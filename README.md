@@ -26,24 +26,14 @@ This repo's hooks do more than passthrough arguments to provide these features:
 
 ## Example Usage
 
-With this err.c
+With this [err.c](tests/test_repo/err.c)
 
-```cpp
-#include <string>
+```c
+#include <stdio.h>
 int main(){int i;return;}
 ```
 
-All seven linters should fail on commit
-and produce [this output](tests/test_repo/test_integration_expected_stderr.txt)
-
-<details>
-  <summary>Pre-commit linters image output</summary>
-    <p align="center">
-      <img src="media/clinters_err.png" width="80%">
-    </p>
-</details>
-
-using this `.pre-commit-config.yaml`:
+and using this `.pre-commit-config.yaml`:
 
 ```yaml
 fail_fast: false
@@ -58,21 +48,170 @@ repos:
       - id: uncrustify
       - id: cppcheck
       - id: cpplint
-      - id: iwyu
+      - id: include-what-you-use
 ```
+
+All seven linters should fail on commit with these messages.
+Full text is at [media/all_failed.txt](media/all_failed.txt).
+
+<details>
+  <summary>clang-format error (indentation)</summary>
+
+```
+clang-format.............................................................Failed
+- hook id: clang-format
+- exit code: 1
+
+err.c
+====================
+--- original
+
++++ formatted
+
+@@ -1,3 +1,6 @@
+
+ #include <stdio.h>
+-int main(){int i;return;}
++int main() {
++  int i;
++  return;
++}
+
+```
+</details>
+<details>
+  <summary>clang-tidy error (non-void main should return a value)</summary>
+
+```
+clang-tidy...............................................................Failed
+- hook id: clang-tidy
+- exit code: 1
+
+/tmp/temp/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
+int main(){int i;return;}
+                 ^
+1 error generated.
+Error while processing /tmp/temp/err.c.
+Found compiler error(s).
+
+```
+</details>
+<details>
+  <summary>oclint error (non-void main should return a value)</summary>
+
+```
+oclint...................................................................Failed
+- hook id: oclint
+- exit code: 6
+
+Compiler Errors:
+(please be aware that these errors will prevent OCLint from analyzing this source code)
+
+/tmp/temp/err.c:2:18: non-void function 'main' should return a value
+
+Clang Static Analyzer Results:
+
+/tmp/temp/err.c:2:18: non-void function 'main' should return a value
+
+
+OCLint Report
+
+Summary: TotalFiles=0 FilesWithViolations=0 P1=0 P2=0 P3=0
+
+
+[OCLint (https://oclint.org) v21.05]
+
+```
+</details>
+<details>
+  <summary>uncrustify error (indentation)</summary>
+
+```
+uncrustify...............................................................Failed
+- hook id: uncrustify
+- exit code: 1
+
+err.c
+====================
+--- original
+
++++ formatted
+
+@@ -1,3 +1,5 @@
+
+ #include <stdio.h>
+-int main(){int i;return;}
++int main(){
++  int i; return;
++}
+
+```
+</details>
+<details>
+  <summary>cppcheck error (unused variable i)</summary>
+
+```
+cppcheck.................................................................Failed
+- hook id: cppcheck
+- exit code: 1
+
+err.c:2:16: style: Unused variable: i [unusedVariable]
+int main(){int i;return;}
+               ^
+
+```
+</details>
+<details>
+  <summary>cpplint error (no copyright message, bad whitespace)</summary>
+
+```
+cpplint..................................................................Failed
+- hook id: cpplint
+- exit code: 1
+
+Done processing err.c
+Total errors found: 4
+err.c:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
+err.c:2:  More than one command on the same line  [whitespace/newline] [0]
+err.c:2:  Missing space after ;  [whitespace/semicolon] [3]
+err.c:2:  Missing space before {  [whitespace/braces] [5]
+
+```
+</details>
+<details>
+  <summary>include-what-you-use error (remove unused #include <stdio.h>)</summary>
+
+```
+include-what-you-use.....................................................Failed
+- hook id: include-what-you-use
+- exit code: 3
+
+err.c:2:18: error: non-void function 'main' should return a value [-Wreturn-type]
+int main(){int i;return;}
+                 ^
+
+err.c should add these lines:
+
+err.c should remove these lines:
+- #include <stdio.h>  // lines 1-1
+
+The full include-list for err.c:
+---
+
+```
+</details>
 
 _Note that for your config yaml, you can supply your own args or remove the args line entirely,
 depending on your use case._
 
-You can also clone this repo and then run the test_repo to see all of the linters at work,
+You can also clone this repo and then run the test_repo to see all of the linters at work to produce this output,
 
 ```bash
 git clone https://github.com/pocc/pre-commit-hooks
-cd tests/test_repo
+cd pre-commit-hooks/tests/test_repo
 git init
 pre-commit install
-git add .
-git commit
+pre-commit run
 ```
 
 ## Using this repo
@@ -98,7 +237,7 @@ These options are automatically added to enable all errors or are required.
 * cppcheck: `["-q" , "--error-exitcode=1", "--enable=all", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"]` (See https://github.com/pocc/pre-commit-hooks/pull/30)
 * cpplint: `["--verbose=0"]`
 
-If any of these options are supplied in `args:`, they will override the above defaults.
+If any of these options are supplied in `args:`, they will override the above defaults (use -<flag>=<option> if possible when overriding).
 
 ### Compilation Database
 
@@ -106,7 +245,7 @@ If any of these options are supplied in `args:`, they will override the above de
 [compilation database](https://clang.llvm.org/docs/JSONCompilationDatabase.html).
 Both of the hooks for them will ignore the error for not having one.
 
-You can generate with one `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ...` if you
+You can generate with one `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON <dir>` if you
 have a cmake-based project.
 
 ## Information about the Commands
@@ -230,6 +369,17 @@ See [README_dev.md](README_dev.md)
 * [Official Docs](http://cppcheck.sourceforge.net/)
 * [Using Cppcheck](https://katecpp.wordpress.com/2015/08/04/cppcheck/)
 * [Source Code](https://github.com/danmar/cppcheck)
+
+### cpplint
+
+* [Google C++ style guide (basis of cpplint)](https://google.github.io/styleguide/cppguide.html)
+* [Source Code](https://github.com/cpplint/cpplint)
+
+### include-what-you-use
+
+* [Official Docs](https://include-what-you-use.org/)
+* [Using include-what-you-use](https://www.incredibuild.com/blog/include-what-you-use-how-to-best-utilize-this-tool-and-avoid-common-issues)
+* [Source Code](https://github.com/include-what-you-use/include-what-you-use)
 
 ## License
 
