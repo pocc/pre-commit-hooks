@@ -21,7 +21,7 @@ This repo's hooks do more than passthrough arguments to provide these features:
 
 * Relay correct pass/fail to pre-commit, even when some commands exit 0 when they should not. Some versions of oclint, clang-tidy, and cppcheck have this behavior.
 * Honor `--` arguments, which pre-commit [has problems with](https://github.com/pre-commit/pre-commit/issues/1000)
-* Optionally [enforce a command version](https://github.com/pocc/pre-commit-hooks#specialh-flags-in-this-repo) so your team gets code formatted/analyzed the same way
+* Optionally [enforce a command version](https://github.com/pocc/pre-commit-hooks#special-flags-in-this-repo) so your team gets code formatted/analyzed the same way
 * Formatters clang-format and uncrustify will error with diffs of what has changed
 
 ## Example Usage
@@ -237,7 +237,7 @@ These options are automatically added to enable all errors or are required.
 * cppcheck: `["-q" , "--error-exitcode=1", "--enable=all", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"]` (See https://github.com/pocc/pre-commit-hooks/pull/30)
 * cpplint: `["--verbose=0"]`
 
-If any of these options are supplied in `args:`, they will override the above defaults (use -<flag>=<option> if possible when overriding).
+If any of these options are supplied in `args:`, they will override the above defaults (use `-<flag>=<option>` if possible when overriding).
 
 ### Compilation Database
 
@@ -258,10 +258,10 @@ As this is also the minimum version of pre-commit, this should not be an issue.
 _You will need to install these utilities in order to use them. Your package
 manager may already have them. Below are the package names for each package manager, if available:_
 
-- `apt install clang clang-format clang-tidy uncrustify cppcheck iwyu` [1] [2]
-- `yum install llvm uncrustify cppcheck iwyu` [2]
-- `brew install llvm oclint uncrustify cppcheck include-what-you-use` [3]
-- `choco install llvm uncrustify cppcheck inlcude-what-you-use` [4]
+* `apt install clang clang-format clang-tidy uncrustify cppcheck iwyu` [1] [2]
+* `yum install llvm uncrustify cppcheck iwyu` [2]
+* `brew install llvm oclint uncrustify cppcheck include-what-you-use` [3]
+* `choco install llvm uncrustify cppcheck inlcude-what-you-use` [4]
 
 cpplint can be installed everywhere with `pip install cpplint`.
 
@@ -334,7 +334,7 @@ See [README_dev.md](README_dev.md)
   a good overview and a great place to get started
 * [clang-format Configurator](https://zed0.co.uk/clang-format-configurator/) - Website to
   interactively design your config while
-* [clang-format Options Explorer](https://clangformat.com/) - Website to interactively
+* [clang-format Options Explorer](https://zed0.co.uk/clang-format-configurator/) - Website to interactively
   understand various options
 * [Source Code](https://github.com/llvm-mirror/clang/tree/master/tools/clang-format)
 
