@@ -9,6 +9,7 @@
   description: Formats C, C++, Objective-C, and Java code
   files: \.(c|cc|cxx|cpp|h|hpp|hxx|m|mm|java)$
   language: python
+  additional_dependencies: [clang-format]
 - id: clang-tidy
   name: clang-tidy
   entry: clang-tidy-hook
