@@ -262,6 +262,7 @@ manager may already have them. Below are the package names for each package mana
 * `yum install llvm uncrustify cppcheck iwyu` [2]
 * `brew install llvm oclint uncrustify cppcheck include-what-you-use` [3]
 * `choco install llvm uncrustify cppcheck inlcude-what-you-use` [4]
+* `pipx install clang-format` or `pip install clang-format` [5]
 
 cpplint can be installed everywhere with `pip install cpplint`.
 
@@ -278,6 +279,8 @@ oclint with `brew cask install oclint`.
 
 [4]: oclint is not available on windows.
 
+[5]: Only supplies the `clang-format` hook requirement. Can be pinned to a specific release.
+    
 If your package manager is not listed here, it will have similar names for these tools.
 You can build all of these from source.
 
