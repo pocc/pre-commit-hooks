@@ -5,7 +5,7 @@ clean:
 	rm -rf dist *.egg-info
 
 install:
-	rm ~/.local/bin/*-hook && pip3 install . --user
+	rm ~/.local/bin/*-hook || true && pip3 install . --user
 
 test: install
 	pytest -x -vvv --pdb

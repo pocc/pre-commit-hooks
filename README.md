@@ -218,15 +218,28 @@ pre-commit run
 
 ### Special flags in this repo
 
-There are 2 flags, `--version` and `--no-diff` that can be added to `args:` for a pre-commit hook.
-They will be removed and not be passed on to the command.
+There are 3 flags, `--version`,  `--no-diff`, and `--line-diff` that can be
+added to `args:` for a pre-commit hook. They will be removed and not be passed
+on to the command.
 
-Some linters change behavior between versions. To enforce a linter version
+`--version`: Some linters change behavior between versions. To enforce a linter version
 8.0.0, for example, add `--version=8.0.0` to `args:` for that linter. Note that
 this is a pre-commit hook arg and will be filtered before args are passed to the linter.
 
-You can add `--no-diff` to the `args:` for clang-format and uncrustify
-if you would like there to be no diff output for these commands.
+`--no-diff`: You can add `--no-diff` to the `args:` for clang-format and uncrustify
+if you would like there to be no diff output for these commands. The maintainer of pre-commit
+is mostly against [having a quiet option](https://github.com/pre-commit/pre-commit/issues/823).
+
+`--line-diff`: Use this flag if you have a large codebase and only want to apply
+clang-format or clang-tidy to lines changed in this commit. It is adapted from
+and has the same functionality as [clang-format-diff.py](https://github.com/llvm/llvm-project/blob/main/clang/tools/clang-format/clang-format-diff.py)
+and [clang-tidy-diff.py](https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clang-tidy/tool/clang-tidy-diff.py).
+It currently only works with clang-format and clang-tidy because only those tools have a flag to specify line numbers to analyze.
+
+Quoting u/Supadoplex from reddit:
+
+> Those are great since they can reasonably be retrofitted to codebases that used to not have formatters or analysers,
+> while allowing their use without a single massive commit that changes formatting of entire files and fixes a billion warnings.
 
 ### Default Options
 
@@ -304,7 +317,6 @@ You can build all of these from source.
 | [cppcheck](http://cppcheck.sourceforge.net/)                             |  | `-enable=all` | |
 | [cpplint](https://github.com/cpplint/cpplint)                            |  | `--verbose=0` |  |
 | [include-what-you-use](https://github.com/include-what-you-use/include-what-you-use) | | `--verbose=3` | |
-
 
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
 and fix compiler errors if it can, like missing semicolons.

@@ -8,6 +8,8 @@ import subprocess as sp
 import sys
 from typing import List
 
+from hooks.line_diff import get_changed_lines
+
 
 class Command:
     """Super class that all commands inherit"""
@@ -23,6 +25,12 @@ class Command:
         self.stdout = b""
         self.stderr = b""
         self.returncode = 0
+
+    def set_line_diff_flag(self):
+        self.line_diff_flag = "--line-diff" in self.args
+        if self.line_diff_flag:
+            self.changed_lines = get_changed_lines()
+            self.args.remove("--line-diff")
 
     def check_installed(self):
         """Check if command is installed and fail exit if not."""
@@ -115,18 +123,23 @@ Edit your pre-commit config or use a different version of {}.""".format(
 
     def get_version_str(self):
         """Get the version string like 8.0.0 for a given command."""
+        def version_has_changed_error():
+            details = """The version format for this command has changed.
+Create an issue at github.com/pocc/pre-commit-hooks."""
+            self.raise_error("getting version", details)
+
         args = [self.command, "--version"]
         sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         version_str = str(sp_child.stdout, encoding="utf-8")
         # After version like `8.0.0` is expected to be '\n' or ' '
+        if not re.search(self.look_behind, version_str):
+            version_has_changed_error()
         regex = self.look_behind + r"((?:\d+\.)+[\d+_\+\-a-z]+)"
-        search = re.search(regex, version_str)
-        if not search:
-            details = """The version format for this command has changed.
-Create an issue at github.com/pocc/pre-commit-hooks."""
-            self.raise_error("getting version", details)
-        version = search.group(1)
-        return version
+        version_matches = re.search(regex, version_str)
+        if version_matches:
+            return version_matches.group(1)
+        else:
+            version_has_changed_error()
 
 
 class StaticAnalyzerCmd(Command):
@@ -156,17 +169,17 @@ class FormatterCmd(Command):
         super().__init__(command, look_behind, args)
         self.file_flag = None
 
-    def set_diff_flag(self):
+    def set_no_diff_flag(self):
         self.no_diff_flag = "--no-diff" in self.args
         if self.no_diff_flag:
             self.args.remove("--no-diff")
 
-    def compare_to_formatted(self, filename_str: str) -> None:
+    def compare_to_formatted(self, filename_str: str, options: List[str]) -> None:
         """Compare the expected formatted output to file contents."""
         # This string encode is from argparse, so we should be able to trust it.
         filename = filename_str.encode()
         actual = self.get_filelines(filename_str)
-        expected = self.get_formatted_lines(filename_str)
+        expected = self.get_formatted_lines(filename_str, options)
         if self.edit_in_place:
             # If edit in place is used, the formatter will fix in place with
             # no stdout. So compare the before/after file for hook pass/fail
@@ -186,10 +199,10 @@ class FormatterCmd(Command):
             return [self.file_flag, filename]
         return [filename]
 
-    def get_formatted_lines(self, filename: str) -> List[bytes]:
+    def get_formatted_lines(self, filename: str, options: List[str]) -> List[bytes]:
         """Get the expected output for a command applied to a file."""
         filename_opts = self.get_filename_opts(filename)
-        args = [self.command, *self.args, *filename_opts]
+        args = [self.command, *self.args, *options, *filename_opts]
         child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         if len(child.stderr) > 0 or child.returncode != 0:
             problem = f"Unexpected Stderr/return code received when analyzing {filename}.\nArgs: {args}"
@@ -205,3 +218,10 @@ class FormatterCmd(Command):
         with open(filename, "rb") as f:
             filetext = f.read()
         return filetext.split(b"\x0a")
+
+    def exit_on_error(self):
+        """Exit on error. Note that this is different from Static Analyzer exit_on_erro.
+        This one only writes stderr to stdout whereas other fn writes stdout+stderr => stdout"""
+        if self.returncode != 0:
+            sys.stdout.buffer.write(self.stderr)
+            sys.exit(self.returncode)

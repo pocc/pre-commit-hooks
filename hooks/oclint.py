@@ -42,7 +42,6 @@ class OCLintCmd(StaticAnalyzerCmd):
                 self.stderr = self.stdout
             # If errors have been captured, stdout is unexpected
             self.stdout = b""
-            self.exit_on_error()
             self.cleanup_files(current_files)
 
     @staticmethod
@@ -57,7 +56,7 @@ class OCLintCmd(StaticAnalyzerCmd):
 def main(argv: List[str] = sys.argv):
     cmd = OCLintCmd(argv)
     cmd.run()
-
+    cmd.exit_on_error()
 
 if __name__ == "__main__":
     main()

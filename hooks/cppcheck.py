@@ -30,12 +30,12 @@ class CppcheckCmd(StaticAnalyzerCmd):
         """Run cppcheck"""
         for filename in self.files:
             self.run_command([filename] + self.args)
-            self.exit_on_error()
 
 
 def main(argv: List[str] = sys.argv):
     cmd = CppcheckCmd(argv)
     cmd.run()
+    cmd.exit_on_error()
 
 
 if __name__ == "__main__":

@@ -24,19 +24,15 @@ class IncludeWhatYouUseCmd(StaticAnalyzerCmd):
         for filename in self.files:
             self.run_command([filename] + self.args)
             is_correct = b"has correct #includes/fwd-decls" in self.stderr
-            if is_correct:
-                self.returncode = 0
-                self.stdout = b""
-                self.stderr = b""
-            else:
-                sys.stderr.buffer.write(self.stdout + self.stderr)
-                sys.exit(self.returncode)
+            if not is_correct:
+                self.returncode = 1
+                self.stderr = self.stdout + self.stderr
 
 
 def main(argv: List[str] = sys.argv):
     cmd = IncludeWhatYouUseCmd(argv)
     cmd.run()
-
+    cmd.exit_on_error()
 
 if __name__ == "__main__":
     main()

@@ -19,7 +19,8 @@ class UncrustifyCmd(FormatterCmd):
         super().__init__(self.command, self.lookbehind, args)
         self.check_installed()
         self.parse_args(args)
-        self.set_diff_flag()
+        self.set_no_diff_flag()
+        self.set_no_diff_flag()
         self.add_if_missing(["-q"])  # Remove stderr, which causes issues
         self.file_flag = "-f"
         self.edit_in_place = "--replace" in self.args
@@ -44,15 +45,13 @@ class UncrustifyCmd(FormatterCmd):
     def run(self):
         """Run uncrustify with the arguments provided."""
         for filename in self.files:
-            self.compare_to_formatted(filename)
-        if self.returncode != 0:
-            sys.stdout.buffer.write(self.stderr)
-            sys.exit(self.returncode)
-
+            options: List[str] = []  # For line diffs at some point
+            self.compare_to_formatted(filename, options)
 
 def main(argv: List[str] = sys.argv):
     cmd = UncrustifyCmd(argv)
     cmd.run()
+    cmd.exit_on_error()
 
 
 if __name__ == "__main__":
