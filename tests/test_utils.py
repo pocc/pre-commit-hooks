@@ -5,7 +5,6 @@ import re
 import shutil
 import subprocess as sp
 import sys
-import uuid
 
 import pytest
 
@@ -17,7 +16,7 @@ test_file_strs = {
 }
 
 
-def assert_equal(expected, actual):
+def assert_equal(expected: bytes, actual: bytes):
     """Stand in for Python's assert which is annoying to work with."""
     actual = actual.replace(b"\r", b"")  # ignore windows file ending differences
     if expected != actual:

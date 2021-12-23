@@ -4,15 +4,15 @@
 clean:
 	rm -rf dist *.egg-info
 
-test:
-	rm ~/.local/bin/*-hook && pip install . && pytest -x -vvv
+install:
+	rm ~/.local/bin/*-hook && pip3 install . --user
+
+test: install
+	pytest -x -vvv --pdb
 
 # Test with fresh installs of downloaded utilities
 test_fresh_installs:
 	./tests/run_tests.sh
-
-install:
-	pip3 install . --user
 
 upload: clean
 	python3 setup.py sdist

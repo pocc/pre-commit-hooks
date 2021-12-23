@@ -4,6 +4,7 @@ import os
 import re
 import subprocess as sp
 import sys
+from typing import List
 
 from hooks.utils import FormatterCmd
 
@@ -14,7 +15,7 @@ class UncrustifyCmd(FormatterCmd):
     command = "uncrustify"
     lookbehind = "[uU]ncrustify[- ]"
 
-    def __init__(self, args):
+    def __init__(self, args: List[str]):
         super().__init__(self.command, self.lookbehind, args)
         self.check_installed()
         self.parse_args(args)
@@ -49,7 +50,7 @@ class UncrustifyCmd(FormatterCmd):
             sys.exit(self.returncode)
 
 
-def main(argv=None):
+def main(argv: List[str] = sys.argv):
     cmd = UncrustifyCmd(argv)
     cmd.run()
 

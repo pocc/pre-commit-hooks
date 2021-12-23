@@ -16,11 +16,8 @@ functionally tests the same thing.
 import json
 import os
 import re
-import shutil
 import subprocess as sp
 import tempfile
-
-import pytest
 
 import tests.test_utils as utils
 from hooks.clang_format import ClangFormatCmd

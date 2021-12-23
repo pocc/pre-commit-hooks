@@ -7,41 +7,42 @@
   name: clang-format
   entry: clang-format-hook
   description: Formats C, C++, Objective-C, and Java code
-  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m|mm|java)$
+  types_or: [c, c++, c#, objective-c, java]
   language: python
 - id: clang-tidy
   name: clang-tidy
   entry: clang-tidy-hook
   description: Find warnings/errors in C, C++, and Objective-C code
-  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+  types_or: [c, c++, c#, objective-c]
   language: python
 - id: oclint
   name: oclint
   entry: oclint-hook
   description: Find warnings/errors in C, C++, and Objective-C code
-  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+  types_or: [c, c++, c#, objective-c]
   language: python
 - id: uncrustify
   name: uncrustify
   entry: uncrustify-hook
   description: Formats C, C++, Objective-C, Java, D, and Vala code
-  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m|mm|d|java|vala)$
+  # D, vala currently aren't valid file types. See https://github.com/pre-commit/identify/issues/258
+  types_or: [c, c++, c#, objective-c, java]
   language: python
 - id: cppcheck
   name: cppcheck
   entry: cppcheck-hook
   description: Find warnings/errors in C, C++, and Objective-C code
-  files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+  types_or: [c, c++, c#, objective-c]
   language: python
 - id: cpplint
   name: cpplint
   entry: cpplint-hook
   description: Find warnings/errors in C/CPP code
-  files: \.(c|cc|cpp|cu|cuh|cxx|h|hh|hpp|hxx)$
+  types_or:  [c, c++, c#, objective-c, cuda]
   language: python
 - id: include-what-you-use
   name: include-what-you-use
   entry: include-what-you-use-hook
   description: Runs Include-What-You-Use (iwyu) in C/CPP code
-  files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx)$
+  types_or:  [c, c++, c#, objective-c, cuda]
   language: python

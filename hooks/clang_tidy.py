@@ -2,6 +2,7 @@
 """Wrapper script for clang-tidy."""
 import re
 import sys
+from typing import List
 
 from hooks.utils import StaticAnalyzerCmd
 
@@ -12,7 +13,7 @@ class ClangTidyCmd(StaticAnalyzerCmd):
     command = "clang-tidy"
     lookbehind = "LLVM version "
 
-    def __init__(self, args):
+    def __init__(self, args: List[str]):
         super().__init__(self.command, self.lookbehind, args)
         self.parse_args(args)
         self.edit_in_place = "-fix" in self.args or "--fix-errors" in self.args
@@ -28,7 +29,7 @@ class ClangTidyCmd(StaticAnalyzerCmd):
             self.exit_on_error()
 
 
-def main(argv=None):
+def main(argv: List[str] = sys.argv):
     cmd = ClangTidyCmd(argv)
     cmd.run()
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Wrapper script for oclint"""
 import os
+import sys
+from typing import List
 
 from hooks.utils import StaticAnalyzerCmd
 
@@ -11,7 +13,7 @@ class OCLintCmd(StaticAnalyzerCmd):
     command = "oclint"
     lookbehind = "OCLint version "
 
-    def __init__(self, args):
+    def __init__(self, args: List[str]):
         super().__init__(self.command, self.lookbehind, args)
         self.version = self.get_version_str()
         self.parse_args(args)
@@ -44,7 +46,7 @@ class OCLintCmd(StaticAnalyzerCmd):
             self.cleanup_files(current_files)
 
     @staticmethod
-    def cleanup_files(existing_files):
+    def cleanup_files(existing_files: List[str]):
         """Delete the plist files that oclint generates."""
         new_files = os.listdir(os.getcwd())
         for filename in new_files:
@@ -52,7 +54,7 @@ class OCLintCmd(StaticAnalyzerCmd):
                 os.remove(filename)
 
 
-def main(argv=None):
+def main(argv: List[str] = sys.argv):
     cmd = OCLintCmd(argv)
     cmd.run()
 

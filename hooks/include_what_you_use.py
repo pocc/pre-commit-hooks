@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Wrapper for include-what-you-use"""
 import sys
+from typing import List
 
 from hooks.utils import StaticAnalyzerCmd
 
@@ -12,7 +13,7 @@ class IncludeWhatYouUseCmd(StaticAnalyzerCmd):
     command = "include-what-you-use"
     lookbehind = "include-what-you-use "
 
-    def __init__(self, args):
+    def __init__(self, args: List[str]):
         super().__init__(self.command, self.lookbehind, args)
         self.check_installed()
         self.parse_args(args)
@@ -32,7 +33,7 @@ class IncludeWhatYouUseCmd(StaticAnalyzerCmd):
                 sys.exit(self.returncode)
 
 
-def main(argv=None):
+def main(argv: List[str] = sys.argv):
     cmd = IncludeWhatYouUseCmd(argv)
     cmd.run()
 
