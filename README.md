@@ -204,15 +204,19 @@ The full include-list for err.c:
 _Note that for your config yaml, you can supply your own args or remove the args line entirely,
 depending on your use case._
 
-You can also clone this repo and then run the test_repo to see all of the linters at work to produce this output,
+You can also clone this repo and then run the test_repo to see all of the linters at work to produce this output:
 
 ```bash
 git clone https://github.com/pocc/pre-commit-hooks
-cd pre-commit-hooks/tests/test_repo
+cp -r pre-commit-hooks/tests/test_repo .
+cd test_repo
 git init
-pre-commit install
+git add .
 pre-commit run
 ```
+
+Note that we are copying the test_repo outside of the pre-commit-hooks repo
+so that pre-commit doesn't get confused by nested github repositories.
 
 ## Using this repo
 
