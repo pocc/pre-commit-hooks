@@ -262,31 +262,29 @@ As this is also the minimum version of pre-commit, this should not be an issue.
 Use these commands to install some or all of the linters used in this project:
 
 * Linux
-    * `brew install llvm uncrustify cppcheck include-what-you-use` [1]
-    * See note below for oclint on Linux
+    * `brew install llvm uncrustify cppcheck include-what-you-use` [1] [2]
+    * `oclint`: See note below for installation [3]
 * MacOS
     * `brew install llvm uncrustify cppcheck include-what-you-use oclint`
 * Windows
     * `choco install llvm uncrustify cppcheck inlcude-what-you-use`
 * Cross-platform
     * `pip install cpplint`
-    * `pipx install clang-format==<version>` [2]
+    * `pipx install clang-format` [4]
 
 [1]: llvm includes tools like `clang-format` and `clang-tidy`.
-[2]: This will download a specific `<version>` of a clang-format binary, from `10.0.1` and up.
-    Check out the [clang-format-wheel repository](https://github.com/ssciwr/clang-format-wheel) for information on
-    how to download the clang-format binary as part of a CI pre-commit build.
 
-While it's possible to use other package managers to install these utilities on Linux, I recommend
-using brew to avoid dependency issues between llvm and linters that use it.
+[2]: While it's possible to use other package managers to install these utilities on Linux, I recommend
+  using brew to avoid dependency issues between llvm and linters that use it, such as include-what-you-use.
 
-#### Installing oclint
+[3]: You can install on MacOS with `brew install oclint`. Oclint's github page also provides compiled
+  binary packages (and zip of source code to compile) for Macos/Linux:
+  [releases](https://github.com/oclint/oclint/releases). oclint is not available on windows.
 
-You can install on MacOS with `brew install oclint`.
-
-Oclint's github page also provides compiled binary packages (and zip of source code to compile) for Macos/Linux: [releases](https://github.com/oclint/oclint/releases).
-
-oclint is not available on windows.
+[4]: This will download the latest version. Versions from `10.0.1` and up are supported.
+  To pin to a specific version like `13.0.0`, use `pipx install clang-format==13.0.0`.
+  Check out the [clang-format-wheel repository](https://github.com/ssciwr/clang-format-wheel) for information on
+  how to download the clang-format binary as part of a CI pre-commit build.
 
 ### Hook Info
 
