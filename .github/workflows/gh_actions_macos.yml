@@ -1,4 +1,4 @@
-name: pre-commit-hooks testing
+name: test macos latest
 on: [push]
 jobs:
   build:

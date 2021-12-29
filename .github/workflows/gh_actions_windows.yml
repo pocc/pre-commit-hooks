@@ -1,4 +1,4 @@
-name: pre-commit-hooks testing
+name: test windows latest
 on: [push]
 jobs:
   build:

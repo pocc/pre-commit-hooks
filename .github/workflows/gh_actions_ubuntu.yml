@@ -1,4 +1,4 @@
-name: pre-commit-hooks testing
+name: test ubuntu 20.04
 on: [push]
 jobs:
   build:

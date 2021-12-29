@@ -241,7 +241,7 @@ These options are automatically added to enable all errors or are required.
 * cppcheck: `["-q" , "--error-exitcode=1", "--enable=all", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"]` (See https://github.com/pocc/pre-commit-hooks/pull/30)
 * cpplint: `["--verbose=0"]`
 
-If any of these options are supplied in `args:`, they will override the above defaults (use `-<flag>=<option>` if possible when overriding).
+If you supply any of these options in `args:`, your options will override the above defaults (use `-<flag>=<option>` if possible when overriding).
 
 ### Compilation Database
 
@@ -259,31 +259,26 @@ As this is also the minimum version of pre-commit, this should not be an issue.
 
 ### Installation
 
-_You will need to install these utilities in order to use them. Your package
-manager may already have them. Below are the package names for each package manager, if available:_
+Use these commands to install some or all of the linters used in this project:
 
-* `apt install clang clang-format clang-tidy uncrustify cppcheck iwyu` [1] [2]
-* `yum install llvm uncrustify cppcheck iwyu` [2]
-* `brew install llvm oclint uncrustify cppcheck include-what-you-use` [3]
-* `choco install llvm uncrustify cppcheck inlcude-what-you-use` [4]
+* Linux/Macos
+    * `brew install llvm uncrustify cppcheck include-what-you-use`
+    * `pip install cpplint`
+    * `brew install oclint` (macos), see note below for oclint on Linux
+* Windows
+    * `choco install llvm uncrustify cppcheck inlcude-what-you-use` [4]
+    * `pip install cpplint`
 
-cpplint can be installed everywhere with `pip install cpplint`.
+While it's possible to use other package managers to install these utilities on Linux, I recommend
+using brew to avoid dependency issues between llvm and linters that use it.
 
-[1]: `clang` is a required install for `clang-format` or `clang-tidy` to work.
+#### Installing oclint
 
-[2]: oclint takes a couple hours to compile. I've compiled and tarred
-[oclint-v0.15](https://dl.dropboxusercontent.com/s/nu474emafxj2nn5/oclint.tar.gz)
-for those using linux who want to skip the wait (built on Ubuntu-18.04).
-You can also download the older [oclint-v0.13.1](https://github.com/oclint/oclint/releases/download/v0.13.1/oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz)
-for linux from oclint's github page (see [releases](https://github.com/oclint/oclint/releases)).
+You can install on MacOS with `brew install oclint`.
 
-[3]: Depending on your brew installation, you may need to install
-oclint with `brew cask install oclint`.
+Oclint's github page also provides compiled binary packages (and zip of source code to compile) for Macos/Linux: [releases](https://github.com/oclint/oclint/releases).
 
-[4]: oclint is not available on windows.
-
-If your package manager is not listed here, it will have similar names for these tools.
-You can build all of these from source.
+oclint is not available on windows.
 
 ### Hook Info
 
@@ -308,7 +303,6 @@ You can build all of these from source.
 | [cppcheck](http://cppcheck.sourceforge.net/)                             |  | `-enable=all` | |
 | [cpplint](https://github.com/cpplint/cpplint)                            |  | `--verbose=0` |  |
 | [include-what-you-use](https://github.com/include-what-you-use/include-what-you-use) | | `--verbose=3` | |
-
 
 [1]: `-fix` will fail if there are compiler errors. `-fix-errors` will `-fix`
 and fix compiler errors if it can, like missing semicolons.
