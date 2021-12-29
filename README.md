@@ -261,13 +261,21 @@ As this is also the minimum version of pre-commit, this should not be an issue.
 
 Use these commands to install some or all of the linters used in this project:
 
-* Linux/Macos
-    * `brew install llvm uncrustify cppcheck include-what-you-use`
-    * `pip install cpplint`
-    * `brew install oclint` (macos), see note below for oclint on Linux
+* Linux
+    * `brew install llvm uncrustify cppcheck include-what-you-use` [1]
+    * See note below for oclint on Linux
+* MacOS
+    * `brew install llvm uncrustify cppcheck include-what-you-use oclint`
 * Windows
-    * `choco install llvm uncrustify cppcheck inlcude-what-you-use` [4]
+    * `choco install llvm uncrustify cppcheck inlcude-what-you-use`
+* Cross-platform
     * `pip install cpplint`
+    * `pipx install clang-format==<version>` [2]
+
+[1]: llvm includes tools like `clang-format` and `clang-tidy`.
+[2]: This will download a specific `<version>` of a clang-format binary, from `10.0.1` and up.
+    Check out the [clang-format-wheel repository](https://github.com/ssciwr/clang-format-wheel) for information on
+    how to download the clang-format binary as part of a CI pre-commit build.
 
 While it's possible to use other package managers to install these utilities on Linux, I recommend
 using brew to avoid dependency issues between llvm and linters that use it.
