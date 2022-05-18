@@ -17,7 +17,7 @@ class Command:
         self.look_behind = look_behind
         self.command = command
         # Will be [] if not run using pre-commit or if there are no committed files
-        self.files = self.get_added_files()
+        self.files = self.get_added_files(args)
         self.edit_in_place = False
 
         self.stdout = b""
@@ -35,9 +35,9 @@ class Command:
             )  # noqa: E501
             self.raise_error(problem, details)
 
-    def get_added_files(self):
+    def get_added_files(self, args):
         """Find added files using git."""
-        added_files = sys.argv[1:]  # 1: don't include the hook file
+        added_files = args[1:]  # 1: don't include the hook file
         # cfg files are used by uncrustify and won't be source files
         added_files = [f for f in added_files if os.path.exists(f) and not f.endswith(".cfg")]
 
