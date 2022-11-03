@@ -281,7 +281,7 @@ Use these commands to install some or all of the linters used in this project:
   binary packages (and zip of source code to compile) for Macos/Linux:
   [releases](https://github.com/oclint/oclint/releases). oclint is not available on windows.
 
-[4]: To install include-what-you-use on Windows, you need to follow this [guide](https://github.com/include-what-you-use/include-what-you-use) as no include-what-you-use package is available on chocolatey by now.
+[4]: To install include-what-you-use on Windows, you need to follow this [guide](https://github.com/include-what-you-use/include-what-you-use) as no include-what-you-use package is available on chocolatey by now. This [link](https://clang.llvm.org/get_started.html) can also be helpfull.
 
 [5]: This will download the latest version. Versions from `10.0.1` and up are supported.
   To pin to a specific version like `13.0.0`, use `pipx install clang-format==13.0.0`.
