@@ -267,10 +267,10 @@ Use these commands to install some or all of the linters used in this project:
 * MacOS
     * `brew install llvm uncrustify cppcheck include-what-you-use oclint`
 * Windows
-    * `choco install llvm uncrustify cppcheck inlcude-what-you-use`
+    * `choco install llvm uncrustify cppcheck` [4]
 * Cross-platform
     * `pip install cpplint`
-    * `pipx install clang-format` [4]
+    * `pipx install clang-format` [5]
 
 [1]: llvm includes tools like `clang-format` and `clang-tidy`.
 
@@ -281,7 +281,9 @@ Use these commands to install some or all of the linters used in this project:
   binary packages (and zip of source code to compile) for Macos/Linux:
   [releases](https://github.com/oclint/oclint/releases). oclint is not available on windows.
 
-[4]: This will download the latest version. Versions from `10.0.1` and up are supported.
+[4]: To install include-what-you-use on Windows, you need to follow this [guide](https://github.com/include-what-you-use/include-what-you-use) as no include-what-you-use package is available on chocolatey by now.
+
+[5]: This will download the latest version. Versions from `10.0.1` and up are supported.
   To pin to a specific version like `13.0.0`, use `pipx install clang-format==13.0.0`.
   Check out the [clang-format-wheel repository](https://github.com/ssciwr/clang-format-wheel) for information on
   how to download the clang-format binary as part of a CI pre-commit build.
