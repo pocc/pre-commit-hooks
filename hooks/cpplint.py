@@ -19,14 +19,18 @@ class CpplintCmd(StaticAnalyzerCmd):
 
     def run(self):
         """Run cpplint"""
-        #error_occured = False
+        error_occured = False
         for filename in self.files:
             self.run_command(self.args + [filename])  # cpplint is unique in requiring args before filename
-            #if self.returncode != 0:
-                #error_occurred = True
+            if self.returncode != 0:
+                error_occurred = True
             self.exit_on_error()
-        #if error_occured:
-        #    sys.exit(1)
+        print("yooooooooooo")
+        print(error_occured)
+        sys.stdout.write("error_occured:")
+        sys.stdout.write(error_occured)
+        if error_occured:
+            sys.exit(1)
 
 
 def main(argv: List[str] = sys.argv):

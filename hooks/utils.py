@@ -146,7 +146,7 @@ class StaticAnalyzerCmd(Command):
     def exit_on_error(self):
         if self.returncode != 0:
             sys.stderr.buffer.write(self.stdout + self.stderr)
-            sys.exit(self.returncode)
+            #sys.exit(self.returncode)
 
 
 class FormatterCmd(Command):
