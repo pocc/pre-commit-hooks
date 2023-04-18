@@ -19,9 +19,15 @@ class CpplintCmd(StaticAnalyzerCmd):
 
     def run(self):
         """Run cpplint"""
+        run_returncode = 0
         for filename in self.files:
             self.run_command(self.args + [filename])  # cpplint is unique in requiring args before filename
-            self.exit_on_error()
+            if self.returncode != 0:
+                run_returncode = self.returncode if self.returncode > run_returncode else run_returncode
+
+        if run_returncode != 0:
+            sys.stderr.buffer.write(self.stderr)
+            sys.exit(run_returncode)
 
 
 def main(argv: List[str] = sys.argv):
