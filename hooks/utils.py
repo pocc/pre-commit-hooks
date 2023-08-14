@@ -143,6 +143,15 @@ class StaticAnalyzerCmd(Command):
         self.stderr += sp_child.stderr
         self.returncode = sp_child.returncode
 
+    def run_command_cpplint(self, args: List[str]):
+        """Run the command and check for errors. Args includes options and filepaths"""
+        args = [self.command, *args]
+        sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
+        self.returncode = sp_child.returncode
+        
+        if self.returncode != 0:
+            sys.stderr.buffer.write(sp_child.stderr + sp_child.stdout)
+
     def exit_on_error(self):
         if self.returncode != 0:
             sys.stderr.buffer.write(self.stdout + self.stderr)
