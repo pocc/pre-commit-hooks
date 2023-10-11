@@ -38,7 +38,7 @@ class OCLintCmd(StaticAnalyzerCmd):
             current_files = os.listdir(os.getcwd())
             self.run_command([filename] + self.args)
             # Errors are sent to stdout instead of stderr
-            if b"Errors" in self.stdout:
+            if b"FilesWithViolations=1" in self.stdout:
                 self.stderr = self.stdout
             # If errors have been captured, stdout is unexpected
             self.stdout = b""
