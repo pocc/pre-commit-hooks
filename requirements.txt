@@ -1,2 +1,2 @@
-black==19.10b0
+black==24.3.0
 pytest==5.4.1
