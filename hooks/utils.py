@@ -37,7 +37,8 @@ class Command:
 
     def get_added_files(self):
         """Find added files using git."""
-        added_files = sys.argv[1:]  # 1: don't include the hook file
+        # Use self.args if available (for testing), otherwise fall back to sys.argv
+        added_files = self.args[1:] if self.args else sys.argv[1:]
         # cfg files are used by uncrustify and won't be source files
         added_files = [f for f in added_files if os.path.exists(f) and not f.endswith(".cfg")]
 
