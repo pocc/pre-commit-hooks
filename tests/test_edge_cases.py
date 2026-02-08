@@ -269,24 +269,29 @@ class TestOCLintVersionHandling:
     @pytest.mark.skipif(os.name == "nt", reason="OCLint not available on Windows")
     def test_oclint_plist_cleanup(self):
         """Test that OCLint cleans up generated .plist files."""
+        original_cwd = os.getcwd()
         with tempfile.TemporaryDirectory() as tmpdir:
-            test_file = os.path.join(tmpdir, "test.c")
-            with open(test_file, "w") as f:
-                f.write("int main() { return 0; }\n")
+            try:
+                os.chdir(tmpdir)
+                test_file = os.path.join(tmpdir, "test.c")
+                with open(test_file, "w") as f:
+                    f.write("int main() { return 0; }\n")
 
-            plist_file = os.path.join(tmpdir, "test.plist")
-            with open(plist_file, "w") as f:
-                f.write("fake plist content\n")
+                plist_file = os.path.join(tmpdir, "test.plist")
+                with open(plist_file, "w") as f:
+                    f.write("fake plist content\n")
 
-            existing_files = os.listdir(tmpdir)
-            assert "test.plist" in existing_files
+                existing_files = os.listdir(tmpdir)
+                assert "test.plist" in existing_files
 
-            # Simulate cleanup
-            OCLintCmd.cleanup_files(existing_files)
+                # Simulate cleanup - cleanup_files uses os.getcwd()
+                OCLintCmd.cleanup_files(existing_files)
 
-            # In actual use, cleanup removes plist files created by oclint
-            # Here we just test the method exists and can be called
-            assert hasattr(OCLintCmd, "cleanup_files")
+                # In actual use, cleanup removes plist files created by oclint
+                # Here we just test the method exists and can be called
+                assert hasattr(OCLintCmd, "cleanup_files")
+            finally:
+                os.chdir(original_cwd)
 
 
 class TestIncludeWhatYouUse:
