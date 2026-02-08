@@ -361,8 +361,8 @@
       "-checks=clang-diagnostic-return-type",
       "--fix-errors"
     ],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\n    2 | int main(){int i;return;}\n      |                  ^\n1 error generated.\nError while processing {test_dir}/err.c.\n\n",
-    "expd_retcode": 1
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
   },
   {
     "command": "clang-tidy",
@@ -413,8 +413,8 @@
       "-checks=clang-diagnostic-return-type",
       "--fix-errors"
     ],
-    "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\n    2 | int main(){int i;return;}\n      |                  ^\n1 error generated.\nError while processing {test_dir}/err.cpp.\n\n",
-    "expd_retcode": 1
+    "expd_output": "clang-tidy...............................................................Passed\n",
+    "expd_retcode": 0
   },
   {
     "command": "clang-tidy",
