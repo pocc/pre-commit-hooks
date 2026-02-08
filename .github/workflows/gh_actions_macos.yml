@@ -8,6 +8,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Add llvm utils clang-format and clang-tidy to path
         run: echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
+      - name: Configure macOS SDK for clang-tidy
+        run: |
+          echo "SDKROOT=$(xcrun --show-sdk-path)" >> $GITHUB_ENV
+          echo "CPATH=$(xcrun --show-sdk-path)/usr/include" >> $GITHUB_ENV
       - name: Install 5 hooks, python3, llvm already includes clang-tidy, clang-format
         run: brew install uncrustify cppcheck oclint iwyu
       - name: Fix OCLint dylib paths
