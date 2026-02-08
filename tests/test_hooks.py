@@ -510,11 +510,12 @@ class TestHooks:
                 if line or i == 0:  # Keep empty lines except trailing ones
                     filtered_lines.append(line)
             filtered_actual = b"\n".join(filtered_lines)
-            # If we filtered warnings/errors and got exit code 1, normalize to 0 if output matches expected
-            if filtered_actual != actual and sp_child.returncode == 1:
-                # clang-tidy returns 1 when warnings/errors are generated, but if we filtered them
-                # and the output is now empty or matches expected, treat as success
-                if filtered_actual.strip() == b"" or filtered_actual.strip() == target_output.strip():
+            # If we filtered system header warnings/errors and got exit code 1, normalize to 0
+            # only if the expected output is also empty (indicating a test that should pass)
+            if filtered_actual != actual and sp_child.returncode == 1 and in_system_header_error:
+                # Only normalize return code if we filtered system header errors
+                # and the result is now empty (matching expected empty output)
+                if filtered_actual.strip() == b"" and target_output.strip() == b"":
                     sp_child = sp.CompletedProcess(
                         sp_child.args, 0, sp_child.stdout, sp_child.stderr
                     )
