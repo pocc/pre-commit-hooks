@@ -466,18 +466,36 @@ class TestHooks:
         if cmd_name == "clang-tidy":
             # Filter warnings count
             filtered_actual = re.sub(rb"\d+ warnings? generated\.\n", b"", actual)
-            # Filter errors from macOS SDK system headers
-            filtered_actual = re.sub(
-                rb"^.*?/Applications/Xcode[^\n]*?/MacOSX\.sdk/[^\n]*\n", b"", filtered_actual, flags=re.MULTILINE
-            )
-            # Filter "X errors generated." from system header errors
-            filtered_actual = re.sub(rb"\d+ errors? generated\.\n", b"", filtered_actual)
-            # Filter "Error while processing..." lines
-            filtered_actual = re.sub(rb"^Error while processing [^\n]*\n", b"", filtered_actual, flags=re.MULTILINE)
-            # Filter "error:" lines from system headers
-            filtered_actual = re.sub(rb"^error: too many errors emitted[^\n]*\n", b"", filtered_actual, flags=re.MULTILINE)
-            # Filter "note:" lines that follow system header errors
-            filtered_actual = re.sub(rb"^note: [^\n]*\n", b"", filtered_actual, flags=re.MULTILINE)
+            # Filter errors from macOS SDK system headers (entire lines containing SDK paths)
+            # Only filter lines that contain the macOS SDK path
+            lines = filtered_actual.split(b"\n")
+            filtered_lines = []
+            skip_next_error_processing = False
+            for i, line in enumerate(lines):
+                # Skip lines containing macOS SDK paths
+                if b"/Applications/Xcode" in line and b"/MacOSX.sdk/" in line:
+                    continue
+                # Skip "note:" lines that directly follow SDK path lines
+                if line.startswith(b"note: ") and i > 0 and (
+                    b"/Applications/Xcode" in lines[i-1] and b"/MacOSX.sdk/" in lines[i-1]
+                ):
+                    continue
+                # Skip "error: too many errors emitted" which only appears with system header errors
+                if line.startswith(b"error: too many errors emitted"):
+                    skip_next_error_processing = True
+                    continue
+                # Skip "X errors generated." when preceded by system header errors
+                if line.strip() and re.match(rb"\d+ errors? generated\.$", line.strip()):
+                    # Check if we've seen SDK paths earlier
+                    if any(b"/MacOSX.sdk/" in l for l in lines[:i]):
+                        skip_next_error_processing = True
+                        continue
+                # Skip "Error while processing" only if it follows system header errors
+                if line.startswith(b"Error while processing") and skip_next_error_processing:
+                    skip_next_error_processing = False
+                    continue
+                filtered_lines.append(line)
+            filtered_actual = b"\n".join(filtered_lines)
             # If we filtered warnings/errors and got exit code 1, normalize to 0 if output matches expected
             if filtered_actual != actual and sp_child.returncode == 1:
                 # clang-tidy returns 1 when warnings/errors are generated, but if we filtered them
