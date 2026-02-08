@@ -113,6 +113,8 @@ def integration_test(cmd_name, files, args, test_dir):
         if test_file_base in test_file_strs:
             with open(test_file, "w") as fd:
                 fd.write(test_file_strs[test_file_base])
+    # Create compilation database for clang-tidy and iwyu
+    set_compilation_db(files)
     # Add only the files we are testing
     run_in(["git", "reset"], test_dir)
     run_in(["git", "add"] + files, test_dir)
