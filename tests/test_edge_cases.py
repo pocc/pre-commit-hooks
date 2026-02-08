@@ -215,32 +215,36 @@ class TestUncrustifyDefaults:
 
     def test_defaults_cfg_creation(self):
         """Test that defaults.cfg is created if missing."""
+        original_cwd = os.getcwd()
         with tempfile.TemporaryDirectory() as tmpdir:
-            os.chdir(tmpdir)
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".c", delete=False, dir=tmpdir
-            ) as f:
-                f.write("int main() { return 0; }\n")
-                temp_file = f.name
-
             try:
-                # Mock sys.argv for get_added_files()
-                original_argv = sys.argv
-                sys.argv = ["uncrustify-hook", temp_file]
-                cmd = UncrustifyCmd(["uncrustify-hook", temp_file])
-                sys.argv = original_argv
-                # If no -c arg provided, defaults.cfg should be created
-                if "-c" in cmd.args:
-                    idx = cmd.args.index("-c")
-                    config_file = cmd.args[idx + 1]
-                    # Check that config file exists or is defaults.cfg
-                    assert config_file == "defaults.cfg" or os.path.exists(config_file)
+                os.chdir(tmpdir)
+                with tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".c", delete=False, dir=tmpdir
+                ) as f:
+                    f.write("int main() { return 0; }\n")
+                    temp_file = f.name
+
+                try:
+                    # Mock sys.argv for get_added_files()
+                    original_argv = sys.argv
+                    sys.argv = ["uncrustify-hook", temp_file]
+                    cmd = UncrustifyCmd(["uncrustify-hook", temp_file])
+                    sys.argv = original_argv
+                    # If no -c arg provided, defaults.cfg should be created
+                    if "-c" in cmd.args:
+                        idx = cmd.args.index("-c")
+                        config_file = cmd.args[idx + 1]
+                        # Check that config file exists or is defaults.cfg
+                        assert config_file == "defaults.cfg" or os.path.exists(config_file)
+                finally:
+                    if os.path.exists(temp_file):
+                        os.unlink(temp_file)
+                    defaults_path = os.path.join(tmpdir, "defaults.cfg")
+                    if os.path.exists(defaults_path):
+                        os.unlink(defaults_path)
             finally:
-                if os.path.exists(temp_file):
-                    os.unlink(temp_file)
-                defaults_path = os.path.join(tmpdir, "defaults.cfg")
-                if os.path.exists(defaults_path):
-                    os.unlink(defaults_path)
+                os.chdir(original_cwd)
 
 
 class TestOCLintVersionHandling:
