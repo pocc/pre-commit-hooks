@@ -418,6 +418,9 @@ class TestHooks:
         # Newer cppcheck versions include a checkers report info line
         if cmd_name == "cppcheck":
             output_actual = re.sub(rb"\nnofile:0:0: information: Active checkers.*\n+", b"\n", output_actual)
+        # Filter out "X warnings generated." from clang-tidy (macOS with SDK configured)
+        if cmd_name == "clang-tidy":
+            output_actual = re.sub(rb"\d+ warnings? generated\.\n", b"", output_actual)
         # Windows clang uses return-mismatch instead of return-type
         if cmd_name in ["clang-tidy", "include-what-you-use"]:
             output_actual = output_actual.replace(b"clang-diagnostic-return-mismatch", b"clang-diagnostic-return-type")
@@ -459,6 +462,9 @@ class TestHooks:
         # Output is unpredictable and platform/version dependent
         if any([f.endswith("err.cpp") for f in files]) and "-std=c++20" in args:
             actual = re.sub(rb"[\d,]+ warnings and ", b"", actual)
+        # Filter out "X warnings generated." from clang-tidy (macOS with SDK configured)
+        if cmd_name == "clang-tidy":
+            actual = re.sub(rb"\d+ warnings? generated\.\n", b"", actual)
         # Newer cppcheck versions include a checkers report info line
         if cmd_name == "cppcheck":
             actual = re.sub(rb"\nnofile:0:0: information: Active checkers.*\n+", b"\n", actual)
