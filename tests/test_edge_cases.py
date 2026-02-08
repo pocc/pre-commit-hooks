@@ -331,14 +331,13 @@ class TestErrorMessages:
 
     def test_command_not_found_error(self):
         """Test error message when command is not installed."""
-        # Mock a command that doesn't exist
-        result = sp.run(
-            ["nonexistent-command-hook"],
-            stdout=sp.PIPE,
-            stderr=sp.PIPE,
-        )
-        # Should fail with non-zero exit code
-        assert result.returncode != 0
+        # Mock a command that doesn't exist - should raise FileNotFoundError
+        with pytest.raises(FileNotFoundError):
+            sp.run(
+                ["nonexistent-command-hook"],
+                stdout=sp.PIPE,
+                stderr=sp.PIPE,
+            )
 
     def test_version_mismatch_error_format(self):
         """Test version mismatch error message format."""
