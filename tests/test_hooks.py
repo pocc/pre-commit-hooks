@@ -553,9 +553,10 @@ class TestHooks:
                 actual = actual.rstrip(b"\n") + b"\n"
             if target_output and target_output.strip():
                 target_output = target_output.rstrip(b"\n") + b"\n"
-        # Windows clang uses return-mismatch instead of return-type
+        # Windows/macOS clang uses return-mismatch instead of return-type
         if cmd_name in ["clang-tidy", "include-what-you-use"]:
             actual = actual.replace(b"clang-diagnostic-return-mismatch", b"clang-diagnostic-return-type")
+            actual = actual.replace(b"-Wreturn-mismatch", b"-Wreturn-type")
         # Filter iwyu suggestions for implementation detail headers on macOS
         if cmd_name == "include-what-you-use" and sys.platform == "darwin":
             # Check if output only suggests adding implementation detail headers (starting with __)
