@@ -464,14 +464,15 @@ class TestHooks:
             actual = re.sub(rb"[\d,]+ warnings and ", b"", actual)
         # Filter out "X warnings generated." from clang-tidy (macOS with SDK configured)
         if cmd_name == "clang-tidy":
-            # Filter warnings count
+            # Filter warnings count and track if we filtered it
             filtered_actual = re.sub(rb"\d+ warnings? generated\.\n", b"", actual)
+            filtered_warnings_count = (filtered_actual != actual)
             # Filter errors from macOS SDK system headers
             lines = filtered_actual.split(b"\n")
             filtered_lines = []
             skip_next_error_processing = False
             in_system_header_error = False
-            filtered_system_headers = False  # Track if we filtered any system header content
+            filtered_system_headers = filtered_warnings_count  # Track if we filtered any system header content
             for i, line in enumerate(lines):
                 # Skip lines containing macOS SDK paths
                 if b"/Applications/Xcode" in line and b"/MacOSX.sdk/" in line:
