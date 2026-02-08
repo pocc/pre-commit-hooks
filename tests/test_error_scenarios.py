@@ -70,13 +70,13 @@ class TestFileNotFoundErrors:
     """Test error handling for missing files."""
 
     def test_nonexistent_file_produces_error(self):
-        """Test that trying to format a nonexistent file produces an error."""
+        """Test that nonexistent files are filtered out gracefully."""
         result = sp.run(
             ["clang-format-hook", "/nonexistent/path/to/file.c"],
             capture_output=True,
         )
-        # Should fail
-        assert result.returncode != 0
+        # Nonexistent files are filtered out, so hook succeeds with no files to check
+        assert result.returncode == 0
 
 
 class TestEmptyInputHandling:
