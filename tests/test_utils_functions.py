@@ -40,17 +40,22 @@ class TestCommandBaseClass:
             temp_file = f.name
 
         try:
+            # Temporarily modify sys.argv to simulate command-line args
+            import sys
+            original_argv = sys.argv
+            sys.argv = ["test-cmd", temp_file]
 
             class TestCmd(Command):
                 def __init__(self):
                     self.command = "test"
                     self.look_behind = "test"
-                    self.args = ["test-cmd", temp_file]
+                    self.args = sys.argv
                     self.files = self.get_added_files()
 
             cmd = TestCmd()
             assert temp_file in cmd.files
         finally:
+            sys.argv = original_argv
             if os.path.exists(temp_file):
                 os.unlink(temp_file)
 
@@ -67,18 +72,23 @@ class TestCommandBaseClass:
             c_path = c_file.name
 
         try:
+            # Temporarily modify sys.argv to simulate command-line args
+            import sys
+            original_argv = sys.argv
+            sys.argv = ["test-cmd", cfg_path, c_path]
 
             class TestCmd(Command):
                 def __init__(self):
                     self.command = "test"
                     self.look_behind = "test"
-                    self.args = ["test-cmd", cfg_path, c_path]
+                    self.args = sys.argv
                     self.files = self.get_added_files()
 
             cmd = TestCmd()
             assert cfg_path not in cmd.files
             assert c_path in cmd.files
         finally:
+            sys.argv = original_argv
             if os.path.exists(cfg_path):
                 os.unlink(cfg_path)
             if os.path.exists(c_path):
