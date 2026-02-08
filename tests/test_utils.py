@@ -19,6 +19,9 @@ test_file_strs = {
 def assert_equal(expected: bytes, actual: bytes):
     """Stand in for Python's assert which is annoying to work with."""
     actual = actual.replace(b"\r", b"")  # ignore windows file ending differences
+    # Normalize path separators for cross-platform compatibility
+    actual = actual.replace(b"\\", b"/")
+    expected = expected.replace(b"\\", b"/")
     # Normalize trailing newlines to handle platform differences (especially cppcheck on Windows)
     if actual and actual.strip() and expected and expected.strip():
         if b"\n" in actual or b"\n" in expected:
