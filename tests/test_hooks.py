@@ -346,6 +346,10 @@ class TestHooks:
         utils.run_in(["git", "init"], tmpdir)
         utils.run_in(["pre-commit", "install"], tmpdir)
         for s in table_tests:
+            # Skip iwyu and oclint on Windows (not installed on CI)
+            if os.name == "nt" and s["command"] in ["include-what-you-use", "oclint"]:
+                continue
+
             s["args"] = [arg.replace("{repo_dir}", os.getcwd()) for arg in s["args"]]
             s["files"] = [arg.replace("{test_dir}", tmpdir) for arg in s["files"]]
             s["expd_output"] = s["expd_output"].replace("{test_dir}", tmpdir)
