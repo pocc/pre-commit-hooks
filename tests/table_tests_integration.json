@@ -454,7 +454,7 @@
       "{test_dir}/err.c"
     ],
     "args": [],
-    "expd_output": "cppcheck.................................................................Failed\n- hook id: cppcheck\n- exit code: 1\n\nerr.c:2:16: style: Unused variable: i [unusedVariable]\nint main(){int i;return;}\n               ^\n\n",
+    "expd_output": "cppcheck.................................................................Failed\n- hook id: cppcheck\n- exit code: 1\n\nerr.c:2:16: style: Unused variable: i [unusedVariable]\nint main(){int i;return;}\n               ^\n",
     "expd_retcode": 1
   },
   {
@@ -463,7 +463,7 @@
       "{test_dir}/err.cpp"
     ],
     "args": [],
-    "expd_output": "cppcheck.................................................................Failed\n- hook id: cppcheck\n- exit code: 1\n\nerr.cpp:2:16: style: Unused variable: i [unusedVariable]\nint main(){int i;return;}\n               ^\n\n",
+    "expd_output": "cppcheck.................................................................Failed\n- hook id: cppcheck\n- exit code: 1\n\nerr.cpp:2:16: style: Unused variable: i [unusedVariable]\nint main(){int i;return;}\n               ^\n",
     "expd_retcode": 1
   },
   {
