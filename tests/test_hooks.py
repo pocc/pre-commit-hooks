@@ -471,40 +471,49 @@ class TestHooks:
             filtered_lines = []
             skip_next_error_processing = False
             in_system_header_error = False
+            filtered_system_headers = False  # Track if we filtered any system header content
             for i, line in enumerate(lines):
                 # Skip lines containing macOS SDK paths
                 if b"/Applications/Xcode" in line and b"/MacOSX.sdk/" in line:
                     in_system_header_error = True
+                    filtered_system_headers = True
                     continue
                 # Skip lines containing homebrew llvm/clang++ library paths
                 if b"/opt/homebrew/Cellar/llvm/" in line or b"/usr/local/Cellar/llvm/" in line:
+                    filtered_system_headers = True
                     continue
                 # Skip code context lines (start with spaces, line number, |)
                 if re.match(rb"^\s+\d+\s*\|", line):
                     if in_system_header_error:
+                        filtered_system_headers = True
                         continue
                 # Skip pointer/caret lines (start with spaces, |, spaces, ^)
                 if re.match(rb"^\s+\|.*\^", line):
                     if in_system_header_error:
+                        filtered_system_headers = True
                         continue
                 # Skip standalone "note:" lines
                 if line.strip().startswith(b"note: "):
                     if in_system_header_error:
+                        filtered_system_headers = True
                         continue
                 # Skip "error: too many errors emitted"
                 if line.startswith(b"error: too many errors emitted"):
                     skip_next_error_processing = True
                     in_system_header_error = True
+                    filtered_system_headers = True
                     continue
                 # Skip "X errors generated." when we've seen system header errors
                 if line.strip() and re.match(rb"\d+ errors? generated\.$", line.strip()):
                     if in_system_header_error or any(b"/MacOSX.sdk/" in l for l in lines[:i]):
                         skip_next_error_processing = True
+                        filtered_system_headers = True
                         continue
                 # Skip "Error while processing" only if it follows system header errors
                 if line.startswith(b"Error while processing") and skip_next_error_processing:
                     skip_next_error_processing = False
                     in_system_header_error = False
+                    filtered_system_headers = True
                     continue
                 # Keep this line if it passed all filters
                 if line or i == 0:  # Keep empty lines except trailing ones
@@ -512,7 +521,7 @@ class TestHooks:
             filtered_actual = b"\n".join(filtered_lines)
             # If we filtered system header warnings/errors and got exit code 1, normalize to 0
             # only if the expected output is also empty (indicating a test that should pass)
-            if filtered_actual != actual and sp_child.returncode == 1 and in_system_header_error:
+            if filtered_actual != actual and sp_child.returncode == 1 and filtered_system_headers:
                 # Only normalize return code if we filtered system header errors
                 # and the result is now empty (matching expected empty output)
                 if filtered_actual.strip() == b"" and target_output.strip() == b"":
