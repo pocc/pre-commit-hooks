@@ -558,12 +558,19 @@ class TestHooks:
             actual = actual.replace(b"clang-diagnostic-return-mismatch", b"clang-diagnostic-return-type")
         # Filter iwyu suggestions for implementation detail headers on macOS
         if cmd_name == "include-what-you-use" and sys.platform == "darwin":
-            # Remove entire iwyu output if it only suggests implementation detail headers (starting with __)
+            # Check if output only suggests adding implementation detail headers (starting with __)
             lines = actual.split(b"\n")
-            # Check if all suggested headers are implementation details
-            suggested_headers = [l for l in lines if l.strip().startswith(b"#include <__")]
-            if suggested_headers and all(b"<__" in l for l in lines if b"#include <" in l and l.strip().startswith(b"#include")):
-                # All suggestions are for implementation headers - filter entire output
+            in_add_section = False
+            add_section_headers = []
+            for line in lines:
+                if b"should add these lines:" in line:
+                    in_add_section = True
+                elif b"should remove these lines:" in line or b"The full include-list" in line:
+                    in_add_section = False
+                elif in_add_section and line.strip().startswith(b"#include"):
+                    add_section_headers.append(line)
+            # If all "add" suggestions are for implementation headers, filter entire output
+            if add_section_headers and all(b"<__" in h for h in add_section_headers):
                 actual = b""
         retcode = sp_child.returncode
         utils.assert_equal(target_output, actual)
