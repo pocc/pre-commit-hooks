@@ -142,10 +142,11 @@ Error while processing {0}.
                     new_arg_set[new_arg_set.index("-std=c18")] = "-std=c++20"
                     # Clang tidy c++20 generates additional warnings
                 # When --fix-errors is used, newer clang-tidy produces no output for unfixable errors
-                # (but -fix still produces error output)
+                # and returns 0 (but -fix still produces error output and returns 1)
                 has_fix_errors_flag = "--fix-errors" in new_arg_set
                 expected_output = b"" if (has_fix_errors_flag and i >= 2) else clang_tidy_output[i]
-                clang_tidy_scenario = [ClangTidyCmd, new_arg_set, [cls.files[i]], expected_output, cls.retcodes[i]]
+                expected_retcode = 0 if (has_fix_errors_flag and i >= 2) else cls.retcodes[i]
+                clang_tidy_scenario = [ClangTidyCmd, new_arg_set, [cls.files[i]], expected_output, expected_retcode]
                 scenarios += [clang_tidy_scenario]
         return scenarios
 
