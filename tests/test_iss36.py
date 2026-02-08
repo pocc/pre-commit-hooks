@@ -9,6 +9,7 @@ import tests.test_utils as utils
 
 
 CMAKELISTS = """\
+cmake_minimum_required(VERSION 3.10)
 project(ct_test C)
 
 set(CMAKE_C_STANDARD 99)
