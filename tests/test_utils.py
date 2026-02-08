@@ -77,6 +77,13 @@ def set_compilation_db(filenames):
     cdb = "["
     clang_location = shutil.which("clang")
     file_dir = os.path.dirname(os.path.abspath(filenames[0]))
+    # On macOS, get SDK path for proper system header resolution
+    sdk_flags = ""
+    if sys.platform == "darwin":
+        sdk_path_result = sp.run(["xcrun", "--show-sdk-path"], stdout=sp.PIPE, stderr=sp.PIPE)
+        if sdk_path_result.returncode == 0:
+            sdk_path = sdk_path_result.stdout.decode().strip()
+            sdk_flags = f" -isysroot {sdk_path}"
     for f in filenames:
         file_base = os.path.basename(f)
         clang_suffix = ""
@@ -84,10 +91,10 @@ def set_compilation_db(filenames):
             clang_suffix = "++"
         cdb += """\n{{
     "directory": "{0}",
-    "command": "{1}{2} {3} -o {3}.o",
+    "command": "{1}{2} {3}{4} -o {3}.o",
     "file": "{3}"
 }},""".format(
-            file_dir, clang_location, clang_suffix, os.path.join(file_dir, file_base)
+            file_dir, clang_location, clang_suffix, os.path.join(file_dir, file_base), sdk_flags
         )
     cdb = cdb[:-1] + "]"  # Subtract extra comma and end json
     # Required for clang-tidy
