@@ -115,9 +115,10 @@ def integration_test(cmd_name, files, args, test_dir):
                 fd.write(test_file_strs[test_file_base])
     # Create compilation database for clang-tidy and iwyu
     set_compilation_db(files)
-    # Add only the files we are testing
+    # Add the files we are testing and the compilation database
     run_in(["git", "reset"], test_dir)
-    run_in(["git", "add"] + files, test_dir)
+    compile_db = os.path.join(test_dir, "compile_commands.json")
+    run_in(["git", "add"] + files + [compile_db], test_dir)
     args = list(args)  # redeclare so there's no memory weirdness
     pre_commit_config_path = os.path.join(test_dir, ".pre-commit-config.yaml")
     pre_commit_config = f"""\
