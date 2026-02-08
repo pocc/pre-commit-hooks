@@ -466,35 +466,49 @@ class TestHooks:
         if cmd_name == "clang-tidy":
             # Filter warnings count
             filtered_actual = re.sub(rb"\d+ warnings? generated\.\n", b"", actual)
-            # Filter errors from macOS SDK system headers (entire lines containing SDK paths)
-            # Only filter lines that contain the macOS SDK path
+            # Filter errors from macOS SDK system headers
             lines = filtered_actual.split(b"\n")
             filtered_lines = []
             skip_next_error_processing = False
+            in_system_header_error = False
             for i, line in enumerate(lines):
                 # Skip lines containing macOS SDK paths
                 if b"/Applications/Xcode" in line and b"/MacOSX.sdk/" in line:
+                    in_system_header_error = True
                     continue
-                # Skip "note:" lines that directly follow SDK path lines
-                if line.startswith(b"note: ") and i > 0 and (
-                    b"/Applications/Xcode" in lines[i-1] and b"/MacOSX.sdk/" in lines[i-1]
-                ):
+                # Skip lines containing homebrew llvm/clang++ library paths
+                if b"/opt/homebrew/Cellar/llvm/" in line or b"/usr/local/Cellar/llvm/" in line:
                     continue
-                # Skip "error: too many errors emitted" which only appears with system header errors
+                # Skip code context lines (start with spaces, line number, |)
+                if re.match(rb"^\s+\d+\s*\|", line):
+                    if in_system_header_error:
+                        continue
+                # Skip pointer/caret lines (start with spaces, |, spaces, ^)
+                if re.match(rb"^\s+\|.*\^", line):
+                    if in_system_header_error:
+                        continue
+                # Skip standalone "note:" lines
+                if line.strip().startswith(b"note: "):
+                    if in_system_header_error:
+                        continue
+                # Skip "error: too many errors emitted"
                 if line.startswith(b"error: too many errors emitted"):
                     skip_next_error_processing = True
+                    in_system_header_error = True
                     continue
-                # Skip "X errors generated." when preceded by system header errors
+                # Skip "X errors generated." when we've seen system header errors
                 if line.strip() and re.match(rb"\d+ errors? generated\.$", line.strip()):
-                    # Check if we've seen SDK paths earlier
-                    if any(b"/MacOSX.sdk/" in l for l in lines[:i]):
+                    if in_system_header_error or any(b"/MacOSX.sdk/" in l for l in lines[:i]):
                         skip_next_error_processing = True
                         continue
                 # Skip "Error while processing" only if it follows system header errors
                 if line.startswith(b"Error while processing") and skip_next_error_processing:
                     skip_next_error_processing = False
+                    in_system_header_error = False
                     continue
-                filtered_lines.append(line)
+                # Keep this line if it passed all filters
+                if line or i == 0:  # Keep empty lines except trailing ones
+                    filtered_lines.append(line)
             filtered_actual = b"\n".join(filtered_lines)
             # If we filtered warnings/errors and got exit code 1, normalize to 0 if output matches expected
             if filtered_actual != actual and sp_child.returncode == 1:
