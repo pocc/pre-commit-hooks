@@ -464,9 +464,15 @@ class TestHooks:
             actual = re.sub(rb"[\d,]+ warnings and ", b"", actual)
         # Filter out "X warnings generated." from clang-tidy (macOS with SDK configured)
         if cmd_name == "clang-tidy":
-            # Filter warnings count and track if we filtered it
+            # Filter warnings/errors count and track if we filtered it
+            # Patterns: "X warnings generated." or "X warnings and Y error(s) generated."
+            before_filter = actual
             filtered_actual = re.sub(rb"\d+ warnings? generated\.\n", b"", actual)
-            filtered_warnings_count = (filtered_actual != actual)
+            # Also filter combined pattern like "148 warnings and 1 error generated."
+            filtered_actual = re.sub(rb"\d+ warnings? and \d+ errors? generated\.\n",
+                                    lambda m: re.sub(rb"\d+ warnings? and ", b"", m.group(0)),
+                                    filtered_actual)
+            filtered_warnings_count = (filtered_actual != before_filter)
             # Filter errors from macOS SDK system headers
             lines = filtered_actual.split(b"\n")
             filtered_lines = []
