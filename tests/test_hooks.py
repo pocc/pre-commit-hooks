@@ -458,11 +458,13 @@ class TestHooks:
         # Newer cppcheck versions include a checkers report info line
         if cmd_name == "cppcheck":
             actual = re.sub(rb"\nnofile:0:0: information: Active checkers.*\n+", b"\n", actual)
-            # Windows cppcheck adds extra trailing newline
-            actual = actual.rstrip(b"\n") + b"\n" if actual.endswith(b"\n") else actual
         # Windows clang uses return-mismatch instead of return-type
         if cmd_name in ["clang-tidy", "include-what-you-use"]:
             actual = actual.replace(b"clang-diagnostic-return-mismatch", b"clang-diagnostic-return-type")
+        # Normalize trailing newlines for cppcheck on Windows
+        if cmd_name == "cppcheck" and (actual.endswith(b"\n\n") or target_output.endswith(b"\n\n")):
+            actual = actual.rstrip(b"\n") + b"\n"
+            target_output = target_output.rstrip(b"\n") + b"\n"
         retcode = sp_child.returncode
         utils.assert_equal(target_output, actual)
         assert target_retcode == retcode
