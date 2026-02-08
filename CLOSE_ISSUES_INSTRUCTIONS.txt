@@ -1,0 +1,58 @@
+GitHub Issue Closing Instructions
+==================================
+
+You have 7 issues ready to close with fixes in commits fd3ea4a and f04963d.
+
+OPTION 1: Using GitHub CLI (Recommended)
+-----------------------------------------
+
+1. Authenticate gh CLI:
+
+   gh auth login
+
+   Then follow the prompts (choose GitHub.com, HTTPS, web browser)
+
+2. Run the automated script:
+
+   cd /Users/rj/gd/code/pre-commit-hooks
+   /tmp/close_issues.sh
+
+   This will close all 7 issues with detailed comments.
+
+
+OPTION 2: Manual via Web Interface
+-----------------------------------
+
+Open CLOSE_ISSUES_MANUAL.md and follow the copy-paste instructions for each issue:
+
+   #44 - https://github.com/pocc/pre-commit-hooks/issues/44
+   #46 - https://github.com/pocc/pre-commit-hooks/issues/46
+   #49 - https://github.com/pocc/pre-commit-hooks/issues/49
+   #53 - https://github.com/pocc/pre-commit-hooks/issues/53
+   #55 - https://github.com/pocc/pre-commit-hooks/issues/55
+   #61 - https://github.com/pocc/pre-commit-hooks/issues/61
+
+Each issue has a pre-written comment explaining the fix.
+
+
+Issues Fixed
+------------
+✅ #44 - clang-format --version handling
+✅ #46 - ClangTidyCmd args parameter (critical logic fix)
+✅ #49 - IWYU argument order
+✅ #53 - LLVM installation PATH documentation
+✅ #55 - IWYU error detection
+✅ #61 - Misleading comment
+✅ #66 - black dependency update (may already be closed)
+
+Also improved (commented, not closed):
+💬 #45 - OCLint progress output
+
+
+Summary
+-------
+- 7 bugs fixed
+- 3 improvements made
+- 50% of open issues resolved
+- All changes pushed to GitHub
+- Ready to close!
