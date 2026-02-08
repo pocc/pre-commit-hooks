@@ -413,7 +413,7 @@ class TestHooks:
 
         # Newer cppcheck versions include a checkers report info line
         if cmd_name == "cppcheck":
-            output_actual = re.sub(rb"\nnofile:0:0: information: Active checkers.*\n", b"\n", output_actual)
+            output_actual = re.sub(rb"\nnofile:0:0: information: Active checkers.*\n+", b"\n", output_actual)
 
         utils.assert_equal(target_output, output_actual)
         assert target_retcode == actual_returncode
@@ -454,7 +454,7 @@ class TestHooks:
             actual = re.sub(rb"[\d,]+ warnings and ", b"", actual)
         # Newer cppcheck versions include a checkers report info line
         if cmd_name == "cppcheck":
-            actual = re.sub(rb"\nnofile:0:0: information: Active checkers.*\n", b"\n", actual)
+            actual = re.sub(rb"\nnofile:0:0: information: Active checkers.*\n+", b"\n", actual)
         retcode = sp_child.returncode
         utils.assert_equal(target_output, actual)
         assert target_retcode == retcode
