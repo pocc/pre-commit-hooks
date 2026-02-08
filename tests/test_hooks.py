@@ -230,7 +230,7 @@ The full include-list for {0}:
 """.format(
             cls.err_cpp
         ).encode()
-        iwyu_retcodes = [0, 0, 3, 3]
+        iwyu_retcodes = [0, 0, 1, 1]  # Newer iwyu returns 1 instead of 3 for errors
         iwyu_output = [b"", b"", iwyu_err_c, iwyu_err_cpp]
         scenarios = []
         for i in range(len(cls.files)):
