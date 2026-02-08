@@ -338,8 +338,9 @@ class TestFormatterCmd:
 
     def test_get_filelines_reads_file(self):
         """Test that get_filelines correctly reads file contents."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".c", delete=False) as f:
-            f.write("line1\nline2\nline3\n")
+        # Use binary mode to avoid Windows text mode \n to \r\n conversion
+        with tempfile.NamedTemporaryFile(mode="wb", suffix=".c", delete=False) as f:
+            f.write(b"line1\nline2\nline3\n")
             temp_file = f.name
 
         try:
