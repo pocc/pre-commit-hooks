@@ -555,6 +555,15 @@ class TestHooks:
         # Windows clang uses return-mismatch instead of return-type
         if cmd_name in ["clang-tidy", "include-what-you-use"]:
             actual = actual.replace(b"clang-diagnostic-return-mismatch", b"clang-diagnostic-return-type")
+        # Filter iwyu suggestions for implementation detail headers on macOS
+        if cmd_name == "include-what-you-use" and sys.platform == "darwin":
+            # Remove entire iwyu output if it only suggests implementation detail headers (starting with __)
+            lines = actual.split(b"\n")
+            # Check if all suggested headers are implementation details
+            suggested_headers = [l for l in lines if l.strip().startswith(b"#include <__")]
+            if suggested_headers and all(b"<__" in l for l in lines if b"#include <" in l and l.strip().startswith(b"#include")):
+                # All suggestions are for implementation headers - filter entire output
+                actual = b""
         retcode = sp_child.returncode
         utils.assert_equal(target_output, actual)
         assert target_retcode == retcode
