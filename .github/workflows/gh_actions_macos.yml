@@ -8,9 +8,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Add llvm utils clang-format and clang-tidy to path
         run: echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
-      - name: Install 4 hooks, python3, llvm already includes clang-tidy, clang-format
-        run: brew install uncrustify cppcheck iwyu
-        # Note: oclint skipped due to dylib loading issue in homebrew formula
+      - name: Install 5 hooks, python3, llvm already includes clang-tidy, clang-format
+        run: brew install uncrustify cppcheck oclint iwyu
+      - name: Fix OCLint dylib paths
+        run: .github/scripts/fix-oclint-macos.sh
       - name: Install pip dependencies
         run: pip3 install --break-system-packages cpplint pytest pre-commit
       - name: Install hooks locally
@@ -22,7 +23,7 @@ jobs:
           cppcheck --version
           cpplint --version
           include-what-you-use --version
-          # oclint --version skipped (broken dylib path in homebrew formula)
+          oclint --version
       - name: Get python library versions
         run: |
           pytest --version
