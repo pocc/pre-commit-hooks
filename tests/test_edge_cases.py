@@ -82,10 +82,15 @@ class TestFileHandling:
     """Test file handling edge cases."""
 
     def test_nonexistent_file(self):
-        """Test that nonexistent files are handled gracefully."""
-        with pytest.raises(SystemExit) as exc_info:
-            cmd = ClangFormatCmd(["clang-format-hook", "/nonexistent/file.c"])
-        assert exc_info.value.code != 0
+        """Test that nonexistent files are filtered out gracefully."""
+        # Mock sys.argv for get_added_files()
+        original_argv = sys.argv
+        sys.argv = ["clang-format-hook", "/nonexistent/file.c"]
+        cmd = ClangFormatCmd(["clang-format-hook", "/nonexistent/file.c"])
+        sys.argv = original_argv
+        # Nonexistent files should be filtered out, resulting in empty file list
+        assert "/nonexistent/file.c" not in cmd.files
+        assert len(cmd.files) == 0
 
     def test_empty_file_list(self):
         """Test handling of empty file list."""
