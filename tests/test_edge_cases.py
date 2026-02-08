@@ -10,6 +10,7 @@ Tests cover:
 """
 import os
 import subprocess as sp
+import sys
 import tempfile
 from pathlib import Path
 
@@ -47,7 +48,11 @@ class TestArgumentParsing:
             temp_file = f.name
 
         try:
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["clang-format-hook", "--no-diff", temp_file]
             cmd = ClangFormatCmd(["clang-format-hook", "--no-diff", temp_file])
+            sys.argv = original_argv
             assert "--no-diff" not in cmd.args
             assert cmd.no_diff_flag is True
         finally:
@@ -62,7 +67,11 @@ class TestArgumentParsing:
 
         try:
             # The -- separator should be handled correctly
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["cppcheck-hook", "--", temp_file]
             cmd = CppcheckCmd(["cppcheck-hook", "--", temp_file])
+            sys.argv = original_argv
             assert temp_file in cmd.files
         finally:
             if os.path.exists(temp_file):
@@ -101,7 +110,11 @@ class TestFileHandling:
             c_file = f.name
 
         try:
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["cppcheck-hook", cfg_file, c_file]
             cmd = CppcheckCmd(["cppcheck-hook", cfg_file, c_file])
+            sys.argv = original_argv
             assert cfg_file not in cmd.files
             assert c_file in cmd.files
         finally:
@@ -121,7 +134,11 @@ class TestClangTidyLogic:
             temp_file = f.name
 
         try:
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["clang-tidy-hook", "--fix-errors", temp_file]
             cmd = ClangTidyCmd(["clang-tidy-hook", "--fix-errors", temp_file])
+            sys.argv = original_argv
             assert cmd.edit_in_place is True
         finally:
             if os.path.exists(temp_file):
@@ -134,7 +151,11 @@ class TestClangTidyLogic:
             temp_file = f.name
 
         try:
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["clang-tidy-hook", "-fix", temp_file]
             cmd = ClangTidyCmd(["clang-tidy-hook", "-fix", temp_file])
+            sys.argv = original_argv
             assert cmd.edit_in_place is True
         finally:
             if os.path.exists(temp_file):
@@ -151,7 +172,11 @@ class TestCppcheckDefaults:
             temp_file = f.name
 
         try:
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["cppcheck-hook", temp_file]
             cmd = CppcheckCmd(["cppcheck-hook", temp_file])
+            sys.argv = original_argv
             assert "-q" in cmd.args
             assert "--error-exitcode=1" in cmd.args
             assert "--enable=all" in cmd.args
@@ -166,7 +191,11 @@ class TestCppcheckDefaults:
             temp_file = f.name
 
         try:
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["cppcheck-hook", "--enable=warning", temp_file]
             cmd = CppcheckCmd(["cppcheck-hook", "--enable=warning", temp_file])
+            sys.argv = original_argv
             # User's --enable=warning should be present
             assert "--enable=warning" in cmd.args
             # Default --enable=all should not be added because user provided --enable
@@ -190,7 +219,11 @@ class TestUncrustifyDefaults:
                 temp_file = f.name
 
             try:
+                # Mock sys.argv for get_added_files()
+                original_argv = sys.argv
+                sys.argv = ["uncrustify-hook", temp_file]
                 cmd = UncrustifyCmd(["uncrustify-hook", temp_file])
+                sys.argv = original_argv
                 # If no -c arg provided, defaults.cfg should be created
                 if "-c" in cmd.args:
                     idx = cmd.args.index("-c")
@@ -216,7 +249,11 @@ class TestOCLintVersionHandling:
             temp_file = f.name
 
         try:
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["oclint-hook", temp_file]
             cmd = OCLintCmd(["oclint-hook", temp_file])
+            sys.argv = original_argv
             # Version should be a string
             assert isinstance(cmd.version, str)
             assert len(cmd.version) > 0
@@ -264,7 +301,11 @@ class TestIncludeWhatYouUse:
             # Just verify the command can be instantiated
             from hooks.include_what_you_use import IncludeWhatYouUseCmd
 
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["include-what-you-use-hook", temp_file]
             cmd = IncludeWhatYouUseCmd(["include-what-you-use-hook", temp_file])
+            sys.argv = original_argv
             assert cmd.command == "include-what-you-use"
         finally:
             if os.path.exists(temp_file):
@@ -309,7 +350,11 @@ class TestMultipleFiles:
             with open(file2, "w") as f:
                 f.write("int func() { return 1; }\n")
 
+            # Mock sys.argv for get_added_files()
+            original_argv = sys.argv
+            sys.argv = ["cppcheck-hook", file1, file2]
             cmd = CppcheckCmd(["cppcheck-hook", file1, file2])
+            sys.argv = original_argv
             assert file1 in cmd.files
             assert file2 in cmd.files
             assert len(cmd.files) == 2
