@@ -125,8 +125,8 @@ class GeneratorT:
         additional_args = [[], ["-fix"], ["--fix-errors"], ["--", "-std=c18"]]
         clang_tidy_args_sets = [ct_base_args + arg for arg in additional_args]
         clang_tidy_err_str = """{0}:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]
-int main(){{int i;return;}}
-                 ^
+    2 | int main(){{int i;return;}}
+      |                  ^
 1 error generated.
 Error while processing {0}.
 """  # noqa: E501
