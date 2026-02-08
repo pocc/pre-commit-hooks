@@ -11,9 +11,9 @@ jobs:
       - name: Install 4 hooks, python3, llvm 12.0.1 already installed which includes clang-tidy, clang-format
         run: brew install uncrustify cppcheck oclint iwyu
       - name: Install pip dependencies
-        run: pip3 install cpplint pytest pre-commit
+        run: pip3 install --break-system-packages cpplint pytest pre-commit
       - name: Install hooks locally
-        run: pip3 install .
+        run: pip3 install --break-system-packages .
       - name: Get command versions
         run: |
           clang-format --version
