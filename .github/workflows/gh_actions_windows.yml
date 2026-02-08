@@ -5,13 +5,15 @@ jobs:
     runs-on: [windows-latest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Install python3.8
-        run: choco install python --version=3.8.10 -y --no-progress
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
       - name: Install 5 hooks (not oclint, iwyu on windows), python3
         run: choco install llvm uncrustify cppcheck -y --no-progress
       - name: Update paths (see https://stackoverflow.com/questions/60169752)
-        run: echo "C:\Program Files\LLVM\bin;C:\ProgramData\chocolatey\lib\uncrustify\tools;C:\Program Files\Cppcheck;C:\Python39" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        run: echo "C:\Program Files\LLVM\bin;C:\ProgramData\chocolatey\lib\uncrustify\tools;C:\Program Files\Cppcheck" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Check installations
         run: |
           clang-format --version
@@ -33,5 +35,5 @@ jobs:
         run: |
           pytest --version
           pre-commit --version
-      - name: Run tests using installed python3.8
-        run: C:\hostedtoolcache\windows\Python\3.8.10\x64\python-3.8.10-amd64.exe -m pytest -x -vvv
+      - name: Run tests
+        run: python -m pytest -x -vvv

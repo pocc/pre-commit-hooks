@@ -19,7 +19,7 @@ class IncludeWhatYouUseCmd(StaticAnalyzerCmd):
         self.parse_args(args)
 
     def run(self):
-        """Run Include-What-You-Use. Error if diff is incorrect. "Correct" """
+        """Run Include-What-You-Use. Error if includes/forward declarations are incorrect."""
 
         for filename in self.files:
             self.run_command([filename] + self.args)

@@ -5,17 +5,9 @@ jobs:
     runs-on: [macos-latest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Add llvm utils clang-format and clang-tidy to path
         run: echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
-      - name: Force macos to symlink includes to expected location (https://stackoverflow.com/questions/58278260)
-        run: sudo ln -sf /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/* /usr/local/include/
-      - name: Show clang search path for libraries
-        run: clang -v tests/test_repo/ok.c -o helloworld
-      - name: list libraries where oclint/clang will look for them
-        run: ls -hal /usr/local/include/
-      - name: list libraries where they are likely to actually be
-        run: ls -hal /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include
       - name: Install 4 hooks, python3, llvm 12.0.1 already installed which includes clang-tidy, clang-format
         run: brew install uncrustify cppcheck oclint iwyu
       - name: Install pip dependencies

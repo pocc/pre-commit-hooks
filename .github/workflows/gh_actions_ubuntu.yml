@@ -5,7 +5,7 @@ jobs:
     runs-on: [ubuntu-latest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name:  Install 7 hooks, python, pip
         run: sudo apt install clang clang-format clang-tidy uncrustify cppcheck iwyu llvm-9-dev libclang-9-dev clang-9 python3.8 python3-pip
       - name: Install latest oclint (21.05)

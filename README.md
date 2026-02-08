@@ -254,8 +254,8 @@ have a cmake-based project.
 
 ## Information about the Commands
 
-Python3.6+ is required to use these hooks as all 5 invoking scripts are written in it.
-As this is also the minimum version of pre-commit, this should not be an issue.
+Python3.8+ is required to use these hooks as all hook scripts are written in it.
+This aligns with modern pre-commit requirements and ensures compatibility with current tools.
 
 ### Installation
 

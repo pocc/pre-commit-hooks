@@ -32,7 +32,7 @@ class OCLintCmd(StaticAnalyzerCmd):
             self.add_if_missing(["-no-analytics"])
 
     def run(self):
-        """Run OCLint and remove generated temporary files. OCLint will put the standard reprot into stderr."""
+        """Run OCLint and remove generated temporary files. OCLint will put the standard report into stderr."""
         # Split text into an array of args that can be passed into oclint
         for filename in self.files:
             current_files = os.listdir(os.getcwd())

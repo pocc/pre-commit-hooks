@@ -1,2 +1,2 @@
-black==19.10b0
-pytest==5.4.1
+black==24.10.0
+pytest==8.3.4

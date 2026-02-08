@@ -24,6 +24,12 @@ def pytest_exception_interact(node, call, report):
 def pytest_generate_tests(metafunc):
     """Taken from pytest documentation to allow for table tests:
     https://docs.pytest.org/en/latest/example/parametrize.html#paramexamples"""
+    # Only apply table test generation if class has setup_class and scenarios
+    if not hasattr(metafunc.cls, "setup_class") or not hasattr(
+        metafunc.cls, "scenarios"
+    ):
+        return
+
     metafunc.cls.setup_class()
     idlist = []
     argvalues = []

@@ -130,7 +130,7 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
 
 
 class StaticAnalyzerCmd(Command):
-    """Commmands that analyze code and are not formatters.s"""
+    """Commands that analyze code and are not formatters."""
 
     def __init__(self, command: str, look_behind: str, args: List[str]):
         super().__init__(command, look_behind, args)
