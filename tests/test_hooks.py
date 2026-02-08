@@ -17,6 +17,7 @@ import json
 import os
 import re
 import subprocess as sp
+import sys
 import tempfile
 
 import tests.test_utils as utils
