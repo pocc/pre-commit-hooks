@@ -205,4 +205,6 @@ class FormatterCmd(Command):
             self.raise_error(f"File {filename} not found", "Check your path to the file.")
         with open(filename, "rb") as f:
             filetext = f.read()
+        # Remove Windows carriage returns before splitting
+        filetext = filetext.replace(b"\r", b"")
         return filetext.split(b"\x0a")
