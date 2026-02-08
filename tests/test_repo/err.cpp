@@ -1,5 +1,2 @@
 #include <string>
-int main() {
-  int i;
-  return;
-}
+int main(){int i;return;}
