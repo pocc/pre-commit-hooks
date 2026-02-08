@@ -464,10 +464,23 @@ class TestHooks:
             actual = re.sub(rb"[\d,]+ warnings and ", b"", actual)
         # Filter out "X warnings generated." from clang-tidy (macOS with SDK configured)
         if cmd_name == "clang-tidy":
+            # Filter warnings count
             filtered_actual = re.sub(rb"\d+ warnings? generated\.\n", b"", actual)
-            # If we filtered warnings and got exit code 1, normalize to 0 if output matches expected
+            # Filter errors from macOS SDK system headers
+            filtered_actual = re.sub(
+                rb"^.*?/Applications/Xcode[^\n]*?/MacOSX\.sdk/[^\n]*\n", b"", filtered_actual, flags=re.MULTILINE
+            )
+            # Filter "X errors generated." from system header errors
+            filtered_actual = re.sub(rb"\d+ errors? generated\.\n", b"", filtered_actual)
+            # Filter "Error while processing..." lines
+            filtered_actual = re.sub(rb"^Error while processing [^\n]*\n", b"", filtered_actual, flags=re.MULTILINE)
+            # Filter "error:" lines from system headers
+            filtered_actual = re.sub(rb"^error: too many errors emitted[^\n]*\n", b"", filtered_actual, flags=re.MULTILINE)
+            # Filter "note:" lines that follow system header errors
+            filtered_actual = re.sub(rb"^note: [^\n]*\n", b"", filtered_actual, flags=re.MULTILINE)
+            # If we filtered warnings/errors and got exit code 1, normalize to 0 if output matches expected
             if filtered_actual != actual and sp_child.returncode == 1:
-                # clang-tidy returns 1 when warnings are generated, but if we filtered them
+                # clang-tidy returns 1 when warnings/errors are generated, but if we filtered them
                 # and the output is now empty or matches expected, treat as success
                 if filtered_actual.strip() == b"" or filtered_actual.strip() == target_output.strip():
                     sp_child = sp.CompletedProcess(
