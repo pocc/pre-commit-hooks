@@ -217,10 +217,10 @@ class TestConcurrentFileHandling:
             file1 = os.path.join(tmpdir, "file1.c")
             file2 = os.path.join(tmpdir, "file2.c")
 
-            # Both files properly formatted
+            # Both files properly formatted for Google style
             for f in [file1, file2]:
                 with open(f, "w") as fd:
-                    fd.write("int main() {\n  return 0;\n}\n")
+                    fd.write("int main() { return 0; }\n")
 
             result = sp.run(
                 ["clang-format-hook", "--style=google", file1, file2],
@@ -364,7 +364,7 @@ class TestReturnCodeCorrectness:
     def test_clean_code_returns_zero(self):
         """Test that properly formatted, error-free code returns 0."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".c", delete=False) as f:
-            f.write("int main() {\n  return 0;\n}\n")
+            f.write("int main() { return 0; }\n")
             temp_file = f.name
 
         try:
