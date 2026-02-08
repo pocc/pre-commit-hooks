@@ -411,6 +411,10 @@ class TestHooks:
         if output_actual == b"":
             pytest.fail("pre-commit should provide output, but none found.")
 
+        # Newer cppcheck versions include a checkers report info line
+        if cmd_name == "cppcheck":
+            output_actual = re.sub(rb"nofile:0:0: information: Active checkers.*\n+", b"", output_actual)
+
         utils.assert_equal(target_output, output_actual)
         assert target_retcode == actual_returncode
 
