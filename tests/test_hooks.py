@@ -203,8 +203,8 @@ Total errors found: 5
     def generate_iwyu_tests(cls):
         iwyu_arg_sets = [[]]
         iwyu_err_c = """{0}:2:18: error: non-void function 'main' should return a value [-Wreturn-type]
-int main(){{int i;return;}}
-                 ^
+    2 | int main(){{int i;return;}}
+      |                  ^
 
 {0} should add these lines:
 
@@ -217,8 +217,8 @@ The full include-list for {0}:
             cls.err_c
         ).encode()
         iwyu_err_cpp = """{0}:2:18: error: non-void function 'main' should return a value [-Wreturn-type]
-int main(){{int i;return;}}
-                 ^
+    2 | int main(){{int i;return;}}
+      |                  ^
 
 {0} should add these lines:
 
