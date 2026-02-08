@@ -448,6 +448,9 @@ class TestHooks:
         # Output is unpredictable and platform/version dependent
         if any([f.endswith("err.cpp") for f in files]) and "-std=c++20" in args:
             actual = re.sub(rb"[\d,]+ warnings and ", b"", actual)
+        # Newer cppcheck versions include a checkers report info line
+        if cmd_name == "cppcheck":
+            actual = re.sub(rb"nofile:0:0: information: Active checkers.*\n+", b"", actual)
         retcode = sp_child.returncode
         utils.assert_equal(target_output, actual)
         assert target_retcode == retcode
