@@ -475,6 +475,11 @@ class TestHooks:
             filtered_warnings_count = (filtered_actual != before_filter)
             # Filter errors from macOS SDK system headers
             lines = filtered_actual.split(b"\n")
+            # Check if there are any test file errors (errors from files in test_repo/)
+            has_test_file_errors = any(
+                b"/test_repo/" in l and b": error:" in l and b"/MacOSX.sdk/" not in l
+                for l in lines
+            )
             filtered_lines = []
             skip_next_error_processing = False
             in_system_header_error = False
@@ -489,6 +494,9 @@ class TestHooks:
                 if b"/opt/homebrew/Cellar/llvm/" in line or b"/usr/local/Cellar/llvm/" in line:
                     filtered_system_headers = True
                     continue
+                # Reset in_system_header_error when we encounter a test file error
+                if b"/test_repo/" in line and b": error:" in line and b"/MacOSX.sdk/" not in line:
+                    in_system_header_error = False
                 # Skip code context lines (start with spaces, line number, |)
                 if re.match(rb"^\s+\d+\s*\|", line):
                     if in_system_header_error:
@@ -510,13 +518,13 @@ class TestHooks:
                     in_system_header_error = True
                     filtered_system_headers = True
                     continue
-                # Skip "X errors generated." when we've seen system header errors
+                # Skip "X errors generated." only if there are no test file errors
                 if line.strip() and re.match(rb"\d+ errors? generated\.$", line.strip()):
-                    if in_system_header_error or any(b"/MacOSX.sdk/" in l for l in lines[:i]):
+                    if (in_system_header_error or any(b"/MacOSX.sdk/" in l for l in lines[:i])) and not has_test_file_errors:
                         skip_next_error_processing = True
                         filtered_system_headers = True
                         continue
-                # Skip "Error while processing" only if it follows system header errors
+                # Skip "Error while processing" only if it follows system header errors (not test file errors)
                 if line.startswith(b"Error while processing") and skip_next_error_processing:
                     skip_next_error_processing = False
                     in_system_header_error = False
