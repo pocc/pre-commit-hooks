@@ -26,7 +26,10 @@ def assert_equal(expected: bytes, actual: bytes):
             expected_str = expected.decode()
             actual_str = actual.decode()
             print("String comparison:", expected_str == actual_str)
-            diff_lines_gen = difflib.context_diff(expected_str, actual_str, "Expected", "Actual")
+            # difflib.context_diff requires sequences of strings (lines), not strings
+            expected_lines = expected_str.splitlines(keepends=True)
+            actual_lines = actual_str.splitlines(keepends=True)
+            diff_lines_gen = difflib.context_diff(expected_lines, actual_lines, "Expected", "Actual")
             diff_lines = "".join(list(diff_lines_gen))
             print(f"\n\nDifference:\n{diff_lines}")
         else:
