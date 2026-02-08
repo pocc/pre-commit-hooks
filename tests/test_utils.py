@@ -121,10 +121,12 @@ def integration_test(cmd_name, files, args, test_dir):
     run_in(["git", "add"] + files + [compile_db], test_dir)
     args = list(args)  # redeclare so there's no memory weirdness
     pre_commit_config_path = os.path.join(test_dir, ".pre-commit-config.yaml")
+    # Use local repository to test current code, not remote v1.3.4
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     pre_commit_config = f"""\
 repos:
-- repo: https://github.com/pocc/pre-commit-hooks
-  rev: v1.3.4
+- repo: {repo_root}
+  rev: HEAD
   hooks:
     - id: {cmd_name}
       args: {args}
