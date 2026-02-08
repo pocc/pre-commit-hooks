@@ -266,13 +266,18 @@ Use these commands to install some or all of the linters used in this project:
     * `oclint`: See note below for installation [3]
 * MacOS
     * `brew install llvm uncrustify cppcheck include-what-you-use oclint`
+    * **Note**: After installing llvm, you may need to add it to your PATH:
+      ```bash
+      echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> ~/.zshrc
+      # or for bash: echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+      ```
 * Windows
     * `choco install llvm uncrustify cppcheck inlcude-what-you-use`
 * Cross-platform
     * `pip install cpplint`
     * `pipx install clang-format` [4]
 
-[1]: llvm includes tools like `clang-format` and `clang-tidy`.
+[1]: llvm includes tools like `clang-format` and `clang-tidy`, but they may not be automatically added to your PATH (see MacOS note above).
 
 [2]: While it's possible to use other package managers to install these utilities on Linux, I recommend
   using brew to avoid dependency issues between llvm and linters that use it, such as include-what-you-use.

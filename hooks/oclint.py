@@ -33,8 +33,14 @@ class OCLintCmd(StaticAnalyzerCmd):
 
     def run(self):
         """Run OCLint and remove generated temporary files. OCLint will put the standard report into stderr."""
-        # Split text into an array of args that can be passed into oclint
-        for filename in self.files:
+        # OCLint runs once per file to provide per-file analysis
+        # See: https://github.com/pocc/pre-commit-hooks/issues/45
+        total_files = len(self.files)
+        for idx, filename in enumerate(self.files, 1):
+            # Print progress for multiple files
+            if total_files > 1:
+                sys.stderr.buffer.write(f"\n[OCLint {idx}/{total_files}] Analyzing {filename}\n".encode())
+
             current_files = os.listdir(os.getcwd())
             self.run_command([filename] + self.args)
             # Errors are sent to stdout instead of stderr
