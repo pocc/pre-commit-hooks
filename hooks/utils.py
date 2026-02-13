@@ -136,10 +136,16 @@ class StaticAnalyzerCmd(Command):
     def __init__(self, command: str, look_behind: str, args: List[str]):
         super().__init__(command, look_behind, args)
 
-    def run_command(self, args: List[str]):
+    def run_command(self, args: List[str], input_data: Optional[str] = None):
         """Run the command and check for errors. Args includes options and filepaths"""
         args = [self.command, *args]
-        sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
+        run_kwargs = {
+            "stdout": sp.PIPE,
+            "stderr": sp.PIPE
+        }
+        if input_data is not None:
+            run_kwargs["input"] = input_data.encode('utf-8')
+        sp_child = sp.run(args, **run_kwargs)
         self.stdout += sp_child.stdout
         self.stderr += sp_child.stderr
         self.returncode = sp_child.returncode
