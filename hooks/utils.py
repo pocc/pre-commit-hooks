@@ -22,6 +22,8 @@ class Command:
 
         self.stdout = b""
         self.stderr = b""
+        self.stdout_re = None
+        self.stderr_re = None
         self.returncode = 0
 
     def check_installed(self):
@@ -152,7 +154,18 @@ class StaticAnalyzerCmd(Command):
 
     def exit_on_error(self):
         if self.returncode != 0:
-            sys.stderr.buffer.write(self.stdout + self.stderr)
+            if self.stdout_re:
+                filtered = sorted({line.strip() for line in self.stdout.splitlines() if self.stdout_re.match(line.strip())})
+                if filtered:
+                    sys.stdout.buffer.write(b"\n".join(filtered) + b"\n")
+            else:
+                sys.stdout.buffer.write(self.stdout)
+            if self.stderr_re:
+                filtered = sorted({line.strip() for line in self.stderr.splitlines() if self.stderr_re.match(line.strip())})
+                if filtered:
+                    sys.stderr.buffer.write(b"\n".join(filtered) + b"\n")
+            else:
+                sys.stderr.buffer.write(self.stderr)
             sys.exit(self.returncode)
 
 

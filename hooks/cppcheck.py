@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Wrapper script for cppcheck."""
+import re
 import sys
 from typing import List
 
@@ -25,6 +26,7 @@ class CppcheckCmd(StaticAnalyzerCmd):
         self.add_if_missing(
             ["--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"]
         )
+        self.stderr_re = re.compile(rb"^([^:]+):(\d+):(\d+): (.+)$")
 
     def run(self):
         """Run cppcheck"""
