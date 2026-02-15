@@ -31,8 +31,7 @@ class CppcheckCmd(StaticAnalyzerCmd):
         """Run cppcheck"""
         self.run_command(
             self.args + ["--file-list=-"],
-            input_data="\n".join(self.files).encode(),
-            env={"CLICOLOR_FORCE": "1"}
+            input_data="\n".join(self.files).encode()
         )
         self.post_process_output(filter=r"[^:]+:\d+:\d+: .+", unique=True)
         self.exit_on_error()
