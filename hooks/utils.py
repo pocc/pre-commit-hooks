@@ -141,11 +141,14 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
 
         def _filter_gen():
             for stream, data in self.output:
-                if unique and data in seen:
-                    continue
+                normalized = None
+                if unique:
+                    normalized = data.strip()
+                    if normalized in seen:
+                        continue
                 if regex.match(data):
                     if unique:
-                        seen.add(data)
+                        seen.add(normalized)
                     yield stream, data
 
         self.output[:] = list(_filter_gen())
