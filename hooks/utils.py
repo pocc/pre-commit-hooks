@@ -167,41 +167,37 @@ class StaticAnalyzerCmd(Command):
         while True:
             if not sel.get_map():
                 break
-            events = sel.select()
-            for key, mask in events:
-                file = key.fileobj
-                name = key.data
-                if name == 'stdin' and (mask & selectors.EVENT_WRITE):
+            for key, mask in sel.select():
+                if key.data == 'stdin' and (mask & selectors.EVENT_WRITE):
                     if bytes_written < len(input_data):
-                        count = file.write(input_data[bytes_written:])
+                        count = key.fileobj.write(input_data[bytes_written:])
                         bytes_written += count
                     else:
-                        sel.unregister(file)
-                        file.close()
-                elif name in ('stdout', 'stderr') and (mask & selectors.EVENT_READ):
-                    data = file.read()
+                        sel.unregister(key.fileobj)
+                        key.fileobj.close()
+                elif key.data in ('stdout', 'stderr') and (mask & selectors.EVENT_READ):
+                    data = key.fileobj.read()
                     if data:
-                        self.output.append((name, data))
+                        self.output.append((key.data, data))
                     else:
-                        sel.unregister(file)
-                        file.close()
-
+                        sel.unregister(key.fileobj)
+                        key.fileobj.close()
         sel.close()
         sp_child.wait()
         self.returncode = sp_child.returncode
 
     def exit_on_error(self):
-        for name, text in self.output:
-            if name == 'stdout':
-                if self.stdout_re and not self.stdout_re.match(text):
-                    continue
-                sys.stdout.buffer.write(text)
+        for to, msg in self.output:
+            if to == 'stdout':
+                #if self.stdout_re and not self.stdout_re.match(text):
+                #    continue
+                sys.stdout.buffer.write(msg)
+                sys.stdout.flush()
             else:
-                if self.stderr_re and not self.stderr_re.match(text):
-                    continue
-                sys.stderr.buffer.write(text)
-        sys.stdout.flush()
-        sys.stderr.flush()
+                #if self.stderr_re and not self.stderr_re.match(text):
+                #    continue
+                sys.stderr.buffer.write(msg)
+                sys.stderr.flush()
         sys.exit(self.returncode)
 
     #def exit_on_error(self):
