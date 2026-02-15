@@ -185,6 +185,8 @@ class StaticAnalyzerCmd(Command):
             sel.register(sp_child.stdin, selectors.EVENT_WRITE, data='stdin')
 
         bytes_written = 0
+        buffers = {'stdout': b'', 'stderr': b''}
+
         while True:
             if not sel.get_map():
                 break
@@ -197,12 +199,23 @@ class StaticAnalyzerCmd(Command):
                         sel.unregister(key.fileobj)
                         key.fileobj.close()
                 elif key.data in ('stdout', 'stderr') and (mask & selectors.EVENT_READ):
-                    data = key.fileobj.read()
-                    if data:
-                        marker_start = f"\n--- CHUNK START ({key.data}) ---\n".encode()
-                        marker_end = f"--- CHUNK END ---\n".encode()
-                        self.output.append((key.data, marker_start + data + marker_end))
+                    raw_chunk = key.fileobj.read()
+                    if raw_chunk:
+                        buffers[key.data] += raw_chunk
+                        lines = buffers[key.data].splitlines(keepends=True)
+                        if not lines[-1].endswith(b'\n'):
+                            buffers[key.data] = lines.pop()  # Keep the incomplete line in the buffer
+                        else:
+                            buffers[key.data] = b''  # Clear the buffer if all lines are complete
+                        for line in lines:
+                            # DEBUG PREFIX: helpful to see that each append is a single line
+                            # prefix = f"[{stream_name}] ".encode()
+                            # self.output.append((stream_name, prefix + line))
+                            self.output.append((key.data, line))
                     else:
+                        if buffers[key.data]:
+                            self.output.append((key.data, buffers[key.data]))
+                            buffers[key.data] = b''
                         sel.unregister(key.fileobj)
                         key.fileobj.close()
         sel.close()
