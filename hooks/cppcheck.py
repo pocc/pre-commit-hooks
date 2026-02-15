@@ -35,8 +35,26 @@ class CppcheckCmd(StaticAnalyzerCmd):
             input_data="\n".join(self.files).encode(),
             env={"CLICOLOR_FORCE": "1"}
         )
-        self.post_process_output(filter_pattern=rb"[^:]+:\d+:\d+: .+", unique=True)
+        self.post_process_output()
         self.exit_on_error()
+
+    def post_process_output(self):
+        """
+        Filters self.output for lines matching filter_pattern and removes duplicates.
+        """
+        seen: Set[str] = set()
+        regex = re.compile(rb"[^:]+:\d+:\d+: .+")
+
+        def _filter_gen():
+            for stream, data in self.output:
+                normalized = data.decode().strip()
+                if normalized in seen:
+                    continue
+                if regex.match(data):
+                    seen.add(normalized)
+                    yield stream, data
+
+        self.output[:] = list(_filter_gen())
 
 
 def main(argv: List[str] = sys.argv):

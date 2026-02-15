@@ -132,27 +132,6 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
         version = search.group(1)
         return version
 
-    def post_process_output(self, filter_pattern: bytes = rb".*", unique: bool = False):
-        """
-        Filters self.output for lines matching filter_pattern and removes duplicates.
-        """
-        seen: Set[bytes] = set()
-        regex: Pattern[bytes] = re.compile(filter_pattern)
-
-        def _filter_gen():
-            for stream, data in self.output:
-                normalized = None
-                if unique:
-                    normalized = data.strip()
-                    if normalized in seen:
-                        continue
-                if regex.match(data):
-                    if unique:
-                        seen.add(normalized)
-                    yield stream, data
-
-        self.output[:] = list(_filter_gen())
-
 
 class StaticAnalyzerCmd(Command):
     """Commands that analyze code and are not formatters."""
