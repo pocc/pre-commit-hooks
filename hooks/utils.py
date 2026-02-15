@@ -193,11 +193,11 @@ class StaticAnalyzerCmd(Command):
             if name == 'stdout':
                 if self.stdout_re and not self.stdout_re.match(text):
                     continue
-                sys.stdout.buffer.write(text.decode())
+                sys.stdout.buffer.write(text)
             else:
                 if self.stderr_re and not self.stderr_re.match(text):
                     continue
-                sys.stderr.buffer.write(text.decode())
+                sys.stderr.buffer.write(text)
         sys.exit(self.returncode)
 
     #def exit_on_error(self):
