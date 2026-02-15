@@ -171,7 +171,7 @@ class StaticAnalyzerCmd(Command):
             for key, mask in events:
                 file = key.fileobj
                 name = key.data
-                if name == 'stdin' and mask & selectors.EVENT_WRITE:
+                if name == 'stdin' and (mask & selectors.EVENT_WRITE):
                     if bytes_written < len(input_data):
                         count = file.write(input_data[bytes_written:])
                         bytes_written += count
@@ -200,6 +200,8 @@ class StaticAnalyzerCmd(Command):
                 if self.stderr_re and not self.stderr_re.match(text):
                     continue
                 sys.stderr.buffer.write(text)
+        sys.stdout.flush()
+        sys.stderr.flush()
         sys.exit(self.returncode)
 
     #def exit_on_error(self):
