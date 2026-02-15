@@ -39,15 +39,16 @@ class OCLintCmd(StaticAnalyzerCmd):
         for idx, filename in enumerate(self.files, 1):
             # Print progress for multiple files
             if total_files > 1:
-                sys.stderr.buffer.write(f"\n[OCLint {idx}/{total_files}] Analyzing {filename}\n".encode())
+                self.output.append(('stdout', f"\n[OCLint {idx}/{total_files}] Analyzing {filename}\n".encode()))
 
             current_files = os.listdir(os.getcwd())
             self.run_command([filename] + self.args)
             # Errors are sent to stdout instead of stderr
-            if b"Errors" in self.stdout:
-                self.stderr = self.stdout
-            # If errors have been captured, stdout is unexpected
-            self.stdout = b""
+            if any(src == 'stdout' and b"Errors" in msg for src, msg in self.output):
+                self.output = [
+                        ('stderr' if src == 'stdout' else 'stdout' if src == 'stderr' else src, msg)
+                        for src, msg in self.output
+                        ]
             self.exit_on_error()
             self.cleanup_files(current_files)
 

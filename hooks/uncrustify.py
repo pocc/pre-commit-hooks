@@ -45,9 +45,7 @@ class UncrustifyCmd(FormatterCmd):
         """Run uncrustify with the arguments provided."""
         for filename in self.files:
             self.compare_to_formatted(filename)
-        if self.returncode != 0:
-            sys.stdout.buffer.write(self.stderr)
-            sys.exit(self.returncode)
+        self.exit_on_error()
 
 
 def main(argv: List[str] = sys.argv):

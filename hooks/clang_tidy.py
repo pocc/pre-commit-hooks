@@ -23,8 +23,9 @@ class ClangTidyCmd(StaticAnalyzerCmd):
         for filename in self.files:
             self.run_command([filename] + self.args)
             # Warnings generated aren't important.
-            self.stderr = re.sub(rb"[\d,]+ warning \S+\s+", b"", self.stderr)
-            if len(self.stderr) > 0 and "--fix-errors" not in self.args:
+            pattern = re.compile(rb"[\d,]+ warning \S+\s+")
+            count = sum(1 for source, msg in self.output if source == 'stderr' and not pattern.search(msg))
+            if count > 0 and "--fix-errors" not in self.args:
                 self.returncode = 1
             self.exit_on_error()
 

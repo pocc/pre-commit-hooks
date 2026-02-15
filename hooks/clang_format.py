@@ -23,9 +23,7 @@ class ClangFormatCmd(FormatterCmd):
         """Run clang-format. Error if diff is incorrect."""
         for filename in self.files:
             self.compare_to_formatted(filename)
-        if self.returncode != 0:
-            sys.stdout.buffer.write(self.stderr)
-            sys.exit(self.returncode)
+        sys.exit(self.returncode)
 
 
 def main(argv: List[str] = sys.argv):
