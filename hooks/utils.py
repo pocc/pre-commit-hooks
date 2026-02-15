@@ -153,20 +153,41 @@ class StaticAnalyzerCmd(Command):
         self.returncode = sp_child.returncode
 
     def exit_on_error(self):
-        if self.returncode != 0:
-            if self.stdout_re:
-                filtered = sorted({line.strip() for line in self.stdout.splitlines() if self.stdout_re.match(line.strip())})
-                if filtered:
-                    sys.stdout.buffer.write(b"\n".join(filtered) + b"\n")
-            else:
-                sys.stdout.buffer.write(self.stdout)
-            if self.stderr_re:
-                filtered = sorted({line.strip() for line in self.stderr.splitlines() if self.stderr_re.match(line.strip())})
-                if filtered:
-                    sys.stderr.buffer.write(b"\n".join(filtered) + b"\n")
-            else:
-                sys.stderr.buffer.write(self.stderr)
-            sys.exit(self.returncode)
+        return
+        if self.returncode == 0:
+            return
+
+        if self.stdout_re:
+            # Use splitlines() to handle any \n or \r\n consistently
+            unique_out = sorted(set(self.stdout.splitlines()))
+            # Filter the set of unique lines against the regex
+            filtered_out = [line for line in unique_out if self.stdout_re.match(line)]
+            self.stdout = b"\n".join(filtered_out) + (b"\n" if filtered_out else b"")
+
+        # Process STDERR: Filter, sort, and replace
+        if self.stderr_re:
+            unique_err = sorted(set(self.stderr.splitlines()))
+            filtered_err = [line for line in unique_err if self.stderr_re.match(line)]
+            self.stderr = b"\n".join(filtered_err) + (b"\n" if filtered_err else b"")
+
+        #sys.stderr.buffer.write(self.stdout + self.stderr)
+        sys.exit(self.returncode)
+
+    #def exit_on_error(self):
+    #    if self.returncode != 0:
+    #        if self.stdout_re:
+    #            filtered = sorted({line.strip() for line in self.stdout.splitlines() if self.stdout_re.match(line.strip())})
+    #            if filtered:
+    #                sys.stdout.buffer.write(b"\n".join(filtered) + b"\n")
+    #        else:
+    #            sys.stdout.buffer.write(self.stdout)
+    #        if self.stderr_re:
+    #            filtered = sorted({line.strip() for line in self.stderr.splitlines() if self.stderr_re.match(line.strip())})
+    #            if filtered:
+    #                sys.stderr.buffer.write(b"\n".join(filtered) + b"\n")
+    #        else:
+    #            sys.stderr.buffer.write(self.stderr)
+    #        sys.exit(self.returncode)
 
 
 class FormatterCmd(Command):
