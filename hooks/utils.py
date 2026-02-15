@@ -7,7 +7,11 @@ import selectors
 import shutil
 import subprocess as sp
 import sys
-from typing import List, Optional, Pattern, Set, Tuple
+from typing import List
+from typing import Optional
+from typing import Pattern
+from typing import Set
+from typing import Tuple
 
 
 class Command:
@@ -195,7 +199,9 @@ class StaticAnalyzerCmd(Command):
                 elif key.data in ('stdout', 'stderr') and (mask & selectors.EVENT_READ):
                     data = key.fileobj.read()
                     if data:
-                        self.output.append((key.data, data))
+                        marker_start = f"\n--- CHUNK START ({key.data}) ---\n".encode()
+                        marker_end = f"--- CHUNK END ---\n".encode()
+                        self.output.append((key.data, marker_start + data + marker_end))
                     else:
                         sel.unregister(key.fileobj)
                         key.fileobj.close()
