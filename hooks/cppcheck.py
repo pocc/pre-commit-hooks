@@ -33,7 +33,7 @@ class CppcheckCmd(StaticAnalyzerCmd):
             self.args + ["--file-list=-"],
             input_data="\n".join(self.files).encode()
         )
-        self.post_process_output(filter=r"[^:]+:\d+:\d+: .+", unique=True)
+        self.post_process_output(filter_pattern=rb"[^:]+:\d+:\d+: .+", unique=True)
         self.exit_on_error()
 
 

@@ -7,9 +7,7 @@ import selectors
 import shutil
 import subprocess as sp
 import sys
-from typing import List
-from typing import Optional
-from typing import Tuple
+from typing import List, Optional, Pattern, Set, Tuple
 
 
 class Command:
@@ -130,22 +128,23 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
         version = search.group(1)
         return version
 
-    def post_process_output(self, filter: str = r".*", unique: bool = False):
+    def post_process_output(self, filter_pattern: bytes = rb".*", unique: bool = False):
         """
         Filters self.output for lines matching filter_pattern and removes duplicates.
         """
-        processed: List[Tuple[str, str]] = []
-        seen: Set[str] = set()
-        regex: Pattern[str] = re.compile(filter)
+        seen: Set[bytes] = set()
+        regex: Pattern[bytes] = re.compile(filter_pattern)
 
-        for stream, data in self.output:
-            line: str = data.decode(errors='replace').strip()
-            if regex.match(line):
-                if not unique or line not in seen:
-                    processed.append((stream, data))
+        def _filter_gen():
+            for stream, data in self.output:
+                if unique and data in seen:
+                    continue
+                if regex.match(data):
                     if unique:
-                        seen.add(line)
-        self.output = processed
+                        seen.add(data)
+                    yield stream, data
+
+        self.output[:] = list(_filter_gen())
 
 
 class StaticAnalyzerCmd(Command):
