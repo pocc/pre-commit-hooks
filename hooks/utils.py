@@ -186,6 +186,8 @@ class StaticAnalyzerCmd(Command):
                         sel.unregister(file)
                         file.close()
 
+        sel.close()
+        sp_child.wait()
         self.returncode = sp_child.returncode
 
     def exit_on_error(self):
