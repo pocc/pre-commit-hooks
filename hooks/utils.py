@@ -9,6 +9,7 @@ import subprocess as sp
 import sys
 from typing import List
 from typing import Optional
+from typing import Tuple
 
 
 class Command:
@@ -22,10 +23,7 @@ class Command:
         self.files = self.get_added_files()
         self.edit_in_place = False
 
-        self.output = []
-
-        self.stdout_re = None
-        self.stderr_re = None
+        self.output: List[Tuple[str, bytes]] = []
         self.returncode = 0
 
     def check_installed(self):
@@ -132,6 +130,23 @@ Create an issue at github.com/pocc/pre-commit-hooks."""
         version = search.group(1)
         return version
 
+    def post_process_output(self, filter: str = r".*", unique: bool = False):
+        """
+        Filters self.output for lines matching filter_pattern and removes duplicates.
+        """
+        processed: List[Tuple[str, str]] = []
+        seen: Set[str] = set()
+        regex: Pattern[str] = re.compile(filter)
+
+        for stream, data in self.output:
+            line: str = data.decode(errors='replace').strip()
+            if regex.match(line):
+                if not unique or line not in seen:
+                    processed.append((stream, data))
+                    if unique:
+                        seen.add(line)
+        self.output = processed
+
 
 class StaticAnalyzerCmd(Command):
     """Commands that analyze code and are not formatters."""
@@ -190,34 +205,14 @@ class StaticAnalyzerCmd(Command):
         self.returncode = sp_child.returncode
 
     def exit_on_error(self):
-        for to, msg in self.output:
-            if to == 'stdout':
-                #if self.stdout_re and not self.stdout_re.match(text):
-                #    continue
-                sys.stdout.buffer.write(msg)
+        for stream, data in self.output:
+            if stream == 'stdout':
+                sys.stdout.buffer.write(data)
                 sys.stdout.flush()
             else:
-                #if self.stderr_re and not self.stderr_re.match(text):
-                #    continue
-                sys.stderr.buffer.write(msg)
+                sys.stderr.buffer.write(data)
                 sys.stderr.flush()
         sys.exit(self.returncode)
-
-    #def exit_on_error(self):
-    #    if self.returncode != 0:
-    #        if self.stdout_re:
-    #            filtered = sorted({line.strip() for line in self.stdout.splitlines() if self.stdout_re.match(line.strip())})
-    #            if filtered:
-    #                sys.stdout.buffer.write(b"\n".join(filtered) + b"\n")
-    #        else:
-    #            sys.stdout.buffer.write(self.stdout)
-    #        if self.stderr_re:
-    #            filtered = sorted({line.strip() for line in self.stderr.splitlines() if self.stderr_re.match(line.strip())})
-    #            if filtered:
-    #                sys.stderr.buffer.write(b"\n".join(filtered) + b"\n")
-    #        else:
-    #            sys.stderr.buffer.write(self.stderr)
-    #        sys.exit(self.returncode)
 
 
 class FormatterCmd(Command):

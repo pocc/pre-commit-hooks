@@ -26,7 +26,6 @@ class CppcheckCmd(StaticAnalyzerCmd):
         self.add_if_missing(
             ["--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"]
         )
-        self.stderr_re = re.compile(rb"^([^:]+):(\d+):(\d+): (.+)$")
 
     def run(self):
         """Run cppcheck"""
@@ -35,6 +34,7 @@ class CppcheckCmd(StaticAnalyzerCmd):
             input_data="\n".join(self.files).encode(),
             env={"CLICOLOR_FORCE": "1"}
         )
+        self.post_process_output(filter=r"[^:]+:\d+:\d+: .+", unique=True)
         self.exit_on_error()
 
 
