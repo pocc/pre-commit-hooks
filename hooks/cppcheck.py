@@ -30,7 +30,11 @@ class CppcheckCmd(StaticAnalyzerCmd):
 
     def run(self):
         """Run cppcheck"""
-        self.run_command(self.args + ["--file-list=-"], input_data="\n".join(self.files).encode())
+        self.run_command(
+            self.args + ["--file-list=-"],
+            input_data="\n".join(self.files).encode(),
+            env={"CLICOLOR_FORCE": "1"}
+        )
         self.exit_on_error()
 
 

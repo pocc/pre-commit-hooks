@@ -139,7 +139,7 @@ class StaticAnalyzerCmd(Command):
     def __init__(self, command: str, look_behind: str, args: List[str]):
         super().__init__(command, look_behind, args)
 
-    def run_command(self, args: List[str], input_data: Optional[str] = None):
+    def run_command(self, args: List[str], input_data: Optional[str] = None, env: Optional[dict] = None):
         """Run the command and check for errors. Args includes options and filepaths"""
         args = [self.command, *args]
         run_kwargs = {
@@ -147,6 +147,9 @@ class StaticAnalyzerCmd(Command):
             "stderr": sp.PIPE,
             "bufsize": 0,
         }
+        if env is not None:
+            env = {**os.environ, **env}
+            run_kwargs["env"] = env
         if input_data is not None:
             run_kwargs["stdin"] = sp.PIPE
 
