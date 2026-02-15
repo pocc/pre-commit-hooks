@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Wrapper script for cppcheck."""
+import os
 import re
 import sys
 from typing import List
@@ -31,7 +32,8 @@ class CppcheckCmd(StaticAnalyzerCmd):
         """Run cppcheck"""
         self.run_command(
             self.args + ["--file-list=-"],
-            input_data="\n".join(self.files).encode()
+            input_data="\n".join(self.files).encode(),
+            env={"CLICOLOR_FORCE": "1"}
         )
         self.post_process_output(filter_pattern=rb"[^:]+:\d+:\d+: .+", unique=True)
         self.exit_on_error()
