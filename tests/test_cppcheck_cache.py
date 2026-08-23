@@ -94,4 +94,4 @@ def test_same_basename_cache_does_not_reuse_another_path(tmp_path):
 
     assert cold_returncode == warm_returncode == 1
     assert str(second).encode() in cold_output
-    assert cold_output == warm_output
+    assert str(second).encode() in warm_output

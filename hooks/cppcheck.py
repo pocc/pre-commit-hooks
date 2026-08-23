@@ -62,7 +62,7 @@ class CppcheckCmd(StaticAnalyzerCmd):
         for filename in self.files:
             args = self.args
             if cache_root:
-                source_path = os.path.normcase(os.path.relpath(os.path.abspath(filename)))
+                source_path = os.path.normcase(os.path.abspath(filename))
                 cache_dir = os.path.join(cache_root, hashlib.sha256(source_path.encode()).hexdigest())
                 os.makedirs(cache_dir, exist_ok=True)
                 args = [f"{BUILD_DIR_OPTION}={cache_dir}" if arg == build_arg else arg for arg in self.args]
