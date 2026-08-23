@@ -367,6 +367,12 @@ See [README_dev.md](README_dev.md)
 * [Fastlane Integration](https://docs.fastlane.tools/actions/oclint/)
 * [Source Code](https://github.com/oclint/oclint)
 
+On Linux, use a release no newer than 22.02. The published 24.11 binary cannot load
+its own rules (`undefined symbol: _ZN4llvm24DisableABIBreakingChecksE`) and reports
+`no rule loaded` instead of analyzing. Releases 21.05 through 22.02 work. macOS is
+unaffected. Building from source needs `ENABLE_EXPORTS` on the driver target so the
+`dlopen`ed rules can resolve LLVM symbols against it.
+
 ### uncrustify
 
 * [Official Docs](http://uncrustify.sourceforge.net/)
