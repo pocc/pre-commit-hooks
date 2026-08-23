@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Wrapper script for oclint"""
 import os
+import re
 import sys
 from typing import List
 
@@ -43,13 +44,31 @@ class OCLintCmd(StaticAnalyzerCmd):
 
             current_files = os.listdir(os.getcwd())
             self.run_command([filename] + self.args)
-            # Errors are sent to stdout instead of stderr
-            if b"Errors" in self.stdout:
+            # OCLint writes its report to stdout, so promote it to stderr when it
+            # found something. This covers rule violations, not just compiler errors.
+            if self.has_findings(self.stdout):
                 self.stderr = self.stdout
             # If errors have been captured, stdout is unexpected
             self.stdout = b""
             self.exit_on_error()
             self.cleanup_files(current_files)
+
+    @staticmethod
+    def has_findings(stdout: bytes) -> bool:
+        """Whether OCLint reported anything that should fail the hook.
+
+        OCLint prints its report to stdout. Two independent signals matter, and
+        only checking for the word "Errors" (see #45) missed the second:
+
+        - compiler errors appear under a "Compiler Errors" heading
+        - rule violations are summarised as "FilesWithViolations=N"; a clean run
+          reports N=0, and a file that failed to compile reports N=0 as well, so
+          the count alone is not sufficient and neither signal subsumes the other.
+        """
+        if b"Compiler Errors" in stdout:
+            return True
+        match = re.search(rb"FilesWithViolations=(\d+)", stdout)
+        return bool(match and int(match.group(1)) > 0)
 
     @staticmethod
     def cleanup_files(existing_files: List[str]):
