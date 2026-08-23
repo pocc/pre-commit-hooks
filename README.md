@@ -267,6 +267,23 @@ UNCRUSTIFY=/home/me/.local/bin/uncrustify pre-commit run uncrustify
 
 The value may be an absolute path or another name to resolve on `PATH`.
 
+### Vala
+
+uncrustify can format Vala, but pre-commit's [identify](https://github.com/pre-commit/identify)
+library does not yet tag `.vala` files (see
+[identify#258](https://github.com/pre-commit/identify/issues/258)), so the hook cannot list
+`vala` in `types_or`. Until that lands, match Vala files yourself and tell uncrustify the
+language explicitly:
+
+```yaml
+- id: uncrustify
+  types_or: [text]
+  files: \.vala$
+  args: [-l, VALA]
+```
+
+The other hooks target C/C++/Objective-C and do not apply to Vala.
+
 ### Compilation Database
 
 `clang-tidy` and `oclint` both expect a
