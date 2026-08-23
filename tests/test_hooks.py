@@ -37,7 +37,7 @@ def strip_generated_counts(text: bytes) -> bytes:
     version and platform, so they are removed from both expected and actual
     output rather than being matched.
     """
-    return re.sub(rb"\d+ (warnings?|errors?)( and \d+ (warnings?|errors?))? generated\.\n?", b"", text)
+    return re.sub(rb"\d+ (warnings?|errors?)( and \d+ (warnings?|errors?))? generated\.\r?\n?", b"", text)
 
 
 class GeneratorT:
