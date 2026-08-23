@@ -95,8 +95,8 @@ def test_cached_mode_keeps_same_basenames_distinct(tmp_path):
         cached=True,
     ).run()
 
-    index = (cache_root / "files.txt").read_text()
-    assert all(str(path) in index for path in files)
+    index = (cache_root / "files.txt").read_text().replace("\\", "/")
+    assert all(str(path).replace("\\", "/") in index for path in files)
     assert len(list(cache_root.glob("foo.a*"))) == 2
 
 
