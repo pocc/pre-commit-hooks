@@ -243,6 +243,26 @@ These options are automatically added to enable all errors or are required.
 
 If you supply any of these options in `args:`, your options will override the above defaults (use `-<flag>=<option>` if possible when overriding).
 
+### Persistent cppcheck caching
+
+Caching is opt-in. Pass `--cppcheck-build-dir` to the existing hook to reuse cppcheck analysis between runs:
+
+```yaml
+- id: cppcheck
+  args:
+    - --cppcheck-build-dir=.cache/cppcheck
+```
+
+The hook creates and locks one hashed subdirectory per source file. Different sources remain parallel; repeated analysis of the same source is serialized. Without `--cppcheck-build-dir`, behavior is unchanged.
+
+With `--project`, disable filename passing because the project supplies the complete file set:
+
+```yaml
+- id: cppcheck
+  pass_filenames: false
+  args: [--project=compile_commands.json, --cppcheck-build-dir=.cache/cppcheck]
+```
+
 ### Choosing a specific executable
 
 Each hook runs the tool of the same name from your `PATH`. To point a hook at a specific

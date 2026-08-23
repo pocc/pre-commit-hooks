@@ -1,12 +1,43 @@
 #!/usr/bin/env python
 """fns for clang-format, clang-tidy, oclint"""
 import difflib
+import errno
 import os
 import re
 import shutil
 import subprocess as sp
 import sys
+import time
+from contextlib import contextmanager
+from typing import Iterator
 from typing import List
+
+
+@contextmanager
+def file_lock(filename: str) -> Iterator[None]:
+    """Hold an exclusive file lock for the duration of the context."""
+    with open(filename, "a+b") as lock_file:
+        if os.name == "nt":
+            import msvcrt
+
+            lock_file.seek(0)
+            if not lock_file.read(1):
+                lock_file.write(b"\0")
+                lock_file.flush()
+            while True:
+                lock_file.seek(0)
+                try:
+                    msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError as exc:
+                    if exc.errno not in (errno.EACCES, errno.EAGAIN, errno.EDEADLK):
+                        raise
+                    time.sleep(0.05)
+        else:
+            import fcntl
+
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        yield
 
 
 class Command:
