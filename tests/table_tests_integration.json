@@ -229,7 +229,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type"
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment"
     ],
     "expd_output": "clang-tidy...............................................................Passed\n",
     "expd_retcode": 0
@@ -241,7 +241,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "-fix"
     ],
     "expd_output": "clang-tidy...............................................................Passed\n",
@@ -254,7 +254,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "--fix-errors"
     ],
     "expd_output": "clang-tidy...............................................................Passed\n",
@@ -267,7 +267,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "--",
       "-std=c18"
     ],
@@ -281,7 +281,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type"
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment"
     ],
     "expd_output": "clang-tidy...............................................................Passed\n",
     "expd_retcode": 0
@@ -293,7 +293,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "-fix"
     ],
     "expd_output": "clang-tidy...............................................................Passed\n",
@@ -306,7 +306,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "--fix-errors"
     ],
     "expd_output": "clang-tidy...............................................................Passed\n",
@@ -319,7 +319,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "--",
       "-std=c++20"
     ],
@@ -333,7 +333,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type"
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment"
     ],
     "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\n    2 | int main(){int i;return;}\n      |                  ^\n1 error generated.\nError while processing {test_dir}/err.c.\n\n",
     "expd_retcode": 1
@@ -345,7 +345,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "-fix"
     ],
     "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.c:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\n    2 | int main(){int i;return;}\n      |                  ^\n1 error generated.\nError while processing {test_dir}/err.c.\n\n",
@@ -358,7 +358,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "--fix-errors"
     ],
     "expd_output": "clang-tidy...............................................................Passed\n",
@@ -371,7 +371,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "--",
       "-std=c18"
     ],
@@ -385,7 +385,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type"
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment"
     ],
     "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\n    2 | int main(){int i;return;}\n      |                  ^\n1 error generated.\nError while processing {test_dir}/err.cpp.\n\n",
     "expd_retcode": 1
@@ -397,7 +397,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "-fix"
     ],
     "expd_output": "clang-tidy...............................................................Failed\n- hook id: clang-tidy\n- exit code: 1\n\n{test_dir}/err.cpp:2:18: error: non-void function 'main' should return a value [clang-diagnostic-return-type]\n    2 | int main(){int i;return;}\n      |                  ^\n1 error generated.\nError while processing {test_dir}/err.cpp.\n\n",
@@ -410,7 +410,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "--fix-errors"
     ],
     "expd_output": "clang-tidy...............................................................Passed\n",
@@ -423,7 +423,7 @@
     ],
     "args": [
       "-quiet",
-      "-checks=clang-diagnostic-return-type",
+      "-checks=clang-diagnostic-return-type,llvm-namespace-comment",
       "--",
       "-std=c++20"
     ],
