@@ -11,10 +11,21 @@ jobs:
       - name: Configure macOS SDK for clang-tidy
         run: |
           echo "SDKROOT=$(xcrun --show-sdk-path)" >> $GITHUB_ENV
-      - name: Install 5 hooks, python3, llvm already includes clang-tidy, clang-format
-        run: brew install uncrustify cppcheck oclint iwyu
-      - name: Fix OCLint dylib paths
-        run: .github/scripts/fix-oclint-macos.sh
+      - name: Install 4 hooks, python3, llvm already includes clang-tidy, clang-format
+        run: brew install uncrustify cppcheck iwyu
+      # The oclint cask is 24.11, built against LLVM 16, whose clang cannot parse the
+      # libc++ headers shipped with current Xcode SDKs. It is also deprecated upstream
+      # and scheduled for removal, so build 26.02 against LLVM 21 instead.
+      - name: Build and install oclint
+        run: |
+          brew install llvm@21 cmake ninja
+          curl -sL https://github.com/oclint/oclint/archive/refs/tags/v26.02.tar.gz | tar xz
+          cd oclint-26.02/oclint-scripts
+          python3 ./build all --release --llvm-root "$(brew --prefix llvm@21)" -j 3
+          python3 ./bundle --release --llvm-root "$(brew --prefix llvm@21)"
+          sudo cp ../build/oclint-release/bin/oclint* /usr/local/bin/
+          sudo mkdir -p /usr/local/lib
+          sudo cp -r ../build/oclint-release/lib/* /usr/local/lib/
       - name: Install pip dependencies
         run: pip3 install --break-system-packages cpplint pytest pre-commit
       - name: Install hooks locally
