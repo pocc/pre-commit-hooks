@@ -251,6 +251,36 @@ class TestDefaultArgumentsRegression:
             if os.path.exists(temp_file):
                 os.unlink(temp_file)
 
+    def test_cppcheck_user_suppress_keeps_defaults(self):
+        """A user supplied --suppress must not displace the default suppressions.
+
+        --suppress may be repeated, so matching on the key alone dropped every
+        default as soon as the user supplied one of their own. Losing
+        --suppress=unusedFunction in particular makes cppcheck report functions
+        whose only caller is not part of the commit.
+        """
+        from hooks.cppcheck import CppcheckCmd
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".c", delete=False) as f:
+            f.write("int main() { return 0; }\n")
+            temp_file = f.name
+
+        try:
+            cmd = CppcheckCmd(["cppcheck-hook", "--suppress=myCheck", temp_file])
+            assert "--suppress=myCheck" in cmd.args
+            for default in [
+                "--suppress=unmatchedSuppression",
+                "--suppress=missingIncludeSystem",
+                "--suppress=unusedFunction",
+            ]:
+                assert default in cmd.args, f"{default} was dropped"
+            # A default the user already supplied is not duplicated
+            cmd2 = CppcheckCmd(["cppcheck-hook", "--suppress=unusedFunction", temp_file])
+            assert cmd2.args.count("--suppress=unusedFunction") == 1
+        finally:
+            if os.path.exists(temp_file):
+                os.unlink(temp_file)
+
     def test_oclint_version_specific_args(self):
         """Test that OCLint uses different args based on version."""
         if os.name == "nt":

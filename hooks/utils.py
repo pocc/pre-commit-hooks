@@ -76,13 +76,20 @@ class Command:
         if not has_args and not is_cmd_clang_analyzer:
             self.raise_error("Missing arguments", "No file arguments found and no files are pending commit.")
 
-    def add_if_missing(self, new_args: List[str]):
+    def add_if_missing(self, new_args: List[str], allow_multiple: bool = False):
         """Add a default if it's missing from the command. This library
         exists to force checking, so prefer those options.
         len(new_args) should be 1, or 2 for options like --key=value
 
         If first arg is missing, add new_args to command's args
-        Do not change an option - in those cases return."""
+        Do not change an option - in those cases return.
+
+        Options like --suppress may be repeated, and a user supplied value
+        should not displace the defaults. Pass allow_multiple for those, which
+        compares whole arguments instead of only the key."""
+        if allow_multiple:
+            self.args += [arg for arg in new_args if arg not in self.args]
+            return
         new_arg_key = new_args[0].split("=")[0]
         for arg in self.args:
             existing_arg_key = arg.split("=")[0]

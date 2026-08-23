@@ -22,8 +22,10 @@ class CppcheckCmd(StaticAnalyzerCmd):
         # Enable all of the checks
         self.add_if_missing(["--enable=all"])
         # Per https://github.com/pocc/pre-commit-hooks/pull/30, suppress missingIncludeSystem messages
+        # allow_multiple so a user supplied --suppress adds to these rather than replacing them
         self.add_if_missing(
-            ["--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"]
+            ["--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"],
+            allow_multiple=True,
         )
 
     def run(self):
