@@ -29,7 +29,16 @@ class CppcheckCmd(StaticAnalyzerCmd):
         )
 
     def run(self):
-        """Run cppcheck"""
+        """Run cppcheck.
+
+        --project supplies the file list itself and cppcheck rejects source files
+        alongside it ("--project cannot be used in conjunction with source files"),
+        so in that mode run once and do not append the committed files.
+        """
+        if any(arg.startswith("--project") for arg in self.args):
+            self.run_command(self.args)
+            self.exit_on_error()
+            return
         for filename in self.files:
             self.run_command([filename] + self.args)
             self.exit_on_error()
