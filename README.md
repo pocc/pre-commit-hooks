@@ -256,6 +256,18 @@ Caching is opt-in. Pass `--cppcheck-build-dir` to the existing hook to reuse cpp
 
 The hook creates and locks one hashed subdirectory per source file. Different sources remain parallel; repeated analysis of the same source is serialized. Without `--cppcheck-build-dir`, behavior is unchanged.
 
+For large multi-file commits, `cppcheck-cached` analyzes the supplied files in one cppcheck invocation. It requires a persistent build directory, runs serially under pre-commit, and locks that directory while cppcheck runs:
+
+```yaml
+- id: cppcheck-cached
+  args:
+    - --cppcheck-build-dir=.cache/cppcheck
+    - -j
+    - "8"
+```
+
+`-j` is entirely user-selected. Use the ordinary `cppcheck` hook when caching is not needed.
+
 With `--project`, disable filename passing because the project supplies the complete file set:
 
 ```yaml

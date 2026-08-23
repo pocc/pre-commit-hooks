@@ -9,8 +9,9 @@ import subprocess as sp
 import sys
 import time
 from contextlib import contextmanager
-from typing import Iterator
 from typing import List
+from typing import Iterator
+from typing import Optional
 
 
 @contextmanager
@@ -179,10 +180,10 @@ class StaticAnalyzerCmd(Command):
     def __init__(self, command: str, look_behind: str, args: List[str]):
         super().__init__(command, look_behind, args)
 
-    def run_command(self, args: List[str]):
+    def run_command(self, args: List[str], input_data: Optional[bytes] = None):
         """Run the command and check for errors. Args includes options and filepaths"""
         args = [self.executable, *args]
-        sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
+        sp_child = sp.run(args, input=input_data, stdout=sp.PIPE, stderr=sp.PIPE)
         self.stdout += sp_child.stdout
         self.stderr += sp_child.stderr
         self.returncode = sp_child.returncode

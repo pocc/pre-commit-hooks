@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for cppcheck persistent caching (#83)."""
+"""Tests for cppcheck persistent caching (#83, #84)."""
 import multiprocessing
 import shutil
 from pathlib import Path
@@ -37,6 +37,67 @@ def test_build_dir_is_split_by_source_path(tmp_path, monkeypatch):
     assert build_dirs[0] != build_dirs[1]
     assert all(path.parent == cache_root and path.is_dir() for path in build_dirs)
     assert all("-j" in call and "4" in call for call in calls)
+
+
+def test_cached_mode_runs_one_file_list(tmp_path, monkeypatch):
+    cache_root = tmp_path / "cache"
+    files = [tmp_path / "first.c", tmp_path / "second.c"]
+    for path in files:
+        path.write_text("int main() { return 0; }\n")
+    cmd = CppcheckCmd(
+        [
+            "cppcheck-cached-hook",
+            f"{BUILD_DIR_OPTION}={cache_root}",
+            "-j",
+            "4",
+            *(str(path) for path in files),
+        ],
+        cached=True,
+    )
+    calls = []
+    monkeypatch.setattr(cmd, "run_command", lambda args, input_data=None: calls.append((args, input_data)))
+    monkeypatch.setattr(cmd, "exit_on_error", lambda: None)
+
+    cmd.run()
+
+    assert calls == [(cmd.args + ["--file-list=-"], "\n".join(str(path) for path in files).encode())]
+    assert (cache_root / ".lock").is_file()
+
+
+def test_cached_mode_requires_build_dir(tmp_path, capfd):
+    source = tmp_path / "source.c"
+    source.write_text("int main() { return 0; }\n")
+    cmd = CppcheckCmd(["cppcheck-cached-hook", str(source)], cached=True)
+
+    with pytest.raises(SystemExit) as error:
+        cmd.run()
+
+    assert error.value.code == 1
+    assert "cppcheck-cached requires --cppcheck-build-dir=<path>." in capfd.readouterr().err
+
+
+@pytest.mark.skipif(shutil.which("cppcheck") is None, reason="cppcheck is not installed")
+def test_cached_mode_keeps_same_basenames_distinct(tmp_path):
+    cache_root = tmp_path / "cache"
+    files = [tmp_path / "first" / "foo.c", tmp_path / "second" / "foo.c"]
+    for path in files:
+        path.parent.mkdir()
+        path.write_text("int main() { return 0; }\n")
+
+    CppcheckCmd(
+        [
+            "cppcheck-cached-hook",
+            f"{BUILD_DIR_OPTION}={cache_root}",
+            "-j",
+            "4",
+            *(str(path) for path in files),
+        ],
+        cached=True,
+    ).run()
+
+    index = (cache_root / "files.txt").read_text()
+    assert all(str(path) in index for path in files)
+    assert len(list(cache_root.glob("foo.a*"))) == 2
 
 
 def test_cache_lock_serializes_processes(tmp_path):

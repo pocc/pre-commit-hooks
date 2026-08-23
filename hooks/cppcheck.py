@@ -17,8 +17,9 @@ class CppcheckCmd(StaticAnalyzerCmd):
     command = "cppcheck"
     lookbehind = "Cppcheck "
 
-    def __init__(self, args: List[str]):
+    def __init__(self, args: List[str], cached: bool = False):
         super().__init__(self.command, self.lookbehind, args)
+        self.cached = cached
         self.parse_args(args)
         # quiet for stdout purposes
         self.add_if_missing(["-q"])
@@ -48,6 +49,21 @@ class CppcheckCmd(StaticAnalyzerCmd):
         """
         build_arg = next((arg for arg in self.args if arg.startswith(BUILD_DIR_OPTION + "=")), None)
         cache_root = build_arg.split("=", 1)[1] if build_arg else None
+        if self.cached:
+            if not cache_root:
+                self.raise_error(
+                    "Missing cppcheck build directory",
+                    "cppcheck-cached requires --cppcheck-build-dir=<path>.",
+                )
+            os.makedirs(cache_root, exist_ok=True)
+            with file_lock(os.path.join(cache_root, ".lock")):
+                if any(arg.startswith("--project") for arg in self.args):
+                    self.run_command(self.args)
+                else:
+                    self.run_command(self.args + ["--file-list=-"], "\n".join(self.files).encode())
+                self.exit_on_error()
+            return
+
         if any(arg.startswith("--project") for arg in self.args):
             if cache_root:
                 os.makedirs(cache_root, exist_ok=True)
@@ -76,6 +92,11 @@ class CppcheckCmd(StaticAnalyzerCmd):
 
 def main(argv: List[str] = sys.argv):
     cmd = CppcheckCmd(argv)
+    cmd.run()
+
+
+def cached_main(argv: List[str] = sys.argv):
+    cmd = CppcheckCmd(argv, cached=True)
     cmd.run()
 
 
