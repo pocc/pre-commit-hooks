@@ -1,6 +1,7 @@
 # pre-commit hooks
 
-![Ubuntu Build](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_ubuntu.yml/badge.svg)
+[![Ubuntu 24.04 Build](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_ubuntu.yml/badge.svg)](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_ubuntu.yml)
+[![Ubuntu 26.04 Build](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_ubuntu_2604.yml/badge.svg)](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_ubuntu_2604.yml)
 ![Macos Build](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_macos.yml/badge.svg)
 ![Windows Build](https://github.com/pocc/pre-commit-hooks/actions/workflows/gh_actions_windows.yml/badge.svg)
 

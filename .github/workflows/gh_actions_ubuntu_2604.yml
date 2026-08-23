@@ -1,0 +1,35 @@
+name: test ubuntu 26.04
+on: [push]
+jobs:
+  build:
+    runs-on: [ubuntu-26.04]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name:  Install 7 hooks, python, pip
+        run: sudo apt install clang clang-format clang-tidy uncrustify cppcheck iwyu python3 python3-pip
+      - name: Install latest oclint (21.05)
+        run: |
+          wget https://github.com/oclint/oclint/releases/download/v21.05/oclint-21.05-llvm-12.0.0-x86_64-linux-ubuntu-20.04.tar.gz
+            tar -xvzf oclint-21.05-llvm-12.0.0-x86_64-linux-ubuntu-20.04.tar.gz
+            sudo cp -v oclint-21.05/bin/oclint /usr/local/bin/
+            sudo cp -vr oclint-21.05/lib/* /usr/local/lib/
+            oclint --version
+      - name: Install pip dependencies
+        run: pip install cpplint pytest black pre-commit
+      - name: Install hooks locally
+        run: pip install .
+      - name: Get command versions
+        run: |
+          clang-format --version
+          clang-tidy --version
+          cppcheck --version
+          cpplint --version
+          iwyu --version
+          oclint --version
+      - name: Get python library versions
+        run: |
+          pytest --version
+          pre-commit --version
+      - name: Run tests
+        run: python3 -m pytest -x -vvv
