@@ -21,9 +21,6 @@ def file_lock(filename: str) -> Iterator[None]:
             import msvcrt
 
             lock_file.seek(0)
-            if not lock_file.read(1):
-                lock_file.write(b"\0")
-                lock_file.flush()
             while True:
                 lock_file.seek(0)
                 try:
