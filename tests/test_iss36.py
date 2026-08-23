@@ -45,7 +45,9 @@ class TestIss36:
         with open(os.path.join(cls.test_dir, "CMakeLists.txt"), "w") as f:
             f.write(CMAKELISTS)
         child = sp.run(
-            ["cmake", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", "-Wno-dev", cls.test_dir],
+            # No -Wno-dev: cmake 4 deprecated it and writes a warning to stderr,
+            # which fails the stderr check below. This project emits no dev warnings.
+            ["cmake", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", cls.test_dir],
             cwd=cls.test_dir,
             stdout=sp.PIPE,
             stderr=sp.PIPE,

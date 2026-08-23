@@ -121,7 +121,10 @@ class GeneratorT:
     @classmethod
     def generate_clang_tidy_tests(cls):
         """Don't care about warnings. They'll be removed in later tests."""
-        ct_base_args = ["-quiet", "-checks=clang-diagnostic-return-type"]
+        # clang-tidy 22 refuses to run when only clang-diagnostic-* globs are given
+        # ("no checks enabled"), so pair it with a real check. llvm-namespace-comment
+        # never fires on the test files, leaving the compiler diagnostic as the only output.
+        ct_base_args = ["-quiet", "-checks=clang-diagnostic-return-type,llvm-namespace-comment"]
         # Run normal, plus two in-place arguments
         additional_args = [[], ["-fix"], ["--fix-errors"], ["--", "-std=c18"]]
         clang_tidy_args_sets = [ct_base_args + arg for arg in additional_args]
