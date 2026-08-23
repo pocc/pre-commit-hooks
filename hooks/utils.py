@@ -24,12 +24,20 @@ class Command:
         self.stderr = b""
         self.returncode = 0
 
+    @property
+    def executable(self):
+        """The binary to invoke. Overridable by an env var named after the command,
+        e.g. CLANG_TIDY=/opt/llvm/bin/clang-tidy or UNCRUSTIFY=/home/me/bin/uncrustify.
+        self.command stays the plain name for identity checks and messages. Resolved
+        on access so it tracks self.command and the environment rather than caching."""
+        return os.environ.get(re.sub(r"[^A-Z0-9]+", "_", self.command.upper()), self.command)
+
     def check_installed(self):
         """Check if command is installed and fail exit if not."""
-        path = shutil.which(self.command)
+        path = shutil.which(self.executable)
         if path is None:
             website = "https://github.com/pocc/pre-commit-hooks#example-usage"
-            problem = self.command + " not found"
+            problem = self.executable + " not found"
             details = """Make sure {} is installed and on your PATH.\nFor more info: {}""".format(
                 self.command, website
             )  # noqa: E501
@@ -123,7 +131,7 @@ Edit your pre-commit config or use a different version of {}.""".format(
 
     def get_version_str(self):
         """Get the version string like 8.0.0 for a given command."""
-        args = [self.command, "--version"]
+        args = [self.executable, "--version"]
         sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         version_str = str(sp_child.stdout, encoding="utf-8")
         # After version like `8.0.0` is expected to be '\n' or ' '
@@ -145,7 +153,7 @@ class StaticAnalyzerCmd(Command):
 
     def run_command(self, args: List[str]):
         """Run the command and check for errors. Args includes options and filepaths"""
-        args = [self.command, *args]
+        args = [self.executable, *args]
         sp_child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         self.stdout += sp_child.stdout
         self.stderr += sp_child.stderr
@@ -197,7 +205,7 @@ class FormatterCmd(Command):
     def get_formatted_lines(self, filename: str) -> List[bytes]:
         """Get the expected output for a command applied to a file."""
         filename_opts = self.get_filename_opts(filename)
-        args = [self.command, *self.args, *filename_opts]
+        args = [self.executable, *self.args, *filename_opts]
         child = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
         if len(child.stderr) > 0 or child.returncode != 0:
             problem = f"Unexpected Stderr/return code received when analyzing {filename}.\nArgs: {args}"

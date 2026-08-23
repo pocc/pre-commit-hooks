@@ -243,6 +243,30 @@ These options are automatically added to enable all errors or are required.
 
 If you supply any of these options in `args:`, your options will override the above defaults (use `-<flag>=<option>` if possible when overriding).
 
+### Choosing a specific executable
+
+Each hook runs the tool of the same name from your `PATH`. To point a hook at a specific
+binary instead, set an environment variable named after the command, upper-cased with
+non-alphanumeric characters replaced by `_`:
+
+| Command | Environment variable |
+| --- | --- |
+| `clang-format` | `CLANG_FORMAT` |
+| `clang-tidy` | `CLANG_TIDY` |
+| `cppcheck` | `CPPCHECK` |
+| `cpplint` | `CPPLINT` |
+| `oclint` | `OCLINT` |
+| `uncrustify` | `UNCRUSTIFY` |
+| `include-what-you-use` | `INCLUDE_WHAT_YOU_USE` |
+
+For example, to use a non-default uncrustify without touching `PATH`:
+
+```bash
+UNCRUSTIFY=/home/me/.local/bin/uncrustify pre-commit run uncrustify
+```
+
+The value may be an absolute path or another name to resolve on `PATH`.
+
 ### Compilation Database
 
 `clang-tidy` and `oclint` both expect a
