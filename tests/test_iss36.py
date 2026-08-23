@@ -57,7 +57,10 @@ class TestIss36:
         output, retcode = utils.integration_test(
             "clang-tidy",
             [os.path.join(cls.test_dir, "src", "ok.c")],
-            ["--fix", "--quiet", "-p=cmake-build-debug"],
+            # clang-tidy 22 exits with "no checks enabled" when the check list is
+            # empty, so name one. llvm-namespace-comment never fires on this C file,
+            # which keeps the hook's expected "Passed" output unchanged.
+            ["--fix", "--quiet", "-p=cmake-build-debug", "-checks=llvm-namespace-comment"],
             cls.test_dir,
         )
         utils.assert_equal(expd_output, output)
