@@ -24,6 +24,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME output)
 
 
 class TestIss36:
+    @staticmethod
+    def extra_clang_tidy_args():
+        """clang-tidy 22 errors out unless a real check is named. Older versions
+        would then compile the file and print "N warnings generated." to stderr,
+        which the hook reports as a failure, so only add it where required."""
+        version = utils.get_versions()["clang-tidy"]
+        major = int(version.split(".")[0]) if version and version[0].isdigit() else 0
+        # llvm-namespace-comment never fires on the C file used here
+        return ["-checks=llvm-namespace-comment"] if major >= 22 else []
+
     @classmethod
     def setup_class(cls):
         cls.test_dir = os.path.join(tempfile.gettempdir(), "pre-commit-hooks-testing")
@@ -57,10 +67,7 @@ class TestIss36:
         output, retcode = utils.integration_test(
             "clang-tidy",
             [os.path.join(cls.test_dir, "src", "ok.c")],
-            # clang-tidy 22 exits with "no checks enabled" when the check list is
-            # empty, so name one. llvm-namespace-comment never fires on this C file,
-            # which keeps the hook's expected "Passed" output unchanged.
-            ["--fix", "--quiet", "-p=cmake-build-debug", "-checks=llvm-namespace-comment"],
+            ["--fix", "--quiet", "-p=cmake-build-debug"] + cls.extra_clang_tidy_args(),
             cls.test_dir,
         )
         utils.assert_equal(expd_output, output)

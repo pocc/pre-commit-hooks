@@ -30,6 +30,25 @@ from hooks.oclint import OCLintCmd
 from hooks.uncrustify import UncrustifyCmd
 
 
+def clang_tidy_checks_arg(version: str) -> str:
+    """Build the -checks argument for the installed clang-tidy.
+
+    clang-tidy 22 treats an empty enabled-check list as an error and no longer
+    counts clang-diagnostic-* globs as checks, so a real check has to be named
+    for the compiler diagnostic to be reported at all. Naming one on older
+    versions is not free: they then compile the file and print
+    "N warnings generated." to stderr, which the hook reports as a failure.
+    """
+    base = "clang-diagnostic-return-type"
+    major = 0
+    if version and version[0].isdigit():
+        major = int(version.split(".")[0])
+    if major >= 22:
+        # llvm-namespace-comment never fires on the test files
+        return f"-checks={base},llvm-namespace-comment"
+    return f"-checks={base}"
+
+
 def strip_generated_counts(text: bytes) -> bytes:
     """Remove clang's "N warnings/errors generated." summary lines.
 
@@ -131,10 +150,7 @@ class GeneratorT:
     @classmethod
     def generate_clang_tidy_tests(cls):
         """Don't care about warnings. They'll be removed in later tests."""
-        # clang-tidy 22 refuses to run when only clang-diagnostic-* globs are given
-        # ("no checks enabled"), so pair it with a real check. llvm-namespace-comment
-        # never fires on the test files, leaving the compiler diagnostic as the only output.
-        ct_base_args = ["-quiet", "-checks=clang-diagnostic-return-type,llvm-namespace-comment"]
+        ct_base_args = ["-quiet", clang_tidy_checks_arg(cls.versions["clang-tidy"])]
         # Run normal, plus two in-place arguments
         additional_args = [[], ["-fix"], ["--fix-errors"], ["--", "-std=c18"]]
         clang_tidy_args_sets = [ct_base_args + arg for arg in additional_args]
@@ -368,6 +384,14 @@ class TestHooks:
             s["args"] = [arg.replace("{repo_dir}", os.getcwd()) for arg in s["args"]]
             s["files"] = [arg.replace("{test_dir}", tmpdir) for arg in s["files"]]
             s["expd_output"] = s["expd_output"].replace("{test_dir}", tmpdir)
+            # The table stores the pre-22 form; newer clang-tidy needs a real check named
+            if s["command"] == "clang-tidy":
+                s["args"] = [
+                    clang_tidy_checks_arg(versions["clang-tidy"])
+                    if arg == "-checks=clang-diagnostic-return-type"
+                    else arg
+                    for arg in s["args"]
+                ]
 
             if os.name == "nt":
                 s["files"] = [arg.replace("/", "\\\\") for arg in s["files"]]
