@@ -21,12 +21,15 @@ class CppcheckCmd(StaticAnalyzerCmd):
         self.add_if_missing(["--error-exitcode=1"])
         # Enable all of the checks
         self.add_if_missing(["--enable=all"])
-        # Per https://github.com/pocc/pre-commit-hooks/pull/30, suppress missingIncludeSystem messages
-        # allow_multiple so a user supplied --suppress adds to these rather than replacing them
-        self.add_if_missing(
-            ["--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--suppress=unusedFunction"],
-            allow_multiple=True,
-        )
+        # Per https://github.com/pocc/pre-commit-hooks/pull/30, suppress missingIncludeSystem messages.
+        # allow_multiple so a user supplied --suppress adds to these rather than replacing them.
+        suppressions = ["--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem"]
+        # unusedFunction false-positives on a partial file set (a function whose only caller
+        # is not staged looks unused), so suppress it by default. With --project cppcheck sees
+        # the whole program, so the check is valid there and must not be forced off.
+        if not any(arg.startswith("--project") for arg in self.args):
+            suppressions.append("--suppress=unusedFunction")
+        self.add_if_missing(suppressions, allow_multiple=True)
 
     def run(self):
         """Run cppcheck.
