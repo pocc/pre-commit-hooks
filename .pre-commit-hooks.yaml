@@ -34,12 +34,6 @@
   description: Find warnings/errors in C, C++, and Objective-C code
   types_or: [c, c++, c#, objective-c]
   language: python
-- id: cppcheck-cached
-  name: cppcheck cached
-  entry: cppcheck-cached-hook
-  description: Find warnings/errors using a persistent cppcheck build directory
-  types_or: [c, c++, c#, objective-c]
-  language: python
   require_serial: true
 - id: cpplint
   name: cpplint

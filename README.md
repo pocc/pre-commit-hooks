@@ -223,7 +223,7 @@ so that pre-commit doesn't get confused by nested github repositories.
 
 ### Special flags in this repo
 
-There are 2 flags, `--version` and `--no-diff` that can be added to `args:` for a pre-commit hook.
+The `--version`, `--no-diff`, and `--no-cppcheck-cache` flags can be added to `args:` for a pre-commit hook.
 They will be removed and not be passed on to the command.
 
 Some linters change behavior between versions. To enforce a linter version
@@ -246,20 +246,25 @@ If you supply any of these options in `args:`, your options will override the ab
 
 ### Persistent cppcheck caching
 
-Caching is opt-in. Pass `--cppcheck-build-dir` to the existing hook to reuse cppcheck analysis between runs:
+`cppcheck` caches analysis by default and checks all selected files in one invocation. Its cache is outside the repository:
+
+* macOS: `~/Library/Caches/pre-commit-hooks/cppcheck/`
+* Linux: `$XDG_CACHE_HOME/pre-commit-hooks/cppcheck/` (or `~/.cache/...`)
+* Windows: `%LOCALAPPDATA%\pre-commit-hooks\cppcheck\`
+
+The cache is keyed by cppcheck version and repository path. It is safe to delete; cppcheck recreates it. The hook supplies `-j` with the available CPU count unless `args:` already supplies `-j`.
+
+Disable caching for a run with the hook-only `--no-cppcheck-cache` flag:
 
 ```yaml
 - id: cppcheck
-  args:
-    - --cppcheck-build-dir=.cache/cppcheck
+  args: [--no-cppcheck-cache]
 ```
 
-The hook creates and locks one hashed subdirectory per source file. Different sources remain parallel; repeated analysis of the same source is serialized. Without `--cppcheck-build-dir`, behavior is unchanged.
-
-For large multi-file commits, `cppcheck-cached` analyzes the supplied files in one cppcheck invocation. It requires a persistent build directory, runs serially under pre-commit, and locks that directory while cppcheck runs:
+For CI, override the cache location with `--cppcheck-build-dir` and cache that directory with the CI provider. Include the cppcheck version in the CI cache key so cache formats are not mixed.
 
 ```yaml
-- id: cppcheck-cached
+- id: cppcheck
   args:
     - --cppcheck-build-dir=.cache/cppcheck
     - -j
@@ -273,7 +278,7 @@ With `--project`, disable filename passing because the project supplies the comp
 ```yaml
 - id: cppcheck
   pass_filenames: false
-  args: [--project=compile_commands.json, --cppcheck-build-dir=.cache/cppcheck]
+  args: [--project=compile_commands.json]
 ```
 
 ### Choosing a specific executable

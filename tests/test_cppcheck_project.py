@@ -7,6 +7,7 @@ import tempfile
 import pytest
 
 from hooks.cppcheck import CppcheckCmd
+from hooks.cppcheck import NO_CACHE_OPTION
 
 
 @pytest.fixture
@@ -28,7 +29,9 @@ def test_project_run_omits_source_files(project_tree, capfd):
     """With --project, cppcheck is invoked without the committed file, so it does
     not fail with '--project cannot be used in conjunction with source files'."""
     d, src, cdb = project_tree
-    cmd = CppcheckCmd(["cppcheck-hook", "--project=compile_commands.json", src])
+    cmd = CppcheckCmd(
+        ["cppcheck-hook", NO_CACHE_OPTION, "--project=compile_commands.json", src]
+    )
     try:
         cmd.run()
     except SystemExit:

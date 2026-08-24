@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Tests for cppcheck persistent caching (#83, #84)."""
+"""Tests for cppcheck persistent caching."""
+import hashlib
 import multiprocessing
+import os
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
 
 from hooks.cppcheck import BUILD_DIR_OPTION
 from hooks.cppcheck import CppcheckCmd
+from hooks.cppcheck import NO_CACHE_OPTION
 from hooks.utils import file_lock
 
 
@@ -18,66 +22,95 @@ def _hold_lock(cache_dir, attempting, entered, release):
         release.wait(5)
 
 
-def test_build_dir_is_split_by_source_path(tmp_path, monkeypatch):
-    cache_root = tmp_path / "cache"
+def test_default_cache_runs_one_file_list(tmp_path, monkeypatch):
     files = [tmp_path / "first" / "foo.cpp", tmp_path / "second" / "foo.cpp"]
     for path in files:
         path.parent.mkdir()
         path.write_text("int main() { return 0; }\n")
-    cmd = CppcheckCmd(["cppcheck-hook", f"{BUILD_DIR_OPTION}={cache_root}", "-j", "4", *(str(path) for path in files)])
+    home = tmp_path / "home"
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    monkeypatch.chdir(repo)
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("XDG_CACHE_HOME", str(home / "cache"))
+    monkeypatch.setenv("LOCALAPPDATA", str(home / "local"))
+    cmd = CppcheckCmd(["cppcheck-hook", *(str(path) for path in files)])
     calls = []
-    monkeypatch.setattr(cmd, "run_command", lambda args: calls.append(args))
-    monkeypatch.setattr(cmd, "exit_on_error", lambda: None)
-
-    cmd.run()
-
-    build_dirs = [
-        Path(next(arg.split("=", 1)[1] for arg in call if arg.startswith(BUILD_DIR_OPTION + "="))) for call in calls
-    ]
-    assert build_dirs[0] != build_dirs[1]
-    assert all(path.parent == cache_root and path.is_dir() for path in build_dirs)
-    assert all("-j" in call and "4" in call for call in calls)
-
-
-def test_cached_mode_runs_one_file_list(tmp_path, monkeypatch):
-    cache_root = tmp_path / "cache"
-    files = [tmp_path / "first.c", tmp_path / "second.c"]
-    for path in files:
-        path.write_text("int main() { return 0; }\n")
-    cmd = CppcheckCmd(
-        [
-            "cppcheck-cached-hook",
-            f"{BUILD_DIR_OPTION}={cache_root}",
-            "-j",
-            "4",
-            *(str(path) for path in files),
-        ],
-        cached=True,
+    monkeypatch.setattr(cmd, "get_version_str", lambda: "2.19.0")
+    monkeypatch.setattr(
+        cmd, "run_command", lambda args, input_data=None: calls.append((args, input_data))
     )
-    calls = []
-    monkeypatch.setattr(cmd, "run_command", lambda args, input_data=None: calls.append((args, input_data)))
     monkeypatch.setattr(cmd, "exit_on_error", lambda: None)
 
     cmd.run()
 
-    assert calls == [(cmd.args + ["--file-list=-"], "\n".join(str(path) for path in files).encode())]
+    if os.name == "nt":
+        cache_home = home / "local"
+    elif sys.platform == "darwin":
+        cache_home = home / "Library" / "Caches"
+    else:
+        cache_home = home / "cache"
+    cache_root = cache_home / "pre-commit-hooks" / "cppcheck" / "2.19.0"
+    cache_root /= hashlib.sha256(
+        os.path.normcase(os.path.abspath(repo)).encode()
+    ).hexdigest()
+    assert calls == [
+        (cmd.args + ["--file-list=-"], "\n".join(str(path) for path in files).encode())
+    ]
+    assert f"{BUILD_DIR_OPTION}={cache_root}" in cmd.args
+    assert "-j" in cmd.args and str(os.cpu_count() or 1) in cmd.args
     assert (cache_root / ".lock").is_file()
 
 
-def test_cached_mode_requires_build_dir(tmp_path, capfd):
+def test_explicit_cache_and_jobs_override_defaults(tmp_path, monkeypatch):
     source = tmp_path / "source.c"
     source.write_text("int main() { return 0; }\n")
-    cmd = CppcheckCmd(["cppcheck-cached-hook", str(source)], cached=True)
+    cache_root = tmp_path / "cache"
+    cmd = CppcheckCmd(
+        ["cppcheck-hook", f"{BUILD_DIR_OPTION}={cache_root}", "-j", "4", str(source)]
+    )
+    calls = []
+    monkeypatch.setattr(
+        cmd,
+        "get_version_str",
+        lambda: pytest.fail("explicit cache must not query the version"),
+    )
+    monkeypatch.setattr(
+        cmd, "run_command", lambda args, input_data=None: calls.append((args, input_data))
+    )
+    monkeypatch.setattr(cmd, "exit_on_error", lambda: None)
 
-    with pytest.raises(SystemExit) as error:
-        cmd.run()
+    cmd.run()
 
-    assert error.value.code == 1
-    assert "cppcheck-cached requires --cppcheck-build-dir=<path>." in capfd.readouterr().err
+    assert calls == [(cmd.args + ["--file-list=-"], str(source).encode())]
+    assert "-j" in cmd.args and "4" in cmd.args
+    assert (cache_root / ".lock").is_file()
+
+
+def test_no_cache_omits_build_directory(tmp_path, monkeypatch):
+    source = tmp_path / "source.c"
+    source.write_text("int main() { return 0; }\n")
+    cmd = CppcheckCmd(["cppcheck-hook", NO_CACHE_OPTION, str(source)])
+    calls = []
+    monkeypatch.setattr(
+        cmd,
+        "get_version_str",
+        lambda: pytest.fail("disabled cache must not query the version"),
+    )
+    monkeypatch.setattr(
+        cmd, "run_command", lambda args, input_data=None: calls.append((args, input_data))
+    )
+    monkeypatch.setattr(cmd, "exit_on_error", lambda: None)
+
+    cmd.run()
+
+    assert calls == [(cmd.args + ["--file-list=-"], str(source).encode())]
+    assert NO_CACHE_OPTION not in cmd.args
+    assert not any(arg.startswith(BUILD_DIR_OPTION) for arg in cmd.args)
 
 
 @pytest.mark.skipif(shutil.which("cppcheck") is None, reason="cppcheck is not installed")
-def test_cached_mode_keeps_same_basenames_distinct(tmp_path):
+def test_cached_run_keeps_same_basenames_distinct(tmp_path):
     cache_root = tmp_path / "cache"
     files = [tmp_path / "first" / "foo.c", tmp_path / "second" / "foo.c"]
     for path in files:
@@ -86,13 +119,12 @@ def test_cached_mode_keeps_same_basenames_distinct(tmp_path):
 
     CppcheckCmd(
         [
-            "cppcheck-cached-hook",
+            "cppcheck-hook",
             f"{BUILD_DIR_OPTION}={cache_root}",
             "-j",
             "4",
             *(str(path) for path in files),
         ],
-        cached=True,
     ).run()
 
     index = (cache_root / "files.txt").read_text().replace("\\", "/")
@@ -127,32 +159,3 @@ def test_cache_lock_serializes_processes(tmp_path):
                 process.join(5)
 
     assert first.exitcode == second.exitcode == 0
-
-
-@pytest.mark.skipif(shutil.which("cppcheck") is None, reason="cppcheck is not installed")
-def test_same_basename_cache_does_not_reuse_another_path(tmp_path):
-    cache_root = tmp_path / "cache"
-    first = tmp_path / "first" / "foo.cpp"
-    second = tmp_path / "second" / "foo.cpp"
-    first.parent.mkdir()
-    second.parent.mkdir()
-    first.write_text("int main(){int i;return;}\n")
-    second.write_text(first.read_text())
-    suppression = f"--suppress=unusedVariable:{first}"
-
-    def run(source):
-        cmd = CppcheckCmd(["cppcheck-hook", f"{BUILD_DIR_OPTION}={cache_root}", suppression, str(source)])
-        returncode = 0
-        try:
-            cmd.run()
-        except SystemExit as exc:
-            returncode = int(exc.code)
-        return returncode, cmd.stdout + cmd.stderr
-
-    assert run(first)[0] == 0
-    cold_returncode, cold_output = run(second)
-    warm_returncode, warm_output = run(second)
-
-    assert cold_returncode == warm_returncode == 1
-    assert str(second).encode() in cold_output
-    assert str(second).encode() in warm_output

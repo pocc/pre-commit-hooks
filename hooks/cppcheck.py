@@ -3,12 +3,14 @@
 import hashlib
 import os
 import sys
+from contextlib import nullcontext
 from typing import List
 
 from hooks.utils import file_lock
 from hooks.utils import StaticAnalyzerCmd
 
 BUILD_DIR_OPTION = "--cppcheck-build-dir"
+NO_CACHE_OPTION = "--no-cppcheck-cache"
 
 
 class CppcheckCmd(StaticAnalyzerCmd):
@@ -17,10 +19,12 @@ class CppcheckCmd(StaticAnalyzerCmd):
     command = "cppcheck"
     lookbehind = "Cppcheck "
 
-    def __init__(self, args: List[str], cached: bool = False):
+    def __init__(self, args: List[str]):
         super().__init__(self.command, self.lookbehind, args)
-        self.cached = cached
         self.parse_args(args)
+        self.no_cache = NO_CACHE_OPTION in self.args
+        if self.no_cache:
+            self.args.remove(NO_CACHE_OPTION)
         # quiet for stdout purposes
         self.add_if_missing(["-q"])
         # make cppcheck behave as expected for pre-commit
@@ -36,6 +40,43 @@ class CppcheckCmd(StaticAnalyzerCmd):
         if not any(arg.startswith("--project") for arg in self.args):
             suppressions.append("--suppress=unusedFunction")
         self.add_if_missing(suppressions, allow_multiple=True)
+        if not any(arg == "-j" or arg.startswith("-j") for arg in self.args):
+            self.args += ["-j", str(os.cpu_count() or 1)]
+
+    def get_cache_root(self):
+        """Return the configured cppcheck build directory, if any."""
+        build_arg = next(
+            (arg for arg in self.args if arg.startswith(BUILD_DIR_OPTION + "=")),
+            None,
+        )
+        if self.no_cache:
+            if build_arg:
+                self.raise_error(
+                    "Conflicting cppcheck cache options",
+                    f"Use {NO_CACHE_OPTION} or {BUILD_DIR_OPTION}=<path>, not both.",
+                )
+            return None
+        if build_arg:
+            return build_arg.split("=", 1)[1]
+        if os.name == "nt":
+            cache_home = os.environ.get("LOCALAPPDATA", os.path.expanduser("~"))
+        elif sys.platform == "darwin":
+            cache_home = os.path.expanduser("~/Library/Caches")
+        else:
+            cache_home = os.environ.get(
+                "XDG_CACHE_HOME", os.path.expanduser("~/.cache")
+            )
+        repository = os.path.normcase(os.path.abspath(os.getcwd()))
+        repository_hash = hashlib.sha256(repository.encode()).hexdigest()
+        cache_root = os.path.join(
+            cache_home,
+            "pre-commit-hooks",
+            "cppcheck",
+            self.get_version_str(),
+            repository_hash,
+        )
+        self.args.append(f"{BUILD_DIR_OPTION}={cache_root}")
+        return cache_root
 
     def run(self):
         """Run cppcheck.
@@ -44,59 +85,27 @@ class CppcheckCmd(StaticAnalyzerCmd):
         alongside it ("--project cannot be used in conjunction with source files"),
         so in that mode run once and do not append the committed files.
 
-        When a build directory is configured, each source gets its own cache so
-        parallel analysis of different sources does not share cache files.
+        The normal hook passes one file list to cppcheck so all selected files
+        share a coherent build directory.
         """
-        build_arg = next((arg for arg in self.args if arg.startswith(BUILD_DIR_OPTION + "=")), None)
-        cache_root = build_arg.split("=", 1)[1] if build_arg else None
-        if self.cached:
-            if not cache_root:
-                self.raise_error(
-                    "Missing cppcheck build directory",
-                    "cppcheck-cached requires --cppcheck-build-dir=<path>.",
-                )
+        cache_root = self.get_cache_root()
+        if cache_root:
             os.makedirs(cache_root, exist_ok=True)
-            with file_lock(os.path.join(cache_root, ".lock")):
-                if any(arg.startswith("--project") for arg in self.args):
-                    self.run_command(self.args)
-                else:
-                    self.run_command(self.args + ["--file-list=-"], "\n".join(self.files).encode())
-                self.exit_on_error()
-            return
-
-        if any(arg.startswith("--project") for arg in self.args):
-            if cache_root:
-                os.makedirs(cache_root, exist_ok=True)
-                with file_lock(os.path.join(cache_root, ".lock")):
-                    self.run_command(self.args)
-                    self.exit_on_error()
-            else:
+        lock = (
+            file_lock(os.path.join(cache_root, ".lock")) if cache_root else nullcontext()
+        )
+        with lock:
+            if any(arg.startswith("--project") for arg in self.args):
                 self.run_command(self.args)
-                self.exit_on_error()
-            return
-
-        for filename in self.files:
-            args = self.args
-            if cache_root:
-                source_path = os.path.normcase(os.path.abspath(filename))
-                cache_dir = os.path.join(cache_root, hashlib.sha256(source_path.encode()).hexdigest())
-                os.makedirs(cache_dir, exist_ok=True)
-                args = [f"{BUILD_DIR_OPTION}={cache_dir}" if arg == build_arg else arg for arg in self.args]
-                with file_lock(os.path.join(cache_dir, ".lock")):
-                    self.run_command([filename] + args)
-                    self.exit_on_error()
             else:
-                self.run_command([filename] + args)
-                self.exit_on_error()
+                self.run_command(
+                    self.args + ["--file-list=-"], "\n".join(self.files).encode()
+                )
+            self.exit_on_error()
 
 
 def main(argv: List[str] = sys.argv):
     cmd = CppcheckCmd(argv)
-    cmd.run()
-
-
-def cached_main(argv: List[str] = sys.argv):
-    cmd = CppcheckCmd(argv, cached=True)
     cmd.run()
 
 
