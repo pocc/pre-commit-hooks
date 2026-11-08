@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import difflib
+import functools
 import os
 import re
 import shutil
 import subprocess as sp
 import sys
+import warnings
 
 import pytest
 
@@ -122,6 +124,33 @@ def run_in(commands, tmpdir):
         pytest.fail(err_msg)
 
 
+@functools.lru_cache(maxsize=None)
+def get_repo_rev(repo_root: str) -> str:
+    """Return the commit SHA to use as `rev` for this repo in integration tests.
+
+    pre-commit caches a repo by (repo, rev) and treats rev as immutable, so a literal `HEAD`
+    is cloned once and then reused forever: integration tests silently ran stale hook code.
+    A SHA gets a fresh clone for each commit. pre-commit only clones committed code, so warn
+    when hook files have uncommitted changes that these tests will not exercise.
+    """
+    try:
+        rev = sp.run(["git", "rev-parse", "HEAD"], cwd=repo_root, stdout=sp.PIPE, check=True).stdout
+        dirty = sp.run(
+            ["git", "status", "--porcelain", "--", "hooks", ".pre-commit-hooks.yaml", "setup.cfg", "setup.py"],
+            cwd=repo_root,
+            stdout=sp.PIPE,
+            check=True,
+        ).stdout
+    except (sp.CalledProcessError, FileNotFoundError) as e:
+        pytest.fail(f"Integration tests need {repo_root} to be a git checkout: {e}")
+    if dirty.strip():
+        warnings.warn(
+            "Integration tests run the last commit; uncommitted changes to hook files are not tested:\n"
+            + dirty.decode()
+        )
+    return rev.decode().strip()
+
+
 def integration_test(cmd_name, files, args, test_dir):
     for test_file in files:
         test_file_base = os.path.split(test_file)[-1]
@@ -141,7 +170,7 @@ def integration_test(cmd_name, files, args, test_dir):
     pre_commit_config = f"""\
 repos:
 - repo: {repo_root}
-  rev: HEAD
+  rev: {get_repo_rev(repo_root)}
   hooks:
     - id: {cmd_name}
       args: {args}
