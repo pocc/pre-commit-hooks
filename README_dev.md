@@ -39,6 +39,15 @@ To run the tests and verify all of the commands are
 working as expected on your system, use `pytest -x -vvv`.
 This will work on both bash and python branches.
 
+The integration tests run each hook through `pre-commit run`, pointing at this checkout pinned
+to the current commit SHA. pre-commit caches a repo by its `rev`, so pinning to a SHA gets a
+fresh copy for every commit (the older `rev: HEAD` reused the first clone forever and tested
+stale code). pre-commit only sees committed code, so **commit hook changes before running the
+integration tests**; the tests warn when files under `hooks/` have uncommitted changes.
+
+On macOS, oclint and the CMake-based test for issue 36 need the SDK to find system headers:
+`SDKROOT=$(xcrun --show-sdk-path) pytest -x -vvv`. See [docs/MACOS_SDK_SETUP.md](docs/MACOS_SDK_SETUP.md).
+
 Testing is done by using pytest to generate 76 table tests (python branch)
 based on combinations of args, files, and expected results.
 
