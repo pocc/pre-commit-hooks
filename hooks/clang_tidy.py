@@ -6,6 +6,15 @@ from typing import List
 
 from hooks.utils import StaticAnalyzerCmd
 
+# clang-tidy ends a run with summary lines on stderr, such as "2 warnings generated." and
+# "Suppressed 2 warnings (2 in non-user code)." They aren't problems in the checked file,
+# whose warnings and errors are printed to stdout, so they shouldn't fail the hook (#85).
+SUMMARY_LINE = re.compile(rb"\d+ warnings? generated\.|Suppressed \d+ warnings|Use -header-filter=")
+
+# A warning or error in the code, e.g. "main.c:3:5: warning: ...". Warnings without a
+# location, such as "warning: treating 'c' input as 'c++'", are about the build command.
+CODE_DIAGNOSTIC = re.compile(rb"^.+:\d+:\d+: (?:warning|error):", re.MULTILINE)
+
 
 class ClangTidyCmd(StaticAnalyzerCmd):
     """Class for the clang-tidy command."""
@@ -22,9 +31,10 @@ class ClangTidyCmd(StaticAnalyzerCmd):
         """Run clang-tidy. If --fix-errors is passed in, then return code will be 0, even if there are errors."""
         for filename in self.files:
             self.run_command([filename] + self.args)
-            # Warnings generated aren't important.
-            self.stderr = re.sub(rb"[\d,]+ warning \S+\s+", b"", self.stderr)
-            if len(self.stderr) > 0 and "--fix-errors" not in self.args:
+            stderr_lines = self.stderr.splitlines(keepends=True)
+            self.stderr = b"".join(line for line in stderr_lines if not SUMMARY_LINE.match(line))
+            found_problems = CODE_DIAGNOSTIC.search(self.stdout) or self.stderr
+            if found_problems and "--fix-errors" not in self.args:
                 self.returncode = 1
             self.exit_on_error()
 
