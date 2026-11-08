@@ -45,6 +45,6 @@ def test_uncrustify_formats_vala(tmp_path, capfdbinary):
     assert exc.value.code == 1
     assert b"+  public static int main(string[] args) {" in capfdbinary.readouterr().out
 
-    # Writing the formatted output back makes the hook pass.
-    src.write_bytes(b"".join(line + b"\n" for line in cmd.get_formatted_lines(str(src))))
+    # Writing uncrustify's output back byte-for-byte makes the hook pass.
+    src.write_bytes(b"\n".join(cmd.get_formatted_lines(str(src))))
     UncrustifyCmd(["uncrustify-hook", "-c", UNC_DEFAULTS, str(src)]).run()
