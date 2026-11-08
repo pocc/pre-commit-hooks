@@ -18,6 +18,23 @@ and five C/C++ static code analyzers:
 [cpplint](https://github.com/cpplint/cpplint),
 [include-what-you-use](https://github.com/include-what-you-use/include-what-you-use)
 
+## Used by popular projects
+
+These hooks are used by large open-source projects, including:
+
+| Project | GitHub stars |
+| --- | ---: |
+| [TDengine](https://github.com/taosdata/TDengine) | [![TDengine stars](https://img.shields.io/github/stars/taosdata/TDengine?label=&style=flat)](https://github.com/taosdata/TDengine/stargazers) |
+| [Aircrack-ng](https://github.com/aircrack-ng/aircrack-ng) | [![Aircrack-ng stars](https://img.shields.io/github/stars/aircrack-ng/aircrack-ng?label=&style=flat)](https://github.com/aircrack-ng/aircrack-ng/stargazers) |
+| [Fleet](https://github.com/fleetdm/fleet) | [![Fleet stars](https://img.shields.io/github/stars/fleetdm/fleet?label=&style=flat)](https://github.com/fleetdm/fleet/stargazers) |
+| [eBPF for Windows](https://github.com/microsoft/ebpf-for-windows) | [![eBPF for Windows stars](https://img.shields.io/github/stars/microsoft/ebpf-for-windows?label=&style=flat)](https://github.com/microsoft/ebpf-for-windows/stargazers) |
+| [PcapPlusPlus](https://github.com/seladb/PcapPlusPlus) | [![PcapPlusPlus stars](https://img.shields.io/github/stars/seladb/PcapPlusPlus?label=&style=flat)](https://github.com/seladb/PcapPlusPlus/stargazers) |
+| [Node.js Addon Examples](https://github.com/nodejs/node-addon-examples) | [![Node.js Addon Examples stars](https://img.shields.io/github/stars/nodejs/node-addon-examples?label=&style=flat)](https://github.com/nodejs/node-addon-examples/stargazers) |
+| [autodiff](https://github.com/autodiff/autodiff) | [![autodiff stars](https://img.shields.io/github/stars/autodiff/autodiff?label=&style=flat)](https://github.com/autodiff/autodiff/stargazers) |
+| [vsomeip](https://github.com/COVESA/vsomeip) | [![vsomeip stars](https://img.shields.io/github/stars/COVESA/vsomeip?label=&style=flat)](https://github.com/COVESA/vsomeip/stargazers) |
+| [BrowserGym](https://github.com/ServiceNow/BrowserGym) | [![BrowserGym stars](https://img.shields.io/github/stars/ServiceNow/BrowserGym?label=&style=flat)](https://github.com/ServiceNow/BrowserGym/stargazers) |
+| [mlibc](https://github.com/managarm/mlibc) | [![mlibc stars](https://img.shields.io/github/stars/managarm/mlibc?label=&style=flat)](https://github.com/managarm/mlibc/stargazers) |
+
 This repo's hooks do more than passthrough arguments to provide these features:
 
 * Relay correct pass/fail to pre-commit, even when some commands exit 0 when they should not. Some versions of oclint, clang-tidy, and cppcheck have this behavior.
