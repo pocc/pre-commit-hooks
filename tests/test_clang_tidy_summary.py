@@ -42,17 +42,18 @@ int main(void) { return helper(0) + own(0); }
 """
 
 
-def run_clang_tidy_hook(tmp_path, main_source):
+def run_clang_tidy_hook(tmp_path, main_source, compiler_args=()):
     """Write h.h and main.c, run the hook on main.c, and return its exit code."""
     (tmp_path / "h.h").write_text(HEADER)
     main = tmp_path / "main.c"
     main.write_text(main_source)
     args = [
         "clang-tidy-hook",
-        "-checks=-*,readability-else-after-return",
+        "-checks=-*,readability-else-after-return,clang-diagnostic-deprecated",
         "--header-filter=^$",  # h.h is not user code, so clang-tidy suppresses its warning
         str(main),
         "--",
+        *compiler_args,
     ]
     try:
         ClangTidyCmd(args).run()
@@ -63,6 +64,12 @@ def run_clang_tidy_hook(tmp_path, main_source):
 
 def test_warning_only_in_header_passes(tmp_path):
     assert run_clang_tidy_hook(tmp_path, MAIN_WITHOUT_WARNINGS) == 0
+
+
+def test_warning_about_build_command_passes(tmp_path):
+    # Compiling a .c file as C++ prints "warning: treating 'c' input as 'c++' ..." with no
+    # file location. CMake projects on Windows hit this (see tests/test_iss36.py).
+    assert run_clang_tidy_hook(tmp_path, MAIN_WITHOUT_WARNINGS, ["--driver-mode=g++"]) == 0
 
 
 def test_warning_in_checked_file_fails(tmp_path):

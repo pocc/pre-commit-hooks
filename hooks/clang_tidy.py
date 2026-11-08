@@ -11,6 +11,10 @@ from hooks.utils import StaticAnalyzerCmd
 # whose warnings and errors are printed to stdout, so they shouldn't fail the hook (#85).
 SUMMARY_LINE = re.compile(rb"\d+ warnings? generated\.|Suppressed \d+ warnings|Use -header-filter=")
 
+# A warning or error in the code, e.g. "main.c:3:5: warning: ...". Warnings without a
+# location, such as "warning: treating 'c' input as 'c++'", are about the build command.
+CODE_DIAGNOSTIC = re.compile(rb"^.+:\d+:\d+: (?:warning|error):", re.MULTILINE)
+
 
 class ClangTidyCmd(StaticAnalyzerCmd):
     """Class for the clang-tidy command."""
@@ -29,7 +33,7 @@ class ClangTidyCmd(StaticAnalyzerCmd):
             self.run_command([filename] + self.args)
             stderr_lines = self.stderr.splitlines(keepends=True)
             self.stderr = b"".join(line for line in stderr_lines if not SUMMARY_LINE.match(line))
-            found_problems = self.stdout.strip() or self.stderr
+            found_problems = CODE_DIAGNOSTIC.search(self.stdout) or self.stderr
             if found_problems and "--fix-errors" not in self.args:
                 self.returncode = 1
             self.exit_on_error()
