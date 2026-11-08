@@ -24,9 +24,19 @@
 - id: uncrustify
   name: uncrustify
   entry: uncrustify-hook
-  description: Formats C, C++, Objective-C, Java, D, and Vala code
-  # D, vala currently aren't valid file types. See https://github.com/pre-commit/identify/issues/258
+  description: Formats C, C++, C#, Objective-C, and Java code
+  # identify has no `d` tag. `vala` exists only in identify>=2.6.21, and an unknown tag makes
+  # pre-commit reject this whole manifest, so Vala is a separate hook (uncrustify-vala) for now.
   types_or: [c, c++, c#, objective-c, java]
+  language: python
+- id: uncrustify-vala
+  name: uncrustify (vala)
+  entry: uncrustify-hook
+  description: Formats Vala code
+  # Matched by extension rather than `types_or: [vala]` so it works with any identify version.
+  # See https://github.com/pocc/pre-commit-hooks/issues/87
+  types: [text]
+  files: (?i)\.vala$
   language: python
 - id: cppcheck
   name: cppcheck
