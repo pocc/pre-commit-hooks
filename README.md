@@ -324,18 +324,19 @@ The value may be an absolute path or another name to resolve on `PATH`.
 
 ### Vala
 
-uncrustify can format Vala, but pre-commit's [identify](https://github.com/pre-commit/identify)
-library does not yet tag `.vala` files (see
-[identify#258](https://github.com/pre-commit/identify/issues/258)), so the hook cannot list
-`vala` in `types_or`. Until that lands, match Vala files yourself and tell uncrustify the
-language explicitly:
+Use the `uncrustify-vala` hook to format `.vala` files. It takes the same `args` as `uncrustify`,
+and uncrustify picks the Vala language from the file extension:
 
 ```yaml
-- id: uncrustify
-  types_or: [text]
-  files: \.vala$
-  args: [-l, VALA]
+- id: uncrustify-vala
 ```
+
+It is a separate hook because pre-commit's [identify](https://github.com/pre-commit/identify)
+library only tags `.vala` files from v2.6.21
+([identify#601](https://github.com/pre-commit/identify/pull/601)), and pre-commit rejects a hook
+manifest that names a tag the installed identify doesn't know. `uncrustify-vala` matches files by
+extension, so it works with any identify version
+([#87](https://github.com/pocc/pre-commit-hooks/issues/87)).
 
 The other hooks target C/C++/Objective-C and do not apply to Vala.
 
