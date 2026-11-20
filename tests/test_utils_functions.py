@@ -119,6 +119,33 @@ class TestCommandBaseClass:
             if os.path.exists(temp_file):
                 os.unlink(temp_file)
 
+    def test_parse_args_removes_version_flags(self):
+        """Test that version flags are removed from args list."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".c", delete=False) as f:
+            f.write("int main() { return 0; }\n")
+            temp_file = f.name
+
+        try:
+            class TestCmd(Command):
+                def __init__(self):
+                    self.command = "test"
+                    self.look_behind = "test"
+                    self.args = []
+                    self.files = [temp_file]
+
+                def get_version_str(self):
+                    return "1.0.0"
+
+            cmd = TestCmd()
+            cmd.parse_args(["test-cmd", "--version", "1.0.0", "--version=1.0.0"])
+            # Version flags should not be in args
+            assert "--version" not in cmd.args
+            assert "1.0.0" not in cmd.args
+            assert "--version=1.0.0" not in cmd.args
+        finally:
+            if os.path.exists(temp_file):
+                os.unlink(temp_file)
+
     def test_add_if_missing_adds_new_args(self):
         """Test that add_if_missing adds arguments that aren't present."""
 
