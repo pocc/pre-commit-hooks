@@ -102,8 +102,11 @@ class Command:
                 # If --version is passed in as 2 arguments, where the second is version
                 if arg == "--version" and args.index(arg) != len(args) - 1:
                     expected_version = args[args.index(arg) + 1]
+                    self.args.remove(arg)
+                    self.args.remove(args[args.index(arg) + 1])
                 # Expected split of --version=8.0.0 or --version 8.0.0 with as many spaces as needed
                 else:
+                    self.args.remove(arg)
                     expected_version = arg.replace(" ", "").replace("=", "").replace("--version", "")
                 actual_version = self.get_version_str()
                 self.assert_version(actual_version, expected_version)
@@ -145,8 +148,6 @@ Edit your pre-commit config or use a different version of {}.""".format(
                 expected_ver, actual_ver, self.command
             )
             self.raise_error(problem, details)
-        # If the version is correct, exit normally
-        sys.exit(0)
 
     def raise_error(self, problem: str, details: str):
         """Raise a formatted error."""
